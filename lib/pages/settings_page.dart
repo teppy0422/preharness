@@ -71,13 +71,25 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
+  String withDefault(String? value, String defaultValue) {
+    if (value == null || value.trim().isEmpty) return defaultValue;
+    return value;
+  }
+
   Future<void> _loadSettings() async {
     final settings = await _service.loadSettings();
-    _mainController.text = settings['main_path'] ?? '';
-    _pathController.text = settings['path_01']!;
-    _typeController.text = settings['machine_type']!;
-    _serialController.text = settings['machine_serial']!;
-    _workNameController.text = settings['work_name']!;
+
+    _mainController.text = withDefault(
+      settings['main_path'],
+      r'\\192.168.11.8',
+    );
+    _pathController.text = withDefault(
+      settings['path_01'],
+      r'\\192.168.11.8\g\projects\PreHarnessPro\data',
+    );
+    _typeController.text = withDefault(settings['machine_type'], 'CM20');
+    _serialController.text = withDefault(settings['machine_serial'], '0000');
+    _workNameController.text = withDefault(settings['work_name'], '手圧着');
   }
 
   Future<void> _saveSettings() async {
@@ -195,53 +207,55 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildLabeledField(
-                label: 'サーバーパス',
-                hint: '例: \\192.168.11.8',
-                controller: _mainController,
-                errorText: _serverPathErrorText,
-              ),
-              _buildLabeledField(
-                label: '製造指示データ読み込みパス',
-                hint: '例: C:/data/instruction',
-                controller: _pathController,
-                enableFolderPicker: true,
-              ),
-              _buildLabeledField(
-                label: '機種',
-                hint: '例: CM20',
-                controller: _typeController,
-              ),
-              _buildLabeledField(
-                label: '管理ナンバー',
-                hint: '例: 1234',
-                controller: _serialController,
-              ),
-              _buildLabeledField(
-                label: '作業名',
-                hint: '例: 圧着',
-                controller: _workNameController,
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.center,
-                child: ElevatedButton.icon(
-                  onPressed: _saveSettings,
-                  icon: const Icon(Icons.save),
-                  label: const Text('保存'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildLabeledField(
+                  label: 'サーバーパス',
+                  hint: '例: \\192.168.11.8',
+                  controller: _mainController,
+                  errorText: _serverPathErrorText,
+                ),
+                _buildLabeledField(
+                  label: '製造指示データ読み込みパス',
+                  hint: '例: C:/data/instruction',
+                  controller: _pathController,
+                  enableFolderPicker: true,
+                ),
+                _buildLabeledField(
+                  label: '機種',
+                  hint: '例: CM20',
+                  controller: _typeController,
+                ),
+                _buildLabeledField(
+                  label: '管理ナンバー',
+                  hint: '例: 1234',
+                  controller: _serialController,
+                ),
+                _buildLabeledField(
+                  label: '作業名',
+                  hint: '例: 圧着',
+                  controller: _workNameController,
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.center,
+                  child: ElevatedButton.icon(
+                    onPressed: _saveSettings,
+                    icon: const Icon(Icons.save),
+                    label: const Text('保存'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

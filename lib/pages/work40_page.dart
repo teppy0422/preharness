@@ -3,7 +3,8 @@ import 'package:preharness/widgets/efu.dart';
 import 'package:preharness/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
 
-import 'package:preharness/widgets/standard_info_card.dart';
+import 'package:preharness/widgets/measurement.dart';
+import 'package:preharness/widgets/dial_selector.dart';
 
 class Work40Page extends StatelessWidget {
   const Work40Page({super.key});
@@ -60,11 +61,16 @@ class FooterButtons extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          ElevatedButton(onPressed: () {}, child: const Text("作業開始")),
+          ElevatedButton(
+            onPressed: () {
+              showCustomDialog(context, const DialSelectorPage());
+            },
+            child: const Text("ダイヤル調整"),
+          ),
           const SizedBox(width: 8),
           ElevatedButton(
             onPressed: () {
-              showStandardInfoDialog(context);
+              showCustomDialog(context, const Measurement());
             },
             child: const Text("規格測定"),
           ),
@@ -74,21 +80,21 @@ class FooterButtons extends StatelessWidget {
   }
 }
 
-void showStandardInfoDialog(BuildContext context) {
+void showCustomDialog(BuildContext context, Widget child) {
   showDialog(
     context: context,
-    barrierDismissible: true, // ← これでも一応必要
+    barrierDismissible: true,
     barrierColor: Colors.black54,
     builder: (context) {
       return GestureDetector(
-        behavior: HitTestBehavior.opaque, // ← 背景のタップも拾う
+        behavior: HitTestBehavior.opaque,
         onTap: () {
-          Navigator.of(context).pop(); // ← 背景タップで閉じる
+          Navigator.of(context).pop();
         },
         child: Center(
           child: GestureDetector(
-            onTap: () {}, // ← Card 自体はタップしても閉じないように
-            child: const StandardInfoCard(),
+            onTap: () {}, // ダイアログ自体のタップで閉じない
+            child: child,
           ),
         ),
       );

@@ -3,18 +3,17 @@ import "package:preharness/constants/app_colors.dart";
 
 int? _activeIndex;
 
-class StandardInfoCard extends StatefulWidget {
-  const StandardInfoCard({super.key});
+class Measurement extends StatefulWidget {
+  const Measurement({super.key});
 
   @override
-  State<StandardInfoCard> createState() => _StandardInfoCardState();
+  State<Measurement> createState() => _StandardInfoCardState();
 }
 
-class _StandardInfoCardState extends State<StandardInfoCard> {
+class _StandardInfoCardState extends State<Measurement> {
   late List<FocusNode> _focusNodes;
   late List<TextEditingController> _controllers;
   List<String> _statuses = []; // OK / NG 表示用
-
   @override
   void initState() {
     super.initState();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'widgets/sidebar.dart'; // ← 追加
 
 import 'package:preharness/constants/app_colors.dart';
 import 'routes/app_routes.dart';

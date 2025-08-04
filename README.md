@@ -52,10 +52,13 @@ Added key Input to standard_info_card.
 fixed notice.
 copy 007 775MB
 
+Intentions for mac environment
+copy 008 1420MB
+
 ####
 
 flutter でアプリケーション開発
-vscode をメインにする
+vscode を使う
 対象デバイスは Windows10 以上の PC と Android タブレット
 同時接続数は 20 台程度
 ネットワーク環境は社内ローカル
