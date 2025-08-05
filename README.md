@@ -37,14 +37,16 @@ Added display of directory dialog from server path
 copy 002 688MB
 
 copy 003 692MB
+
 Hot reloads don't work.
 Added message when file is missing on import.
 copy 004 692MB
+
 Added efu to work40_page.
 copy 005 689MB
+
 flutter pub add flutter_svg
 Added feltPen at efu.
-
 Added darkmode to efu.
 copy 006 773MB
 
@@ -54,6 +56,17 @@ copy 007 775MB
 
 Intentions for mac environment
 copy 008 1420MB
+
+Added UserResiter.
+copy 009 1420MB
+
+Cange static NotoSansJPfont.
+Added UserList, PrintUserCard, Delete User.
+copy 010 1670MB
+
+Added EditUser.
+Added Login modal.
+copy 011
 
 ####
 
@@ -65,6 +78,18 @@ vscode を使う
 Nas に PostgreSQL の DB
 
 設定ファイルは端末に保存
+設定データは下記
+mainPath: \\192.168.11.8,
+path01: \\192.168.11.8\g\projects\PreHarnessPro\data,
+machineType: CM20,
+machineSerial: 0000,
+workName: 手圧着,
+呼び出す時は下記
+final prefs = await SharedPreferences.getInstance();
+setState(() {
+mainPath = prefs.getString('main_path') ?? '未設定';
+path01 = prefs.getString('path_01') ?? '未設定';
+});
 
 動作内容：
 DB からデータを取得して作業完了したら完了データを DB に保存

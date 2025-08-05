@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:preharness/main.dart'; // themeNotifier 参照用
 import 'package:flutter/services.dart';
+import "package:preharness/widgets/user_icon_button.dart";
 
 class ResponsiveScaffold extends StatefulWidget {
   final String title;
@@ -89,7 +90,8 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                 },
               ),
             ),
-
+          // ログインボタン
+          Positioned(top: 16, right: 80, child: UserIconButton()),
           // モード切替スイッチは右上に固定配置
           Positioned(
             top: 12,
@@ -252,10 +254,10 @@ class _SidebarState extends State<Sidebar> {
         ),
         NavigationRailDestination(
           padding: EdgeInsets.symmetric(vertical: 4),
-          icon: Icon(Icons.upload_file_outlined),
-          selectedIcon: Icon(Icons.upload_file),
+          icon: Icon(Icons.cloud_outlined),
+          selectedIcon: Icon(Icons.cloud),
           label: Text(
-            'インポート',
+            'サーバー',
             style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
           ),
         ),

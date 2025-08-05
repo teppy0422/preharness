@@ -22,17 +22,18 @@ class Work40Page extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  const SizedBox(height: 80),
-
+                  const SizedBox(height: 50),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(flex: 4, child: _EquipmentInfoCard()),
                       const SizedBox(width: 16),
-                      Expanded(flex: 6, child: _OperatorInfoCard()),
+                      Expanded(flex: 4, child: _OperatorInfoCard()),
+                      const SizedBox(width: 16),
+                      Expanded(flex: 4, child: DialSelectorPage()),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   InstructionSheetHeader(
                     lotNo: 'M392',
                     structureNo: '0099',
@@ -117,11 +118,10 @@ class _EquipmentInfoCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
               Text("【設備情報】", style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
+              SizedBox(height: 4),
               Text("号機: 5号機"),
               Text("機種: XYZ-100"),
               Text("管理ナンバー: EQ-123456"),
-              Text("作業名: 圧着"),
             ],
           ),
         ),

@@ -863,14 +863,28 @@ class InstructionSheetHeader extends StatelessWidget {
                       ),
                     ),
                     if (feltColor != null)
-                      SvgPicture.asset(
-                        'assets/images/tearDrop.svg',
-                        width: 28,
-                        height: 28,
-                        colorFilter: ColorFilter.mode(
-                          feltColor,
-                          BlendMode.srcIn,
-                        ),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/tearDrop.svg',
+                            width: 28, // 少し大きめに
+                            height: 28,
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          SvgPicture.asset(
+                            'assets/images/tearDrop.svg',
+                            width: 26,
+                            height: 26,
+                            colorFilter: ColorFilter.mode(
+                              feltColor,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ],
                       ),
                     if (feltColor == null && showFelt)
                       ShaderMask(

@@ -38,15 +38,14 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
     final hintColor = isDark ? Colors.grey[400]! : Colors.grey;
     return Center(
       child: SizedBox(
-        width: 340,
         child: Container(
           decoration: BoxDecoration(
             color: cardColor,
-            border: Border.all(color: Colors.white, width: 0.3),
-            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white, width: .5),
+            borderRadius: BorderRadius.circular(6),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -61,7 +60,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                   },
                   labelColor: labelColor,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 8),
                 _buildDialSection(
                   title: "下ダイヤル",
                   options: bottomDialOptions.map((e) => e.toString()).toList(),
@@ -73,7 +72,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                   },
                   labelColor: labelColor,
                 ),
-                const SizedBox(height: 24),
+                const Divider(thickness: 1, color: Colors.grey),
                 _buildDialSection(
                   title: "後足",
                   options: hindDialOptions.map((e) => e.toString()).toList(),
@@ -102,15 +101,16 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
   }) {
     return Column(
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w900,
-            color: labelColor,
-          ),
-        ),
-        const SizedBox(height: 6),
+        // Text(
+        //   title,
+        //   style: TextStyle(
+        //     fontSize: 14,
+        //     fontFamily: "NotoSansJP",
+        //     fontWeight: FontWeight.w900,
+        //     color: labelColor,
+        //   ),
+        // ),
+        const SizedBox(height: 2),
         Wrap(
           spacing: 8,
           children: options.map((val) {
@@ -118,7 +118,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
             return GestureDetector(
               onTap: () => onTap(val),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.neonGreen : Colors.grey[300],
                   borderRadius: BorderRadius.circular(8),
@@ -128,8 +128,9 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                   val,
                   style: TextStyle(
                     fontSize: 14,
+                    fontFamily: "Inter",
+                    fontWeight: FontWeight.w900,
                     color: isSelected ? Colors.black : Colors.black87,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),

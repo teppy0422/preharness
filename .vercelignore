@@ -1,0 +1,12 @@
+# .vercelignore
+
+build/
+*.mp4
+*.webm
+*.wasm
+*.zip
+*.exe
+*.dmg
+*.ipa
+*.apk
+.DS_Store
