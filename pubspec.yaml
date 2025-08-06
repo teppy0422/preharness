@@ -127,3 +127,4 @@ flutter:
 
   assets:
     - assets/images/tearDrop.svg
+    - assets/fonts/MaterialIcons-Regular.ttf

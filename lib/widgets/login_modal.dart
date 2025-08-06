@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preharness/utils/user_login_manager.dart';
+import "package:preharness/widgets/icon_picker_modal.dart";
 
 class QrLoginModal extends StatefulWidget {
   const QrLoginModal({super.key});
@@ -35,19 +35,22 @@ class _QrLoginModalState extends State<QrLoginModal> {
       _loading = true;
       _error = null;
     });
-
     final error = await UserLoginManager.login(id);
-
     if (!mounted) return;
-
     if (error == null) {
       await _loadLoggedInUser();
       Navigator.of(context).pop(true);
     } else {
       setState(() {
-        _error = error;
+        _error = 'ログインに失敗しました'; // 日本語メッセージ
         _loading = false;
       });
+      // 入力内容を選択状態にする
+      _controller.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _controller.text.length,
+      );
+      _focusNode.requestFocus();
     }
   }
 
@@ -85,7 +88,6 @@ class _QrLoginModalState extends State<QrLoginModal> {
           keyboardType: TextInputType.text,
           decoration: const InputDecoration(hintText: 'ユーザーIDを入力'),
         ),
-        const SizedBox(height: 8),
         ElevatedButton.icon(
           onPressed: _loading
               ? null
@@ -108,13 +110,12 @@ class _QrLoginModalState extends State<QrLoginModal> {
   }
 
   Widget _buildUserInfo() {
+    final iconData =
+        IconPickerModal.iconMap[_user!['iconname']] ?? Icons.person;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        CircleAvatar(
-          radius: 30,
-          backgroundImage: NetworkImage(_user!['iconPath']!),
-        ),
+        Icon(iconData),
         const SizedBox(height: 8),
         Text(
           _user!['username']!,

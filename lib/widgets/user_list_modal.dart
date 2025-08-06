@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:preharness/widgets/user_register_edit_modal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:preharness/widgets/user_card_modal.dart";
+import 'package:preharness/widgets/icon_picker_modal.dart';
 
 class UserListModal extends StatefulWidget {
   const UserListModal({super.key});
@@ -101,7 +102,7 @@ class _UserListModalState extends State<UserListModal> {
     return AlertDialog(
       title: const Text('ユーザー一覧'),
       content: SizedBox(
-        width: 300,
+        width: 600,
         height: 400,
         child: loading
             ? const Center(child: CircularProgressIndicator())
@@ -116,13 +117,9 @@ class _UserListModalState extends State<UserListModal> {
                   separatorBuilder: (_, __) => const Divider(),
                   itemBuilder: (context, index) {
                     final user = users[index];
-                    final iconPath = user['iconPath']?.toString();
-                    final hasIcon = iconPath != null && iconPath.isNotEmpty;
-                    // NAS IPとファイル名からURLを組み立て
-                    final fileName =
-                        iconPath?.split(RegExp(r'[\\/]')).last ?? '';
-                    final imageUrl =
-                        'http://${user["nasIp"]}:3000/uploads/$fileName';
+                    final iconName = user['iconname']?.toString();
+                    final iconMap = IconPickerModal.iconMap;
+                    final iconData = iconMap[iconName] ?? Icons.person;
 
                     return GestureDetector(
                       onTap: () {
@@ -134,17 +131,7 @@ class _UserListModalState extends State<UserListModal> {
 
                       child: Row(
                         children: [
-                          hasIcon
-                              ? Image.network(
-                                  imageUrl,
-                                  width: 40,
-                                  height: 40,
-                                  errorBuilder: (_, __, ___) => const Icon(
-                                    Icons.person,
-                                    size: 40,
-                                  ), // fallback
-                                )
-                              : const Icon(Icons.person, size: 40),
+                          Icon(iconData, size: 40), // ← 画像の代わりにIconで表示
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
@@ -163,7 +150,6 @@ class _UserListModalState extends State<UserListModal> {
                                 builder: (_) =>
                                     UserModal(isEdit: true, user: user),
                               );
-
                               if (updated == true) {
                                 _fetchUsers(); // 編集後、ユーザー一覧を再取得
                               }
@@ -186,10 +172,13 @@ class _UserListModalState extends State<UserListModal> {
           children: [
             TextButton(
               onPressed: () async {
-                showDialog(
+                final created = await showDialog<bool>(
                   context: context,
                   builder: (context) => const UserModal(),
                 );
+                if (created == true) {
+                  _fetchUsers(); // 新規作成後に一覧更新！
+                }
               },
               child: const Text('新規ユーザー'),
             ),

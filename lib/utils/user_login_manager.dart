@@ -24,7 +24,7 @@ class UserLoginManager {
 
       final userId = user['id']?.toString();
       final userName = user['username']?.toString(); // ←ここを修正
-      final iconPath = user['icon_path']?.toString();
+      final iconName = user['iconname']?.toString();
 
       if (userId == null || userId != id) {
         return 'ユーザーが見つかりません';
@@ -32,7 +32,7 @@ class UserLoginManager {
 
       await prefs.setString('userId', userId);
       await prefs.setString('username', userName ?? '');
-      await prefs.setString('iconPath', iconPath ?? '');
+      await prefs.setString('iconname', iconName ?? '');
 
       return null; // 成功
     } catch (e) {
@@ -45,10 +45,10 @@ class UserLoginManager {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
     final username = prefs.getString('username');
-    final iconPath = prefs.getString('iconPath');
+    final iconname = prefs.getString('iconname');
 
-    if (userId != null && username != null && iconPath != null) {
-      return {'userId': userId, 'username': username, 'iconPath': iconPath};
+    if (userId != null && username != null && iconname != null) {
+      return {'userId': userId, 'username': username, 'iconname': iconname};
     }
 
     return null;
@@ -58,6 +58,6 @@ class UserLoginManager {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('userId');
     await prefs.remove('username');
-    await prefs.remove('iconPath');
+    await prefs.remove('iconname');
   }
 }

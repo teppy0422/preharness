@@ -1,19 +1,18 @@
 // lib/widgets/user_icon_button.dart
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_modal.dart';
 import "package:preharness/utils/user_login_manager.dart";
+import "package:preharness/widgets/icon_picker_modal.dart";
 
 class UserIconButton extends StatefulWidget {
   const UserIconButton({super.key});
-
   @override
   State<UserIconButton> createState() => _UserIconButtonState();
 }
 
 class _UserIconButtonState extends State<UserIconButton> {
-  String? _iconPath;
+  String? _iconname;
   String? _username;
   @override
   void initState() {
@@ -22,13 +21,17 @@ class _UserIconButtonState extends State<UserIconButton> {
   }
 
   void _showModal() {
-    showDialog(context: context, builder: (_) => const QrLoginModal()).then((
-      result,
-    ) {
-      if (result == true) {
-        _loadUserInfo(); // ← ログイン・ログアウト後に状態を更新！
-      }
-    });
+    showDialog(context: context, builder: (_) => const QrLoginModal())
+        .then((result) {
+          if (result == true) {
+            _loadUserInfo();
+          } else {
+            // キャンセルや失敗時の処理（必要なら）
+          }
+        })
+        .catchError((e) {
+          debugPrint('Login dialog error: $e');
+        });
   }
 
   Future<void> checkLoginStatus(BuildContext context) async {
@@ -50,35 +53,55 @@ class _UserIconButtonState extends State<UserIconButton> {
 
   Future<void> _loadUserInfo() async {
     final user = await UserLoginManager.getLoggedInUser();
+
+    if (user == null) {
+      setState(() {
+        _username = null;
+        _iconname = null;
+      });
+      return;
+    }
+
     setState(() {
-      _username = user?['username'];
-      _iconPath = user?['iconPath'];
+      _username = user['username'];
+      _iconname = user['iconname'];
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final iconData = _iconname != null
+        ? IconPickerModal.iconMap[_iconname!] ?? Icons.person
+        : null;
+
     return GestureDetector(
       onTap: _showModal,
-      child: ClipOval(
-        child: _iconPath == null
-            ? Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey[300],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipOval(
+            child: Container(
+              width: 34,
+              height: 34,
+              color: Colors.grey[300],
+              child: iconData == null
+                  ? const Icon(Icons.person, color: Colors.white, size: 32)
+                  : Icon(iconData, size: 32, color: Colors.blueAccent),
+            ),
+          ),
+          if (_username != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 0),
+              child: Text(
+                _username!,
+                style: const TextStyle(
+                  fontSize: 9,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
-                child: const Center(
-                  child: Icon(Icons.person, color: Colors.white),
-                ),
-              )
-            : Container(
-                width: 40,
-                height: 40,
-                color: Colors.red[500],
-                child: _username != null ? Text(_username!) : null,
               ),
+            ),
+        ],
       ),
     );
   }

@@ -64,11 +64,18 @@ Cange static NotoSansJPfont.
 Added UserList, PrintUserCard, Delete User.
 copy 010 1670MB
 
+:2025-08-05:
 Added EditUser.
 Added Login modal.
-copy 011
+deploy 0001
+copy 011 1660MB
 
-####
+Added Icon picker.
+Fixed that used Icon cannot be selected.
+deploy 0002
+copy 012 1710MB
+
+#### base
 
 flutter でアプリケーション開発
 vscode を使う

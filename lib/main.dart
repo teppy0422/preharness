@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:preharness/constants/app_colors.dart';
 import 'routes/app_routes.dart';
-import 'package:preharness/widgets/user_icon_button.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
 import 'package:preharness/utils/user_login_manager.dart'; // ← あなたのloginコードをここに入れる想定
 

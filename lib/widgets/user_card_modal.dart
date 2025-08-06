@@ -7,6 +7,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:qr/qr.dart';
 import 'package:http/http.dart' as http;
+import 'package:preharness/widgets/icon_picker_modal.dart';
 
 class UserLoginCardModal extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -50,28 +51,32 @@ class UserLoginCardModal extends StatelessWidget {
     return null;
   }
 
+  IconData getIconData(String name) {
+    final iconMap = IconPickerModal.iconMap;
+    final iconData = iconMap[name] ?? Icons.person;
+    return iconData;
+  }
+
   // 印刷処理
   Future<void> _printCard() async {
     final doc = pw.Document();
-    final qrId = user['id'].toString();
     final username = user['username'];
-    final iconPath = user['iconPath']?.toString();
-    final hasIcon = iconPath != null && iconPath.isNotEmpty;
+    final qrId = user['id'].toString();
+    final qrBytes = await _generateQrImage(qrId);
 
     final fontData = await rootBundle.load(
       'assets/fonts/NotoSansJP-Regular.ttf',
     );
     final ttf = pw.Font.ttf(fontData);
 
-    final qrBytes = await _generateQrImage(qrId);
-    pw.ImageProvider? profileImage;
+    final iconFontData = await rootBundle.load(
+      'assets/fonts/MaterialIcons-Regular.ttf',
+    );
+    final iconFont = pw.Font.ttf(iconFontData);
 
-    if (hasIcon) {
-      final imageBytes = await _fetchImageBytes(iconPath);
-      if (imageBytes != null) {
-        profileImage = pw.MemoryImage(imageBytes);
-      }
-    }
+    final iconChar = String.fromCharCode(
+      getIconData(user['iconname']).codePoint,
+    );
 
     doc.addPage(
       pw.Page(
@@ -94,21 +99,11 @@ class UserLoginCardModal extends StatelessWidget {
                 pw.Text('ID: $qrId', style: pw.TextStyle(font: ttf)),
                 pw.Text('名前: $username', style: pw.TextStyle(font: ttf)),
                 pw.SizedBox(height: 10),
-                pw.Container(
-                  decoration: pw.BoxDecoration(border: pw.Border.all()),
-                  child: pw.Image(
-                    pw.MemoryImage(qrBytes),
-                    width: 80,
-                    height: 80,
-                  ),
-                ),
-                if (profileImage != null) ...[
-                  pw.Container(
-                    width: 80,
-                    height: 80,
-                    child: pw.Image(profileImage),
-                  ),
-                ],
+                // アイコン
+                // pw.Text(
+                //   iconChar,
+                //   style: pw.TextStyle(font: iconFont, fontSize: 40),
+                // ),
               ],
             ),
           );
@@ -135,7 +130,7 @@ class UserLoginCardModal extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text("ID: ${user['id']}"),
-            Text("名前: ${user['username']}"),
+            Text("${user['username']}"),
             const SizedBox(height: 10),
             QrImageView(
               data: user['id'].toString(),
@@ -144,15 +139,8 @@ class UserLoginCardModal extends StatelessWidget {
               backgroundColor: Colors.white,
             ),
             const SizedBox(height: 10),
-            if (user['iconPath'] != null)
-              Image.network(
-                'http://${user["nasIp"]}:3000/uploads/${user["iconPath"].toString().split(RegExp(r"[\\/]")).last}',
-                width: 40,
-                height: 40,
-                errorBuilder: (c, e, s) {
-                  return const Icon(Icons.error, size: 40);
-                },
-              ),
+            if (user['iconname'] != null)
+              Icon(getIconData(user['iconname']), size: 40),
           ],
         ),
       ),

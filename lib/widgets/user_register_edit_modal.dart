@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
+import "package:preharness/widgets/icon_picker_modal.dart";
+import 'dart:convert';
 
 class UserModal extends StatefulWidget {
   final bool isEdit; // 編集モードかどうか
@@ -17,10 +19,10 @@ class UserModal extends StatefulWidget {
 
 class _UserModalState extends State<UserModal> {
   final _usernameController = TextEditingController();
-  File? _selectedImage;
+  IconData? _selectedIcon;
   bool _loading = false;
-
-  final ImagePicker _picker = ImagePicker();
+  String? _usernameError;
+  String? _iconError;
 
   @override
   void initState() {
@@ -28,7 +30,6 @@ class _UserModalState extends State<UserModal> {
     if (widget.isEdit && widget.user != null) {
       // 編集時は初期値セット
       _usernameController.text = widget.user!['username'] ?? '';
-      // 画像はファイルでなくURLだから画像選択は空のままにするか、別途処理する
     }
   }
 
@@ -38,21 +39,58 @@ class _UserModalState extends State<UserModal> {
     super.dispose();
   }
 
+  // アイコン選択関数
   Future<void> _pickImage() async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _selectedImage = File(picked.path));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final nasIp = prefs.getString('main_path')?.replaceAll(r'\\', '') ?? '';
+      final uri = Uri.parse('http://$nasIp:3000/api/users/icons');
+
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final List<dynamic> json = jsonDecode(response.body);
+        final usedIcons = json.cast<String>();
+
+        final selectedIcon = await showDialog<String>(
+          context: context,
+          builder: (_) => IconPickerModal(usedIcons: usedIcons),
+        );
+
+        if (selectedIcon != null) {
+          setState(() => _selectedIcon = IconPickerModal.iconMap[selectedIcon]);
+        }
+      } else {
+        throw Exception('アイコン一覧取得失敗');
+      }
+    } catch (e) {
+      debugPrint('Error fetching used icons: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('アイコン一覧の取得に失敗しました')));
     }
   }
 
   Future<void> _submit() async {
     final username = _usernameController.text.trim();
+    bool hasError = false;
+
+    setState(() {
+      _usernameError = null;
+      _iconError = null;
+    });
+
     if (username.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('ユーザー名を入力してください')));
-      return;
+      setState(() => _usernameError = 'ユーザー名を入力してください');
+      hasError = true;
     }
+
+    if (_selectedIcon == null &&
+        !(widget.isEdit && widget.user?['iconname'] != null)) {
+      setState(() => _iconError = 'アイコンを選択してください');
+      hasError = true;
+    }
+
+    if (hasError) return;
 
     setState(() => _loading = true);
 
@@ -66,25 +104,29 @@ class _UserModalState extends State<UserModal> {
           ? Uri.parse('http://$nasIp:3000/api/users/${widget.user!["id"]}')
           : Uri.parse('http://$nasIp:3000/api/register');
 
-      final request = http.MultipartRequest(
-        widget.isEdit ? 'PUT' : 'POST',
-        uri,
-      );
+      final selectedName = _selectedIcon != null
+          ? IconPickerModal.iconMap.entries
+                .firstWhere((entry) => entry.value == _selectedIcon)
+                .key
+          : null;
 
-      request.fields['username'] = username;
-
-      if (_selectedImage != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'icon',
-            _selectedImage!.path,
-            filename: p.basename(_selectedImage!.path),
-          ),
-        );
-      }
-
-      final response = await request.send();
-
+      final response = await (widget.isEdit
+          ? http.put(
+              uri,
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({
+                'username': username,
+                'iconname': selectedName,
+              }),
+            )
+          : http.post(
+              uri,
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({
+                'username': username,
+                'iconname': selectedName,
+              }),
+            ));
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(widget.isEdit ? '更新成功' : '登録成功')),
@@ -122,21 +164,32 @@ class _UserModalState extends State<UserModal> {
           children: [
             TextField(
               controller: _usernameController,
-              decoration: const InputDecoration(labelText: 'ユーザー名'),
+              decoration: InputDecoration(
+                labelText: 'ユーザー名',
+                errorText: _usernameError,
+              ),
             ),
             const SizedBox(height: 8),
-            _selectedImage != null
-                ? Image.file(_selectedImage!, height: 100)
+            _selectedIcon != null
+                ? Icon(_selectedIcon, size: 100)
                 : widget.isEdit &&
                       widget.user != null &&
-                      widget.user!['iconPath'] != null
-                ? Image.network(
-                    // 編集時は既存のアイコン画像URLを表示
-                    'http://${widget.user!["nasIp"]}:3000/uploads/${widget.user!["iconPath"].toString().split(RegExp(r"[\\/]")).last}',
-                    height: 100,
+                      widget.user!['iconname'] != null
+                ? Icon(
+                    IconPickerModal.iconMap[widget.user!['iconname']] ??
+                        Icons.help_outline,
+                    size: 100,
                   )
-                : const Text('画像未選択'),
-            ElevatedButton(onPressed: _pickImage, child: const Text('画像を選択')),
+                : const Text('アイコン未選択'),
+            if (_iconError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  _iconError!,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
+            ElevatedButton(onPressed: _pickImage, child: const Text('アイコンを選択')),
           ],
         ),
       ),
