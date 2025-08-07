@@ -15,7 +15,8 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-:2025-07-23:
+### 2025-07-23
+
 Download flutter
 Move to c:/dev/flutter
 Add System path c:/dev/flutter/bin
@@ -24,10 +25,12 @@ Installed vs sdk & android sdk
 
 jdk17 をインストールしたあとにターミナルで r 押したらリロードされたけど、jdk17 のインストールが関係あったかは不明
 
-:2025-07-24:
+### 2025-07-24
+
 Add settings_page.
 
-:2025-07-25:
+### 2025-07-25
+
 Add save/load setting_Path to setting_page.
 Add NotoSansJp font.
 copy 001 636MB
@@ -64,22 +67,49 @@ Cange static NotoSansJPfont.
 Added UserList, PrintUserCard, Delete User.
 copy 010 1670MB
 
-:2025-08-05:
+### 2025-08-05
+
 Added EditUser.
 Added Login modal.
 deploy 0001
 copy 011 1660MB
+
+### 2025-08-06
 
 Added Icon picker.
 Fixed that used Icon cannot be selected.
 deploy 0002
 copy 012 1710MB
 
+### 2025-08-07
+
+Modified to allow some browsing when server connection is not available.
+Iconic display of connection status to Nas.
+Add icon animation with littie
+
 #### base
 
-flutter でアプリケーション開発
-vscode を使う
-対象デバイスは Windows10 以上の PC と Android タブレット
+目的:
+作業実績をペーパーレスにして生産性の工場
+
+手段:
+flutter でアプリ開発
+
+テスト環境:← いまここ
+editor=VsCode
+アプリデバイス=andoroid タブレット
+Nas(DB)=windows11
+
+本番環境:
+アプリデバイス=android タブレット or windows10 以上
+Nas(DB)=synology DS423+(メモリ 6GB)
+
+機能:
+タッチパネルによるタッチ操作メイン
+DB からデータを取得して作業完了したら作業実績データを DB に保存
+
+DB:
+PostgreSQL + Node.js API サーバーをバックエンドに利用
 同時接続数は 20 台程度
 ネットワーク環境は社内ローカル
 Nas に PostgreSQL の DB
@@ -98,40 +128,22 @@ mainPath = prefs.getString('main_path') ?? '未設定';
 path01 = prefs.getString('path_01') ?? '未設定';
 });
 
-動作内容：
-DB からデータを取得して作業完了したら完了データを DB に保存
+ログインについて:
+ユーザーは QR コードでログイン
+QR コードは id と同じ
+users テーブルには id, username, iconname を保持
+ログイン状態は SharedPreferences で管理
+iconname はログインユーザーごとに一意で、重複不可
 
-現在は圧着作業のページを作成中
-
-####
-
-keyPath01 のディレクトリ階層にある全ての.txt を同じ Nas にある postregsql の DB にインポートしたい。
-サブディレクトリは含まない。
-Windows と android で動作するようにしたい。
-Nas の Node.js の API サーバーを経由する。
-インポートしたら同じディレクトリの bak に保存。bak が無い場合は作成。
-.txt は固定長、Nas はとりあえず localhost で、設定は以下
-user: "postgres",
-host: "localhost",
-database: "postgres",
-password: "sakurajaiko",
-port: 5432,
-
-テーブル名は parts で、カラムは以下
-part_no, serial, code, flag
-全て string
+チャットルール:
+提案するコードの先頭にはファイルパスを記載して
 
 ####
 
-設定ページを作りたい。
-保存方法は shared_preferences
+インデックス検索
 
-#### Nas
+#### Nas セットアップ
 
-postgreSQL のインストールとテーブル作成
-
-postgreSQL と通信する為に Node.js の API を準備
-Node.js は通常と同じようにプロジェクトを作成する
-変更都度の再起動が面倒なので変更したら再起動を設定しておくと便利
-
+DS423+(6GB)
 Synology で運用する場合は永続サービス機能で API サーバー起動するようにしておく
+node.js と postregSQL をセットアップ

@@ -2,10 +2,37 @@ import 'package:flutter/material.dart';
 
 class IconPickerModal extends StatelessWidget {
   final List<String> usedIcons;
+  final bool error;
 
-  const IconPickerModal({super.key, required this.usedIcons});
+  const IconPickerModal({
+    super.key,
+    required this.usedIcons,
+    this.error = false,
+  });
 
   static final Map<String, IconData> iconMap = {
+    'snowshoeing': Icons.snowshoeing,
+    'paragliding': Icons.paragliding,
+    'snowboarding:': Icons.snowboarding,
+    'thunderstorm': Icons.thunderstorm,
+    'sports_football': Icons.sports_football,
+    'sanitizer': Icons.sanitizer,
+    'surfing': Icons.surfing,
+    'sports_volleyball': Icons.sports_volleyball,
+    'sports_motorsports': Icons.sports_motorsports,
+    'cookie': Icons.cookie,
+    'compost': Icons.compost,
+    'workspace_premium': Icons.workspace_premium,
+    'webhook': Icons.webhook,
+    'api': Icons.api,
+    'loyalty': Icons.loyalty,
+    'catching_pokemon': Icons.catching_pokemon,
+    'pest_control_rodent': Icons.pest_control_rodent,
+    'hive': Icons.hive,
+    'flutter_dash': Icons.flutter_dash,
+    'egg': Icons.egg,
+    'bug_report': Icons.bug_report,
+    'cruelty_free': Icons.cruelty_free,
     'account_balance': Icons.account_balance,
     'anchor': Icons.anchor,
     'apartment': Icons.apartment,
@@ -18,13 +45,10 @@ class IconPickerModal extends StatelessWidget {
     'business': Icons.business,
     'cake': Icons.cake,
     'camera_alt': Icons.camera_alt,
-    'cancel': Icons.cancel,
     'celebration': Icons.celebration,
     'check_circle': Icons.check_circle,
     'color_lens': Icons.color_lens,
     'commute': Icons.commute,
-    'computer': Icons.computer,
-    'cruelty_free': Icons.cruelty_free,
     'directions_bike': Icons.directions_bike,
     'directions_car': Icons.directions_car,
     'directions_run': Icons.directions_run,
@@ -49,8 +73,6 @@ class IconPickerModal extends StatelessWidget {
     'fitness_center': Icons.fitness_center,
     'flare': Icons.flare,
     'flight': Icons.flight,
-    'group': Icons.group,
-    'groups': Icons.groups,
     'hiking': Icons.hiking,
     'home': Icons.home,
     'house': Icons.house,
@@ -64,14 +86,11 @@ class IconPickerModal extends StatelessWidget {
     'location_on': Icons.location_on,
     'map': Icons.map,
     'menu_book': Icons.menu_book,
-    'monetization_on': Icons.monetization_on,
     'music_note': Icons.music_note,
     'navigation': Icons.navigation,
-    'nightlight': Icons.nightlight,
     'nights_stay': Icons.nights_stay,
     'palette': Icons.palette,
     'person': Icons.person,
-    'person_add': Icons.person_add,
     'pets': Icons.pets,
     'psychology': Icons.psychology,
     'public': Icons.public,
@@ -87,8 +106,6 @@ class IconPickerModal extends StatelessWidget {
     'sentiment_very_dissatisfied': Icons.sentiment_very_dissatisfied,
     'sentiment_very_satisfied': Icons.sentiment_very_satisfied,
     'shopping_bag': Icons.shopping_bag,
-    'shopping_cart': Icons.shopping_cart,
-    'smartphone': Icons.smartphone,
     'spa': Icons.spa,
     'sports_basketball': Icons.sports_basketball,
     'sports_esports': Icons.sports_esports,
@@ -98,12 +115,9 @@ class IconPickerModal extends StatelessWidget {
     'star_border': Icons.star_border,
     'store': Icons.store,
     'style': Icons.style,
-    'thumb_down': Icons.thumb_down,
     'thumb_up': Icons.thumb_up,
     'train': Icons.train,
     'travel_explore': Icons.travel_explore,
-    'videocam': Icons.videocam,
-    'warning': Icons.warning,
     'wb_sunny': Icons.wb_sunny,
     'work': Icons.work,
   };
@@ -114,42 +128,55 @@ class IconPickerModal extends StatelessWidget {
 
     return AlertDialog(
       title: const Text('アイコンを選択'),
-      content: SizedBox(
-        width: double.maxFinite,
-        height: 400,
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 10,
-          ),
-          itemCount: iconNames.length,
-          itemBuilder: (context, index) {
-            final iconName = iconNames[index];
-            final isUsed = usedIcons.contains(iconName);
-            final iconData = iconMap[iconName]!;
-
-            return GestureDetector(
-              onTap: isUsed
-                  ? null
-                  : () {
-                      Navigator.of(context).pop(iconName);
-                    },
-              child: Opacity(
-                opacity: isUsed ? 0.3 : 1.0,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(iconData, size: 30),
-                    Text(
-                      iconName,
-                      style: const TextStyle(fontSize: 10),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (error)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                '※ 使用済みアイコンの取得に失敗しました',
+                style: TextStyle(color: Colors.red, fontSize: 12),
               ),
-            );
-          },
-        ),
+            ),
+          SizedBox(
+            width: double.maxFinite,
+            height: 400,
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 10,
+              ),
+              itemCount: iconNames.length,
+              itemBuilder: (context, index) {
+                final iconName = iconNames[index];
+                final isUsed = usedIcons.contains(iconName);
+                final iconData = iconMap[iconName]!;
+
+                return GestureDetector(
+                  onTap: isUsed
+                      ? null
+                      : () {
+                          Navigator.of(context).pop(iconName);
+                        },
+                  child: Opacity(
+                    opacity: isUsed ? 0.3 : 1.0,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(iconData, size: 30),
+                        Text(
+                          iconName,
+                          style: const TextStyle(fontSize: 10),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       actions: [
         TextButton(

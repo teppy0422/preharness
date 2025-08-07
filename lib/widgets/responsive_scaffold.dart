@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:preharness/main.dart'; // themeNotifier 参照用
 import 'package:flutter/services.dart';
 import "package:preharness/widgets/user_icon_button.dart";
+import "package:preharness/widgets/nas_status_icon.dart";
 
 class ResponsiveScaffold extends StatefulWidget {
   final String title;
@@ -90,8 +91,19 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                 },
               ),
             ),
-          // ログインボタン
-          Positioned(top: 16, right: 80, child: UserIconButton()),
+          Positioned(
+            top: 16,
+            right: 80, // ← UserIconButton より左へ
+            child: Row(
+              children: const [
+                // Nasステータス
+                NasStatusIcon(),
+                SizedBox(width: 12),
+                // ユーザーログインアイコン
+                UserIconButton(),
+              ],
+            ),
+          ),
           // モード切替スイッチは右上に固定配置
           Positioned(
             top: 12,

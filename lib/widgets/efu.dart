@@ -129,9 +129,9 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: '日 連 番',
                                     labelAlignment: Alignment.center,
-                                    value: "09",
-                                    valueFontSize: 20,
-                                    overFlowTop: -4,
+                                    value: "17807",
+                                    valueFontSize: 14,
+                                    overFlowTop: 0,
                                     right: BorderSide.none,
                                     bottom: BorderSide.none,
                                   ),
@@ -919,7 +919,7 @@ class InstructionSheetHeader extends StatelessWidget {
                     alignment: Alignment.center,
                     child: QrImageView(
                       data:
-                          "https://teppy.link/skillBlogs/pages/0015", // ← 表示したいQRデータ（文字列）
+                          "N712/5M392009917807001868211126L04D011N712/94.54.5325184039",
                       version: QrVersions.auto,
                       size: 100,
                       backgroundColor: Colors.white,

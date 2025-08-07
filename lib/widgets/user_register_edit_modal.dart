@@ -1,11 +1,9 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as p;
 import "package:preharness/widgets/icon_picker_modal.dart";
 import 'dart:convert';
+import 'dart:async'; // ← これが必要！
 
 class UserModal extends StatefulWidget {
   final bool isEdit; // 編集モードかどうか
@@ -46,7 +44,7 @@ class _UserModalState extends State<UserModal> {
       final nasIp = prefs.getString('main_path')?.replaceAll(r'\\', '') ?? '';
       final uri = Uri.parse('http://$nasIp:3000/api/users/icons');
 
-      final response = await http.get(uri);
+      final response = await http.get(uri).timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         final List<dynamic> json = jsonDecode(response.body);
         final usedIcons = json.cast<String>();
@@ -63,10 +61,11 @@ class _UserModalState extends State<UserModal> {
         throw Exception('アイコン一覧取得失敗');
       }
     } catch (e) {
-      debugPrint('Error fetching used icons: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('アイコン一覧の取得に失敗しました')));
+      // タイムアウトやその他エラー時、usedIcons を空にしてエラー付きで表示
+      await showDialog<String>(
+        context: context,
+        builder: (_) => const IconPickerModal(usedIcons: [], error: true),
+      );
     }
   }
 

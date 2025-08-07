@@ -32,13 +32,14 @@ dependencies:
     sdk: flutter
   shared_preferences: ^2.2.2
   file_picker: ^10.2.0
-  http: ^0.13.6
+  http: ^1.4.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.9
   qr_flutter: ^4.1.0
   barcode: ^2.2.5
+  lottie: ^3.3.1 # アイコンアニメーション
 
   # ユーザー登録
   image_picker: ^1.0.7
@@ -128,3 +129,6 @@ flutter:
   assets:
     - assets/images/tearDrop.svg
     - assets/fonts/MaterialIcons-Regular.ttf
+
+    - assets/lottie/network_ok.json
+    - assets/lottie/network_error.json
