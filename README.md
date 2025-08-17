@@ -94,6 +94,13 @@ copy 013 1720MB
 deploy 014
 copy 014 1710MB
 
+Create new page efu_detail.dart
+
+commit 015
+copy 015
+
+ダイヤル値の保存を追加
+
 Testing Gemini_cli
 Response is displayed below the network status icon
 

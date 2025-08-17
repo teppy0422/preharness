@@ -86,8 +86,8 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>?> fetchProcessingConditions({
-    required String p_number,
-    required String cfg_no,
+    required String pNumber,
+    required String cfgNo,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final mainPath = prefs.getString('main_path');
@@ -100,7 +100,7 @@ class ApiService {
     final ip = mainPath.replaceAll(r'\\', '').replaceAll('//', '');
     // サーバーの仕様に合わせてURLとクエリパラメータ名を修正
     final url = Uri.parse(
-      'http://$ip:3000/api/m_processing_conditions/search?p_number=$p_number&cfg_no=$cfg_no',
+      'http://$ip:3000/api/m_processing_conditions/search?p_number=$pNumber&cfg_no=$cfgNo',
     );
 
     try {

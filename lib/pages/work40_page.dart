@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:preharness/services/api_service.dart';
 import 'package:preharness/widgets/efu.dart';
+import 'package:preharness/widgets/efu_detail.dart'; // 詳細ページをインポート
 import 'package:preharness/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
 import 'package:preharness/utils/user_login_manager.dart';
@@ -17,19 +18,17 @@ class Work40Page extends StatefulWidget {
 }
 
 class _Work40PageState extends State<Work40Page> {
-  // 検索結果を保持する状態変数
   Map<String, dynamic>? _processingConditions;
+  bool _isDetailView = false;
+  Map<String, dynamic>? _selectedBlockInfo;
 
-  // 検索処理
   void _onSearch(String query) async {
     String? pNumber;
     String? cfgNo;
 
-    // 固定長で文字列を抽出
     if (query.length >= 38) {
-      // 必要な長さがあるかチェック
-      cfgNo = query.substring(10, 14); // 9文字目から4文字 (0-indexed)
-      pNumber = query.substring(24, 34); // 28文字目から10文字 (0-indexed)
+      cfgNo = query.substring(10, 14);
+      pNumber = query.substring(24, 34);
     } else {
       ScaffoldMessenger.of(
         context,
@@ -39,15 +38,15 @@ class _Work40PageState extends State<Work40Page> {
 
     try {
       final result = await ApiService.fetchProcessingConditions(
-        p_number: pNumber,
-        cfg_no: cfgNo,
+        pNumber: pNumber,
+        cfgNo: cfgNo,
       );
       setState(() {
         _processingConditions = result;
+        _isDetailView = false; // 新しい検索をしたら一覧に戻す
       });
 
       if (result != null) {
-        // 成功時のSnackBar表示を追加
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('検索成功: ${result.toString()}'),
@@ -55,7 +54,6 @@ class _Work40PageState extends State<Work40Page> {
           ),
         );
       } else {
-        // 失敗時のSnackBar表示
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('データが見つかりませんでした。p: $pNumber, c: $cfgNo')),
         );
@@ -65,6 +63,20 @@ class _Work40PageState extends State<Work40Page> {
         context,
       ).showSnackBar(SnackBar(content: Text('検索エラー: $e')));
     }
+  }
+
+  void _handleBlockTapped(Map<String, dynamic> blockInfo) {
+    setState(() {
+      _selectedBlockInfo = blockInfo;
+      _isDetailView = true;
+    });
+  }
+
+  void _handleBackFromDetail() {
+    setState(() {
+      _isDetailView = false;
+      _selectedBlockInfo = null;
+    });
   }
 
   @override
@@ -85,8 +97,10 @@ class _Work40PageState extends State<Work40Page> {
                     children: [
                       Expanded(flex: 2, child: _EquipmentInfoCard()),
                       const SizedBox(width: 16),
-                      Expanded(flex: 4, child: DialSelectorPage()),
-                      const SizedBox(width: 16),
+                      if (_isDetailView) ...[
+                        Expanded(flex: 4, child: DialSelectorPage()),
+                        const SizedBox(width: 16),
+                      ],
                       Expanded(
                         flex: 2,
                         child: _SearchCard(onSearch: _onSearch),
@@ -94,71 +108,117 @@ class _Work40PageState extends State<Work40Page> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // 検索結果をInstructionSheetHeaderに渡す
-                  InstructionSheetHeader(
-                    lot_num:
-                        _processingConditions?['lot_num']?.toString() ?? "",
-                    p_number:
-                        _processingConditions?['p_number']?.toString() ?? "",
-                    eng_change:
-                        _processingConditions?['eng_change']?.toString() ?? "",
-                    cfg_no: _processingConditions?['cfg_no']?.toString() ?? "",
-                    subAssy:
-                        _processingConditions?['sub_assy']?.toString() ?? "",
-                    wire_type:
-                        _processingConditions?['wire_type']?.toString() ?? "",
-                    wire_size:
-                        _processingConditions?['wire_size']?.toString() ?? "",
-                    wire_color:
-                        _processingConditions?['wire_color']?.toString() ?? "",
-                    wire_len:
-                        _processingConditions?['wire_len']?.toString() ?? "",
-                    circuit_1:
-                        _processingConditions?['circuit_1']?.toString() ?? "",
-                    circuit_2:
-                        _processingConditions?['circuit_2']?.toString() ?? "",
-                    term_proc_inst_1:
-                        _processingConditions?['term_proc_inst_1']
-                            ?.toString() ??
-                        "",
-                    term_proc_inst_2:
-                        _processingConditions?['term_proc_inst_2']
-                            ?.toString() ??
-                        "",
-                    mark_color_1:
-                        (_processingConditions?['mark_color_1']?.toString() ??
-                                "")
-                            .isNotEmpty
-                        ? "ﾏｼﾞｯｸ_${_processingConditions!['mark_color_1']}"
-                        : "",
-                    mark_color_2:
-                        (_processingConditions?['mark_color_2']?.toString() ??
-                                "")
-                            .isNotEmpty
-                        ? "ﾏｼﾞｯｸ_${_processingConditions!['mark_color_2']}"
-                        : "",
-                    strip_len_1:
-                        _processingConditions?['strip_len_1']?.toString() ?? "",
-                    strip_len_2:
-                        _processingConditions?['strip_len_2']?.toString() ?? "",
-                    cut_code:
-                        _processingConditions?['cut_code']?.toString() ?? "",
-                    term_part_no_1:
-                        _processingConditions?['term_part_no_1']?.toString() ??
-                        "",
-                    term_part_no_2:
-                        _processingConditions?['term_part_no_2']?.toString() ??
-                        "",
-                    add_parts_1:
-                        _processingConditions?['add_parts_1']?.toString() ?? "",
-                    add_parts_2:
-                        _processingConditions?['add_parts_2']?.toString() ?? "",
-                    wire_cnt:
-                        _processingConditions?['wire_cnt']?.toString() ?? "",
-                    delivery_date:
-                        _processingConditions?['delivery_date']?.toString() ??
-                        "",
-                  ),
+                  // 状態に応じて表示を切り替える
+                  if (_processingConditions != null)
+                    _isDetailView
+                        ? EfuDetailPage(
+                            processingConditions: _processingConditions!,
+                            blockInfo: _selectedBlockInfo!,
+                            onBack: _handleBackFromDetail,
+                          )
+                        : InstructionSheetHeader(
+                            lot_num:
+                                _processingConditions!['lot_num']?.toString() ??
+                                '',
+                            p_number:
+                                _processingConditions!['p_number']
+                                    ?.toString() ??
+                                '',
+                            eng_change:
+                                _processingConditions!['eng_change']
+                                    ?.toString() ??
+                                '',
+                            cfg_no:
+                                _processingConditions!['cfg_no']?.toString() ??
+                                '',
+                            subAssy:
+                                _processingConditions!['sub_assy']
+                                    ?.toString() ??
+                                '',
+                            wire_type:
+                                _processingConditions!['wire_type']
+                                    ?.toString() ??
+                                '',
+                            wire_size:
+                                _processingConditions!['wire_size']
+                                    ?.toString() ??
+                                '',
+                            wire_color:
+                                _processingConditions!['wire_color']
+                                    ?.toString() ??
+                                '',
+                            wire_len:
+                                _processingConditions!['wire_len']
+                                    ?.toString() ??
+                                '',
+                            circuit_1:
+                                _processingConditions!['circuit_1']
+                                    ?.toString() ??
+                                '',
+                            circuit_2:
+                                _processingConditions!['circuit_2']
+                                    ?.toString() ??
+                                '',
+                            term_proc_inst_1:
+                                _processingConditions!['term_proc_inst_1']
+                                    ?.toString() ??
+                                '',
+                            term_proc_inst_2:
+                                _processingConditions!['term_proc_inst_2']
+                                    ?.toString() ??
+                                '',
+                            mark_color_1:
+                                (_processingConditions?['mark_color_1']
+                                            ?.toString() ??
+                                        "")
+                                    .isNotEmpty
+                                ? "ﾏｼﾞｯｸ_${_processingConditions!['mark_color_1']}"
+                                : "",
+                            mark_color_2:
+                                (_processingConditions?['mark_color_2']
+                                            ?.toString() ??
+                                        "")
+                                    .isNotEmpty
+                                ? "ﾏｼﾞｯｸ_${_processingConditions!['mark_color_2']}"
+                                : "",
+                            strip_len_1:
+                                _processingConditions!['strip_len_1']
+                                    ?.toString() ??
+                                '',
+                            strip_len_2:
+                                _processingConditions!['strip_len_2']
+                                    ?.toString() ??
+                                '',
+                            term_part_no_1:
+                                _processingConditions!['term_part_no_1']
+                                    ?.toString() ??
+                                '',
+                            term_part_no_2:
+                                _processingConditions!['term_part_no_2']
+                                    ?.toString() ??
+                                '',
+                            add_parts_1:
+                                _processingConditions!['add_parts_1']
+                                    ?.toString() ??
+                                '',
+                            add_parts_2:
+                                _processingConditions!['add_parts_2']
+                                    ?.toString() ??
+                                '',
+                            cut_code:
+                                _processingConditions!['cut_code']
+                                    ?.toString() ??
+                                '',
+                            wire_cnt:
+                                _processingConditions!['wire_cnt']
+                                    ?.toString() ??
+                                '',
+                            delivery_date:
+                                _processingConditions!['delivery_date']
+                                    ?.toString() ??
+                                '',
+                            onBlockTapped: _handleBlockTapped,
+                          ),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -234,9 +294,9 @@ class _EquipmentInfoCard extends StatelessWidget {
             children: const [
               Text("【設備情報】", style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 4),
-              Text("号機: 5"),
-              Text("機種: CM20"),
-              Text("管理No: B-3456"),
+              Text("号機: 5号機"),
+              Text("機種: XYZ-100"),
+              Text("管理ナンバー: EQ-123456"),
             ],
           ),
         ),
@@ -255,7 +315,7 @@ class _SearchCard extends StatefulWidget {
 
 class _SearchCardState extends State<_SearchCard> {
   final TextEditingController _searchController = TextEditingController(
-    text: 'N712/5M39255551780700186821616BP80D011N712/94.54.5325184039',
+    text: 'N712/5M39200151780700186821616BP80D011N712/94.54.5325184039',
   );
 
   @override

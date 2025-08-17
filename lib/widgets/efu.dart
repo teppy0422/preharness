@@ -122,6 +122,7 @@ class InstructionSheetHeader extends StatelessWidget {
   final String cut_code;
   final String wire_cnt;
   final String delivery_date;
+  final Function(Map<String, dynamic>) onBlockTapped; // コールバックを追加
 
   const InstructionSheetHeader({
     super.key,
@@ -149,6 +150,7 @@ class InstructionSheetHeader extends StatelessWidget {
     required this.cut_code,
     required this.wire_cnt,
     required this.delivery_date,
+    required this.onBlockTapped, // コールバックを必須引数に
   });
 
   @override
@@ -868,9 +870,15 @@ class InstructionSheetHeader extends StatelessWidget {
       cursor: SystemMouseCursors.click, // ← マウスオーバーでポインターに
       child: GestureDetector(
         onTap: () {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('ブロックがクリックされました')));
+          // タップされたブロックの情報をMapにまとめる
+          final blockInfo = {
+            'strip': strip,
+            'directives': directives,
+            'terminals': terminals,
+            'tubeinfo': tubeinfo,
+          };
+          // コールバックを呼び出して親ウィジェットに通知
+          onBlockTapped(blockInfo);
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
