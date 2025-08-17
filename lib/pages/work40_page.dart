@@ -98,7 +98,12 @@ class _Work40PageState extends State<Work40Page> {
                       Expanded(flex: 2, child: _EquipmentInfoCard()),
                       const SizedBox(width: 16),
                       if (_isDetailView) ...[
-                        Expanded(flex: 4, child: DialSelectorPage()),
+                        Expanded(
+                          flex: 4,
+                          child: DialSelectorPage(
+                            onChanged: (top, bottom, hind) {},
+                          ),
+                        ),
                         const SizedBox(width: 16),
                       ],
                       Expanded(
@@ -244,7 +249,10 @@ class FooterButtons extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: () {
-              showCustomDialog(context, const DialSelectorPage());
+              showCustomDialog(
+                context,
+                DialSelectorPage(onChanged: (top, bottom, hind) {}),
+              );
             },
             child: const Text("ダイヤル調整"),
           ),
@@ -315,7 +323,7 @@ class _SearchCard extends StatefulWidget {
 
 class _SearchCardState extends State<_SearchCard> {
   final TextEditingController _searchController = TextEditingController(
-    text: 'N712/5M39200151780700186821616BP80D011N712/94.54.5325184039',
+    text: 'N712/5M39255551780700186821616BP80D011N712/94.54.5325184039',
   );
 
   @override

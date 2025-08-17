@@ -91,17 +91,21 @@ copy 013 1720MB
 
 ### 2025-08-17
 
+Start using Gemini_cli.
+
 deploy 014
 copy 014 1710MB
 
-Create new page efu_detail.dart
+Create new page efu_detail.dart.
 
 commit 015
 copy 015
 
-ダイヤル値の保存を追加
+Added Dial value local storage.
 
-Testing Gemini_cli
+commit 016
+copy 016
+
 Response is displayed below the network status icon
 
 ファイルインポートのプログレスバーを追加

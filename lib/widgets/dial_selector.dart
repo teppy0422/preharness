@@ -2,7 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:preharness/constants/app_colors.dart';
 
 class DialSelectorPage extends StatefulWidget {
-  const DialSelectorPage({super.key});
+  final Function(String, String, String) onChanged;
+  final List<String>? initialTopDialOptions;
+  final List<String>? initialBottomDialOptions;
+  final List<String>? initialHindDialOptions;
+
+  const DialSelectorPage({
+    super.key,
+    required this.onChanged,
+    this.initialTopDialOptions,
+    this.initialBottomDialOptions,
+    this.initialHindDialOptions,
+  });
 
   @override
   State<DialSelectorPage> createState() => _DialSelectorPageState();
@@ -10,21 +21,21 @@ class DialSelectorPage extends StatefulWidget {
 
 class _DialSelectorPageState extends State<DialSelectorPage> {
   // ダイヤル選択肢
-  final List<double> topDialOptions = [0.35, 0.5, 0.85, 1.25, 2.0];
-  final List<int> bottomDialOptions = [1, 2, 3, 4];
-  final List<int> hindDialOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  final List<String> topDialOptions = ['0.35', '0.5', '0.85', '1.25', '2.0'];
+  final List<String> bottomDialOptions = ['1', '2', '3', '4'];
+  final List<String> hindDialOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
   // 選択状態
-  double? selectedTopDial;
-  int? selectedBottomDial;
-  int? selectedHindDial;
+  late String selectedTopDial;
+  late String selectedBottomDial;
+  late String selectedHindDial;
 
   @override
   void initState() {
     super.initState();
-    selectedTopDial = topDialOptions[0];
-    selectedBottomDial = bottomDialOptions[0];
-    selectedHindDial = hindDialOptions[0];
+    selectedTopDial = widget.initialTopDialOptions?.first ?? topDialOptions[0];
+    selectedBottomDial = widget.initialBottomDialOptions?.first ?? bottomDialOptions[0];
+    selectedHindDial = widget.initialHindDialOptions?.first ?? hindDialOptions[0];
   }
 
   @override
@@ -51,36 +62,39 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
               children: [
                 _buildDialSection(
                   title: "上ダイヤル",
-                  options: topDialOptions.map((e) => e.toString()).toList(),
-                  selectedValue: selectedTopDial.toString(),
+                  options: topDialOptions,
+                  selectedValue: selectedTopDial,
                   onTap: (val) {
                     setState(() {
-                      selectedTopDial = double.parse(val);
+                      selectedTopDial = val;
                     });
+                    widget.onChanged(selectedTopDial, selectedBottomDial, selectedHindDial);
                   },
                   labelColor: labelColor,
                 ),
                 const SizedBox(height: 8),
                 _buildDialSection(
                   title: "下ダイヤル",
-                  options: bottomDialOptions.map((e) => e.toString()).toList(),
-                  selectedValue: selectedBottomDial.toString(),
+                  options: bottomDialOptions,
+                  selectedValue: selectedBottomDial,
                   onTap: (val) {
                     setState(() {
-                      selectedBottomDial = int.parse(val);
+                      selectedBottomDial = val;
                     });
+                    widget.onChanged(selectedTopDial, selectedBottomDial, selectedHindDial);
                   },
                   labelColor: labelColor,
                 ),
                 const Divider(thickness: 1, color: Colors.grey),
                 _buildDialSection(
                   title: "後足",
-                  options: hindDialOptions.map((e) => e.toString()).toList(),
-                  selectedValue: selectedHindDial.toString(),
+                  options: hindDialOptions,
+                  selectedValue: selectedHindDial,
                   onTap: (val) {
                     setState(() {
-                      selectedHindDial = int.parse(val);
+                      selectedHindDial = val;
                     });
+                    widget.onChanged(selectedTopDial, selectedBottomDial, selectedHindDial);
                   },
                   labelColor: labelColor,
                 ),

@@ -150,6 +150,8 @@ class _SidebarState extends State<Sidebar> {
         return 3;
       case 'settings':
         return 4;
+      case 'debug':
+        return 5;
       default:
         return 0;
     }
@@ -167,6 +169,8 @@ class _SidebarState extends State<Sidebar> {
         return 'import';
       case 4:
         return 'settings';
+      case 5:
+        return 'debug';
       default:
         return 'home';
     }
@@ -175,6 +179,68 @@ class _SidebarState extends State<Sidebar> {
   @override
   Widget build(BuildContext context) {
     final selectedIndex = _getSelectedIndex();
+
+    final destinations = [
+      const NavigationRailDestination(
+        padding: EdgeInsets.symmetric(vertical: 4),
+        icon: Icon(Icons.home_outlined),
+        selectedIcon: Icon(Icons.home),
+        label: Text(
+          'ホーム',
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+        ),
+      ),
+      const NavigationRailDestination(
+        padding: EdgeInsets.symmetric(vertical: 4),
+        icon: Icon(Icons.build_outlined),
+        selectedIcon: Icon(Icons.build),
+        label: Text(
+          '圧着',
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+        ),
+      ),
+      const NavigationRailDestination(
+        padding: EdgeInsets.symmetric(vertical: 4),
+        icon: Icon(Icons.file_upload_outlined),
+        selectedIcon: Icon(Icons.file_upload),
+        label: Text(
+          '出荷',
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+        ),
+      ),
+      const NavigationRailDestination(
+        padding: EdgeInsets.symmetric(vertical: 4),
+        icon: Icon(Icons.cloud_outlined),
+        selectedIcon: Icon(Icons.cloud),
+        label: Text(
+          'サーバー',
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+        ),
+      ),
+      const NavigationRailDestination(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        icon: Icon(Icons.settings_outlined),
+        selectedIcon: Icon(Icons.settings),
+        label: Text(
+          '設定',
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+        ),
+      ),
+    ];
+
+    // if (kDebugMode) {
+    destinations.add(
+      const NavigationRailDestination(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        icon: Icon(Icons.bug_report_outlined),
+        selectedIcon: Icon(Icons.bug_report),
+        label: Text(
+          'デバッグ',
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+        ),
+      ),
+    );
+    // }
 
     if (isCollapsed) {
       return Container(
@@ -211,53 +277,7 @@ class _SidebarState extends State<Sidebar> {
           ),
         ],
       ),
-      destinations: const [
-        NavigationRailDestination(
-          padding: EdgeInsets.symmetric(vertical: 4),
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: Text(
-            'ホーム',
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
-          ),
-        ),
-        NavigationRailDestination(
-          padding: EdgeInsets.symmetric(vertical: 4),
-          icon: Icon(Icons.build_outlined),
-          selectedIcon: Icon(Icons.build),
-          label: Text(
-            '圧着',
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
-          ),
-        ),
-        NavigationRailDestination(
-          padding: EdgeInsets.symmetric(vertical: 4),
-          icon: Icon(Icons.file_upload_outlined),
-          selectedIcon: Icon(Icons.file_upload),
-          label: Text(
-            '出荷',
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
-          ),
-        ),
-        NavigationRailDestination(
-          padding: EdgeInsets.symmetric(vertical: 4),
-          icon: Icon(Icons.cloud_outlined),
-          selectedIcon: Icon(Icons.cloud),
-          label: Text(
-            'サーバー',
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
-          ),
-        ),
-        NavigationRailDestination(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          icon: Icon(Icons.settings_outlined),
-          selectedIcon: Icon(Icons.settings),
-          label: Text(
-            '設定',
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
-          ),
-        ),
-      ],
+      destinations: destinations,
       trailing: Expanded(
         child: Align(
           alignment: Alignment.bottomCenter,
@@ -267,7 +287,8 @@ class _SidebarState extends State<Sidebar> {
               valueListenable: themeNotifier,
               builder: (context, mode, _) {
                 final platformDark =
-                    MediaQuery.of(context).platformBrightness == Brightness.dark;
+                    MediaQuery.of(context).platformBrightness ==
+                    Brightness.dark;
                 final isDark =
                     mode == ThemeMode.dark ||
                     (mode == ThemeMode.system && platformDark);
@@ -282,13 +303,14 @@ class _SidebarState extends State<Sidebar> {
                         child: Switch(
                           value: isDark,
                           onChanged: (val) {
-                            themeNotifier.value =
-                                val ? ThemeMode.dark : ThemeMode.light;
+                            themeNotifier.value = val
+                                ? ThemeMode.dark
+                                : ThemeMode.light;
                           },
-                          thumbIcon:
-                              MaterialStateProperty.resolveWith<Icon?>(
-                                  (states) {
-                            if (states.contains(MaterialState.selected)) {
+                          thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
+                            states,
+                          ) {
+                            if (states.contains(WidgetState.selected)) {
                               // Dark mode (selected)
                               return const Icon(Icons.dark_mode);
                             }
