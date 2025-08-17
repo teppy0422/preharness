@@ -40,6 +40,7 @@ dependencies:
   qr_flutter: ^4.1.0
   barcode: ^2.2.5
   lottie: ^3.3.1 # アイコンアニメーション
+  intl: ^0.19.0
 
   # ユーザー登録
   image_picker: ^1.0.7
@@ -47,6 +48,7 @@ dependencies:
   # 印刷
   printing: ^5.11.0
   pdf: ^3.10.1
+  just_audio: ^0.9.36
 
 dev_dependencies:
   flutter_test:
@@ -128,7 +130,9 @@ flutter:
 
   assets:
     - assets/images/tearDrop.svg
+    - assets/images/character.svg
     - assets/fonts/MaterialIcons-Regular.ttf
 
     - assets/lottie/network_ok.json
     - assets/lottie/network_error.json
+    - assets/sounds/

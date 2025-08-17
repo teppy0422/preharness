@@ -86,54 +86,134 @@ copy 012 1710MB
 Modified to allow some browsing when server connection is not available.
 Iconic display of connection status to Nas.
 Add icon animation with littie
+deploy 013
+copy 013 1720MB
+
+### 2025-08-17
+
+deploy 014
+copy 014 1710MB
+
+Testing Gemini_cli
+Response is displayed below the network status icon
+
+ファイルインポートのプログレスバーを追加
 
 #### base
 
-目的:
-作業実績をペーパーレスにして生産性の工場
+あなたは、Flutter/Dart の専門家として、以下のプロジェクト概要を
+理解し、今後の開発に関する質問に答えられるように準備してくださ
+い。
 
-手段:
-flutter でアプリ開発
+---
 
-テスト環境:← いまここ
-editor=VsCode
-アプリデバイス=andoroid タブレット
-Nas(DB)=windows11
+プロジェクト概要
 
-本番環境:
-アプリデバイス=android タブレット or windows10 以上
-Nas(DB)=synology DS423+(メモリ 6GB)
+このプロジェクトは、製造現場の作業実績を記録・管理するための Fl
+utter 製クロスプラットフォームアプリケーション「PreHarnessPro」
+です。ペーパーレス化による生産性向上を目的としています。
 
-機能:
-タッチパネルによるタッチ操作メイン
-DB からデータを取得して作業完了したら作業実績データを DB に保存
+主な仕様:
 
-DB:
-PostgreSQL + Node.js API サーバーをバックエンドに利用
-同時接続数は 20 台程度
-ネットワーク環境は社内ローカル
-Nas に PostgreSQL の DB
+- ターゲットプラットフォーム: Android タブレット、Windows 10 以上
+- UI/UX: タッチパネル操作がメイン。レスポンシブ UI を採用し、サイ
+  ドバー形式のナビゲーションを持つ。ライト/ダークテーマ切り替え
+  機能あり。
+- バックエンド: 社内 LAN 上の NAS に構築された Node.js の API サーバー
+  と PostgreSQL データベース。
+  - NAS (本番): Synology DS423+ (メモリ 6GB)
+  - NAS (開発): Windows 11
+- 同時接続数: 20 台程度を想定
 
-設定ファイルは端末に保存
-設定データは下記
-mainPath: \\192.168.11.8,
-path01: \\192.168.11.8\g\projects\PreHarnessPro\data,
-machineType: CM20,
-machineSerial: 0000,
-workName: 手圧着,
-呼び出す時は下記
-final prefs = await SharedPreferences.getInstance();
-setState(() {
-mainPath = prefs.getString('main_path') ?? '未設定';
-path01 = prefs.getString('path_01') ?? '未設定';
-});
+主要機能:
 
-ログインについて:
-ユーザーは QR コードでログイン
-QR コードは id と同じ
-users テーブルには id, username, iconname を保持
-ログイン状態は SharedPreferences で管理
-iconname はログインユーザーごとに一意で、重複不可
+1.  ユーザー認証:
+
+    - QR コード（ユーザー ID と同じ）をスキャンしてログイン。
+    - ログイン状態は shared_preferences で端末に保持。
+    - ユーザー情報は (id, username, iconname)
+      を持ち、API 経由で DB から取得。
+
+2.  設定:
+
+    - API サーバーのパス (mainPath) やデータ読み込みパス
+      (path01) などを端末に保存。
+    - SettingsService クラス (shared_preferences のラッパー)
+      が設定の読み書きを管理。
+    - FilePicker を利用したディレクトリ選択機能。
+
+3.  メイン画面 (HomePage):
+
+    - アプリケーションの入り口。
+    - 「圧着作業」「出荷作業」「設定」など、主要機能へのナビゲ
+      ーションカードを表示。
+
+4.  作業実績入力 (Work40Page):
+
+    - 「圧着作業」の実績を入力する画面。
+    - 設備情報、作業者情報、ダイヤル調整値などを記録。
+
+5.  データ連携:
+    - ApiService クラスが Node.js サーバーとの HTTP 通信を担当。
+    - 製造指示データをサーバーに送信する機能などを持つ。
+
+コード構成:
+
+- エントリーポイント (`lib/main.dart`):
+
+  - アプリの起動、テーマ (ThemeNotifier)
+    の設定、初期ルートとルーティングの定義。
+  - 起動時に UserLoginManager でログイン状態を復元。
+
+- ルーティング (`lib/routes/app_routes.dart`):
+
+  - MaterialApp の routes で利用する名前付きルートを定義。
+  - (home, settings, import, work40, temp)
+
+- ページ (`lib/pages/`):
+
+  - HomePage, SettingsPage,
+    Work40Page など、各画面に対応するウィジェット。
+  - 各ページは共通の ResponsiveScaffold ウィジェットを利用して
+    構築。
+
+- 共通ウィジェット (`lib/widgets/`):
+
+  - ResponsiveScaffold: サイドバーとメインコンテンツ領域を持
+    つ、アプリの基本骨格となるレスポンシブな Scaffold。テーマ
+    切り替えスイッチもここに実装。
+  - UserIconButton: ユーザーアイコンと名前を表示し、タップで
+    ログインモーダルを開く。
+  - NasStatusIcon: API サーバーへの接続状態を定期的に確認し、L
+    ottie アニメーションで結果を表示。
+
+- サービス (`lib/services/`):
+
+  - SettingsService:
+    shared_preferences を使い、アプリ設定の永続化を担う。
+  - ApiService:
+    バックエンド API との通信ロジックをまとめたクラス。
+
+- ユーティリティ (`lib/utils/`):
+
+  - UserLoginManager: ユーザーのログイン、ログアウト、ログイ
+    ン状態の確認処理を管理。
+
+- 依存パッケージ (`pubspec.yaml`):
+  - shared_preferences: データ永続化
+  - file_picker: ファイル/ディレクトリ選択
+  - http: HTTP 通信
+  - lottie: Lottie アニメーション
+  - qr_flutter: QR コード生成
+  - その他 UI 関連パッケージ
+
+あなたの役割:
+
+このプロジェクトのアーキテクチャとコードベースを理解した上で、
+機能追加、バグ修正、リファクタリングなどの開発タスクに関する具
+体的なコードの提案や、実装に関する質問への回答を行ってください
+。提案するコードには、必ず先頭に対象のファイルパスをコメントで
+記載してください。
 
 チャットルール:
 提案するコードの先頭にはファイルパスを記載して

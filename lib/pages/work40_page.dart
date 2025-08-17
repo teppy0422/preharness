@@ -1,18 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:preharness/services/api_service.dart';
 import 'package:preharness/widgets/efu.dart';
 import 'package:preharness/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
+import 'package:preharness/utils/user_login_manager.dart';
+import 'package:intl/intl.dart';
 
 import 'package:preharness/widgets/measurement.dart';
 import 'package:preharness/widgets/dial_selector.dart';
 
-class Work40Page extends StatelessWidget {
+class Work40Page extends StatefulWidget {
   const Work40Page({super.key});
+
+  @override
+  State<Work40Page> createState() => _Work40PageState();
+}
+
+class _Work40PageState extends State<Work40Page> {
+  // 検索結果を保持する状態変数
+  Map<String, dynamic>? _processingConditions;
+
+  // 検索処理
+  void _onSearch(String query) async {
+    String? pNumber;
+    String? cfgNo;
+
+    // 固定長で文字列を抽出
+    if (query.length >= 38) {
+      // 必要な長さがあるかチェック
+      cfgNo = query.substring(10, 14); // 9文字目から4文字 (0-indexed)
+      pNumber = query.substring(24, 34); // 28文字目から10文字 (0-indexed)
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('入力された文字列が短すぎます。')));
+      return;
+    }
+
+    try {
+      final result = await ApiService.fetchProcessingConditions(
+        p_number: pNumber,
+        cfg_no: cfgNo,
+      );
+      setState(() {
+        _processingConditions = result;
+      });
+
+      if (result != null) {
+        // 成功時のSnackBar表示を追加
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('検索成功: ${result.toString()}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        // 失敗時のSnackBar表示
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('データが見つかりませんでした。p: $pNumber, c: $cfgNo')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('検索エラー: $e')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ResponsiveScaffold(
-      // appBar: AppBar(title: const Text("圧着作業")),
       title: 'work40',
       currentPage: AppRoutes.work40,
       child: Stack(
@@ -26,18 +83,81 @@ class Work40Page extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(flex: 4, child: _EquipmentInfoCard()),
-                      const SizedBox(width: 16),
-                      Expanded(flex: 4, child: _OperatorInfoCard()),
+                      Expanded(flex: 2, child: _EquipmentInfoCard()),
                       const SizedBox(width: 16),
                       Expanded(flex: 4, child: DialSelectorPage()),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 2,
+                        child: _SearchCard(onSearch: _onSearch),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
+                  // 検索結果をInstructionSheetHeaderに渡す
                   InstructionSheetHeader(
-                    lotNo: 'M392',
-                    structureNo: '0099',
-                    subAssy: '15-4',
+                    lot_num:
+                        _processingConditions?['lot_num']?.toString() ?? "",
+                    p_number:
+                        _processingConditions?['p_number']?.toString() ?? "",
+                    eng_change:
+                        _processingConditions?['eng_change']?.toString() ?? "",
+                    cfg_no: _processingConditions?['cfg_no']?.toString() ?? "",
+                    subAssy:
+                        _processingConditions?['sub_assy']?.toString() ?? "",
+                    wire_type:
+                        _processingConditions?['wire_type']?.toString() ?? "",
+                    wire_size:
+                        _processingConditions?['wire_size']?.toString() ?? "",
+                    wire_color:
+                        _processingConditions?['wire_color']?.toString() ?? "",
+                    wire_len:
+                        _processingConditions?['wire_len']?.toString() ?? "",
+                    circuit_1:
+                        _processingConditions?['circuit_1']?.toString() ?? "",
+                    circuit_2:
+                        _processingConditions?['circuit_2']?.toString() ?? "",
+                    term_proc_inst_1:
+                        _processingConditions?['term_proc_inst_1']
+                            ?.toString() ??
+                        "",
+                    term_proc_inst_2:
+                        _processingConditions?['term_proc_inst_2']
+                            ?.toString() ??
+                        "",
+                    mark_color_1:
+                        (_processingConditions?['mark_color_1']?.toString() ??
+                                "")
+                            .isNotEmpty
+                        ? "ﾏｼﾞｯｸ_${_processingConditions!['mark_color_1']}"
+                        : "",
+                    mark_color_2:
+                        (_processingConditions?['mark_color_2']?.toString() ??
+                                "")
+                            .isNotEmpty
+                        ? "ﾏｼﾞｯｸ_${_processingConditions!['mark_color_2']}"
+                        : "",
+                    strip_len_1:
+                        _processingConditions?['strip_len_1']?.toString() ?? "",
+                    strip_len_2:
+                        _processingConditions?['strip_len_2']?.toString() ?? "",
+                    cut_code:
+                        _processingConditions?['cut_code']?.toString() ?? "",
+                    term_part_no_1:
+                        _processingConditions?['term_part_no_1']?.toString() ??
+                        "",
+                    term_part_no_2:
+                        _processingConditions?['term_part_no_2']?.toString() ??
+                        "",
+                    add_parts_1:
+                        _processingConditions?['add_parts_1']?.toString() ?? "",
+                    add_parts_2:
+                        _processingConditions?['add_parts_2']?.toString() ?? "",
+                    wire_cnt:
+                        _processingConditions?['wire_cnt']?.toString() ?? "",
+                    delivery_date:
+                        _processingConditions?['delivery_date']?.toString() ??
+                        "",
                   ),
                   const SizedBox(height: 100),
                 ],
@@ -89,14 +209,9 @@ void showCustomDialog(BuildContext context, Widget child) {
     builder: (context) {
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          Navigator.of(context).pop();
-        },
+        onTap: () => Navigator.of(context).pop(),
         child: Center(
-          child: GestureDetector(
-            onTap: () {}, // ダイアログ自体のタップで閉じない
-            child: child,
-          ),
+          child: GestureDetector(onTap: () {}, child: child),
         ),
       );
     },
@@ -119,9 +234,9 @@ class _EquipmentInfoCard extends StatelessWidget {
             children: const [
               Text("【設備情報】", style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 4),
-              Text("号機: 5号機"),
-              Text("機種: XYZ-100"),
-              Text("管理ナンバー: EQ-123456"),
+              Text("号機: 5"),
+              Text("機種: CM20"),
+              Text("管理No: B-3456"),
             ],
           ),
         ),
@@ -130,7 +245,31 @@ class _EquipmentInfoCard extends StatelessWidget {
   }
 }
 
-class _OperatorInfoCard extends StatelessWidget {
+class _SearchCard extends StatefulWidget {
+  final Function(String) onSearch;
+  const _SearchCard({required this.onSearch});
+
+  @override
+  State<_SearchCard> createState() => _SearchCardState();
+}
+
+class _SearchCardState extends State<_SearchCard> {
+  final TextEditingController _searchController = TextEditingController(
+    text: 'N712/5M39255551780700186821616BP80D011N712/94.54.5325184039',
+  );
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _handleSearch() {
+    final query = _searchController.text;
+    if (query.isEmpty) return;
+    widget.onSearch(query);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -143,11 +282,29 @@ class _OperatorInfoCard extends StatelessWidget {
           padding: const EdgeInsets.all(6),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text("【作業者情報】", style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
-              Text("氏名: 田中 太郎"),
-              Text("開始時間: 2025/07/25 09:15"),
+            children: [
+              const Text(
+                "【データ検索】",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'ロット番号などを入力',
+                  isDense: true,
+                  border: OutlineInputBorder(),
+                ),
+                onSubmitted: (_) => _handleSearch(),
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton(
+                  onPressed: _handleSearch,
+                  child: const Text('検索'),
+                ),
+              ),
             ],
           ),
         ),

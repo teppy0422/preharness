@@ -4,6 +4,7 @@ import 'package:preharness/pages/settings_page.dart';
 import 'package:preharness/pages/import_page.dart';
 import 'package:preharness/pages/work40_page.dart';
 import 'package:preharness/pages/temp_page.dart';
+import 'package:preharness/pages/rhythm_game_page.dart';
 
 class AppRoutes {
   static const home = '/home';
@@ -11,6 +12,7 @@ class AppRoutes {
   static const import = '/import';
   static const work40 = '/work40';
   static const temp = '/temp';
+  static const rhythmGame = '/rhythm_game'; // 新しいルート
 
   static Map<String, WidgetBuilder> routes = {
     home: (context) => const HomePage(),
@@ -18,5 +20,6 @@ class AppRoutes {
     import: (context) => const ImportPage(),
     work40: (context) => const Work40Page(),
     temp: (context) => const TempPage(),
+    rhythmGame: (context) => const RhythmGamePage(), // 新しいマッピング
   };
 }

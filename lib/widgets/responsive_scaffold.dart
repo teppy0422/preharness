@@ -30,9 +30,6 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final platformDark =
-        MediaQuery.of(context).platformBrightness == Brightness.dark;
-
     return Scaffold(
       body: Stack(
         children: [
@@ -93,7 +90,7 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
             ),
           Positioned(
             top: 16,
-            right: 80, // ← UserIconButton より左へ
+            right: 8, // ← UserIconButton より左へ
             child: Row(
               children: const [
                 // Nasステータス
@@ -102,27 +99,6 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
                 // ユーザーログインアイコン
                 UserIconButton(),
               ],
-            ),
-          ),
-          // モード切替スイッチは右上に固定配置
-          Positioned(
-            top: 12,
-            right: 16,
-            child: ValueListenableBuilder<ThemeMode>(
-              valueListenable: themeNotifier,
-              builder: (context, mode, _) {
-                final isDark =
-                    mode == ThemeMode.dark ||
-                    (mode == ThemeMode.system && platformDark);
-                return Switch(
-                  value: isDark,
-                  onChanged: (val) {
-                    themeNotifier.value = val
-                        ? ThemeMode.dark
-                        : ThemeMode.light;
-                  },
-                );
-              },
             ),
           ),
         ],
@@ -227,15 +203,14 @@ class _SidebarState extends State<Sidebar> {
       labelType: NavigationRailLabelType.selected,
       groupAlignment: -1.0,
       leading: Column(
-        children: [
-          const SizedBox(height: 20),
-          const Text(
+        children: const [
+          SizedBox(height: 20),
+          Text(
             'Menu',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ],
       ),
-
       destinations: const [
         NavigationRailDestination(
           padding: EdgeInsets.symmetric(vertical: 4),
@@ -283,6 +258,61 @@ class _SidebarState extends State<Sidebar> {
           ),
         ),
       ],
+      trailing: Expanded(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: ValueListenableBuilder<ThemeMode>(
+              valueListenable: themeNotifier,
+              builder: (context, mode, _) {
+                final platformDark =
+                    MediaQuery.of(context).platformBrightness == Brightness.dark;
+                final isDark =
+                    mode == ThemeMode.dark ||
+                    (mode == ThemeMode.system && platformDark);
+
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Transform.rotate(
+                      angle: -1.57079632679, // -90 degrees in radians
+                      child: Transform.scale(
+                        scale: 0.9,
+                        child: Switch(
+                          value: isDark,
+                          onChanged: (val) {
+                            themeNotifier.value =
+                                val ? ThemeMode.dark : ThemeMode.light;
+                          },
+                          thumbIcon:
+                              MaterialStateProperty.resolveWith<Icon?>(
+                                  (states) {
+                            if (states.contains(MaterialState.selected)) {
+                              // Dark mode (selected)
+                              return const Icon(Icons.dark_mode);
+                            }
+                            // Light mode (unselected)
+                            return const Icon(Icons.light_mode);
+                          }),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      isDark ? 'ダーク' : 'ライト',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

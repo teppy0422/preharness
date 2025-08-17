@@ -34,20 +34,155 @@ Color getHighLightColor(BuildContext context) {
   return isDark ? AppColors.neonGreen : AppColors.red;
 }
 
+int? safeSubstringToInt(String source, int start, int end) {
+  if (source.length < end) return null; // 範囲外
+  final part = source.substring(start, end);
+  if (int.tryParse(part) != null) {
+    return int.parse(part);
+  }
+  return null;
+}
+
+Map<String, dynamic> parseDateCode(String dateCode) {
+  final year = safeSubstringToInt(dateCode, 0, 2);
+  final month = safeSubstringToInt(dateCode, 2, 4);
+  final day = safeSubstringToInt(dateCode, 4, 6);
+  if (year == null || month == null || day == null) {
+    throw ArgumentError("日付コードが不正です");
+  }
+  final fullYear = 2000 + year;
+  final date = DateTime(fullYear, month, day);
+  return {"year": fullYear, "month": month, "day": day, "date": date};
+}
+
+String convertCode(String input) {
+  if (input == "Z") {
+    return "Y";
+  } else if (input == "2") {
+    return "YAC";
+  }
+  return input; // その他はそのまま返す
+}
+
+String mmToCm(String mm) {
+  final value = int.tryParse(mm);
+  if (value == null) return mm; // 数字じゃない場合はそのまま返す
+  return (value / 10).toStringAsFixed(1);
+}
+
+String formatCode(String code) {
+  if (code.length == 8) {
+    // 例: "71144020" → "7114 4020"
+    return "${code.substring(0, 4)} ${code.substring(4, 8)}";
+  } else if (code.length == 10) {
+    // 例: "7114402002" → "7114 4020 02"
+    return "${code.substring(0, 4)} ${code.substring(4, 8)} ${code.substring(8, 10)}";
+  }
+  // それ以外はそのまま返す
+  return code;
+}
+
+List<String> buildFixedList(List<String?> values, {int length = 5}) {
+  final list = <String>[];
+  for (var v in values) {
+    if (v != null && v.isNotEmpty) {
+      list.add(v);
+    }
+  }
+  // 足りない分を "" で埋める
+  while (list.length < length) {
+    list.add("");
+  }
+  // もし length を超えたら切り捨て
+  return list.take(length).toList();
+}
+
 class InstructionSheetHeader extends StatelessWidget {
-  final String lotNo;
-  final String structureNo;
+  final String lot_num;
+  final String p_number;
+  final String eng_change;
+  final String cfg_no;
   final String subAssy;
+  final String wire_type;
+  final String wire_size;
+  final String wire_color;
+  final String wire_len;
+  final String circuit_1;
+  final String circuit_2;
+  final String term_proc_inst_1;
+  final String term_proc_inst_2;
+  final String mark_color_1;
+  final String mark_color_2;
+  final String strip_len_1;
+  final String strip_len_2;
+  final String term_part_no_1;
+  final String term_part_no_2;
+  final String add_parts_1;
+  final String add_parts_2;
+  final String cut_code;
+  final String wire_cnt;
+  final String delivery_date;
 
   const InstructionSheetHeader({
     super.key,
-    required this.lotNo,
-    required this.structureNo,
+    required this.lot_num,
+    required this.p_number,
+    required this.eng_change,
+    required this.cfg_no,
     required this.subAssy,
+    required this.wire_type,
+    required this.wire_size,
+    required this.wire_color,
+    required this.wire_len,
+    required this.circuit_1,
+    required this.circuit_2,
+    required this.term_proc_inst_1,
+    required this.term_proc_inst_2,
+    required this.mark_color_1,
+    required this.mark_color_2,
+    required this.strip_len_1,
+    required this.strip_len_2,
+    required this.term_part_no_1,
+    required this.term_part_no_2,
+    required this.add_parts_1,
+    required this.add_parts_2,
+    required this.cut_code,
+    required this.wire_cnt,
+    required this.delivery_date,
   });
 
   @override
   Widget build(BuildContext context) {
+    final deliveryParse = parseDateCode(delivery_date);
+    final deliveryParseMonth = deliveryParse["month"];
+    final deliveryParseDay = deliveryParse["day"];
+
+    final termProcInt1 = convertCode(term_proc_inst_1);
+    final termProcInt2 = convertCode(term_proc_inst_2);
+
+    final stripLen1 = mmToCm(strip_len_1);
+    final stripLen2 = mmToCm(strip_len_2);
+
+    final termPartNo1 = formatCode(term_part_no_1);
+    final termPartNo2 = formatCode(term_part_no_2);
+
+    final addParts1 = formatCode(add_parts_1);
+    final addParts2 = formatCode(add_parts_2);
+
+    String markString1 = "";
+    Colors? markColor1;
+    if (mark_color_1 != "") {
+      markString1 = "ﾏｼﾞｯｸ";
+    }
+    String markString2 = "";
+    Colors? markColor2;
+    if (mark_color_2 != "") {
+      markString2 = "ﾏｼﾞｯｸ";
+    }
+    final blockList1_1 = buildFixedList([termProcInt1, markString1]);
+    final blockList1_2 = buildFixedList([termPartNo1, mark_color_1, addParts1]);
+    final blockList2_1 = buildFixedList([termProcInt2, markString2]);
+    final blockList2_2 = buildFixedList([termPartNo2, mark_color_2, addParts2]);
     return LayoutBuilder(
       builder: (context, constraints) {
         // 高さ固定（例: 400）にしたい場合
@@ -92,7 +227,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: 'ロットNo.',
                                     cellBgColor: getLightColor(context),
-                                    value: lotNo,
+                                    value: lot_num,
                                     right: BorderSide.none,
                                     bottom: BorderSide.none,
                                   ),
@@ -105,7 +240,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                     labelColor: Colors.white,
                                     labelBgColor: getDarkColor(context),
                                     labelAlignment: Alignment.center,
-                                    value: structureNo,
+                                    value: cfg_no,
                                     valueBgColor: getLightColor(context),
                                     right: BorderSide.none,
                                     bottom: BorderSide.none,
@@ -129,7 +264,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: '日 連 番',
                                     labelAlignment: Alignment.center,
-                                    value: "17807",
+                                    value: "",
                                     valueFontSize: 14,
                                     overFlowTop: 0,
                                     right: BorderSide.none,
@@ -166,7 +301,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                   child: _buildCell(
                                     context: context,
                                     label: '製 品 品 番',
-                                    value: '8211126L04    D01',
+                                    value: "$p_number    $eng_change",
                                     bottom: BorderSide.none,
                                     right: BorderSide.none,
                                   ),
@@ -223,7 +358,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: '品 種',
                                     labelAlignment: Alignment.center,
-                                    value: '184',
+                                    value: wire_type,
                                     bottom: BorderSide.none,
                                     right: BorderSide.none,
                                   ),
@@ -234,7 +369,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: 'サイズ',
                                     labelAlignment: Alignment.center,
-                                    value: '039',
+                                    value: wire_size,
                                     bottom: BorderSide.none,
                                     left: BorderSide.none,
                                     right: BorderSide.none,
@@ -247,7 +382,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: '色',
                                     labelAlignment: Alignment.center,
-                                    value: '91',
+                                    value: wire_color,
                                     valueFontSize: 30,
                                     overFlowTop: -12,
                                     left: BorderSide.none,
@@ -262,7 +397,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: '切 断 線 長',
                                     labelAlignment: Alignment.center,
-                                    value: '325',
+                                    value: wire_len,
                                     bottom: BorderSide.none,
                                     right: BorderSide.none,
                                   ),
@@ -273,7 +408,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: '数 量',
                                     labelAlignment: Alignment.center,
-                                    value: '1',
+                                    value: wire_cnt,
                                     valueFontSize: 24,
                                     valueAlignment: MainAxisAlignment.end,
                                     overFlowTop: -10,
@@ -287,7 +422,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: ' ',
                                     labelAlignment: Alignment.center,
-                                    value: "302  152",
+                                    value: "$circuit_1   $circuit_2",
                                     valueColor: Colors.grey,
                                     bottom: BorderSide.none,
                                   ),
@@ -301,28 +436,22 @@ class InstructionSheetHeader extends StatelessWidget {
                                 Expanded(
                                   flex: 4,
                                   child: _buildOneBlock(
-                                    strip: "4.5",
-                                    directives: ["Y", "", "", "", ""],
-                                    terminals: ["7116 2891 02", "", "", "", ""],
+                                    strip: stripLen1,
+                                    directives: blockList1_1,
+                                    terminals: blockList1_2,
                                     tubeinfo: ["", "", "", ""],
                                     context: context,
-                                  ), // ← 1セット目
+                                  ),
                                 ),
                                 Expanded(
                                   flex: 4,
                                   child: _buildOneBlock(
-                                    strip: "4.5",
-                                    directives: ["YAC", "ﾏｼﾞｯｸ", "", "", ""],
-                                    terminals: [
-                                      "7116 4231 02",
-                                      "7406 5000",
-                                      "7406 3000",
-                                      "7406 3001",
-                                      "",
-                                    ],
+                                    strip: stripLen2,
+                                    directives: blockList2_1,
+                                    terminals: blockList2_2,
                                     tubeinfo: ["500", "100", "209", "325"],
                                     context: context,
-                                  ), // ← 1セット目
+                                  ),
                                 ),
                                 Expanded(flex: 3, child: _buildQr(context)),
                               ],
@@ -345,7 +474,7 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: '切断',
                                     labelFontSize: 12,
-                                    value: '',
+                                    value: cut_code,
                                     right: BorderSide.none,
                                   ),
                                 ),
@@ -397,7 +526,8 @@ class InstructionSheetHeader extends StatelessWidget {
                                     context: context,
                                     label: '準完',
                                     labelFontSize: 12,
-                                    value: "12/9",
+                                    value:
+                                        "$deliveryParseMonth/$deliveryParseDay",
                                     cellBgColor: getLightColor(context),
                                     right: BorderSide.none,
                                   ),
@@ -772,19 +902,23 @@ class InstructionSheetHeader extends StatelessWidget {
     bool lefthalfborder = false,
     double overFlowTop = 0,
     bool showQR = false,
-    bool blinking = false, // ← 新しく追加
+    bool blinking = false,
+    Color markColor = Colors.transparent,
   }) {
     final Color effectiveLabelColor = labelColor ?? getLabelColor(context);
     final Color effectiveValueColor = valueColor ?? getValueColor(context);
     // felt-pen
-    Color? feltColor;
+    Color? feltColor = Colors.transparent;
     bool showFelt = false;
-    if (value != null && value.startsWith("7406")) {
+    if (value != null && value.startsWith("ﾏｼﾞｯｸ_")) {
       showFelt = true;
-      if (value.contains("3000")) {
+      value = value.replaceFirst("ﾏｼﾞｯｸ_", "");
+      if (value.contains("30")) {
         feltColor = AppColors.black;
-      } else if (value.contains("5000")) {
+      } else if (value.contains("50")) {
         feltColor = AppColors.red;
+      } else if (value.contains("60")) {
+        feltColor = AppColors.deepGreen;
       }
     }
 
@@ -862,7 +996,7 @@ class InstructionSheetHeader extends StatelessWidget {
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    if (feltColor != null)
+                    if (feltColor != Colors.transparent)
                       Stack(
                         alignment: Alignment.center,
                         children: [
@@ -886,7 +1020,7 @@ class InstructionSheetHeader extends StatelessWidget {
                           ),
                         ],
                       ),
-                    if (feltColor == null && showFelt)
+                    if (feltColor == Colors.transparent && showFelt)
                       ShaderMask(
                         shaderCallback: (Rect bounds) {
                           return const LinearGradient(

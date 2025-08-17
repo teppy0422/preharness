@@ -10,7 +10,7 @@ class DialSelectorPage extends StatefulWidget {
 
 class _DialSelectorPageState extends State<DialSelectorPage> {
   // ダイヤル選択肢
-  final List<double> topDialOptions = [0.3, 0.5, 0.85, 1.25, 2.0];
+  final List<double> topDialOptions = [0.35, 0.5, 0.85, 1.25, 2.0];
   final List<int> bottomDialOptions = [1, 2, 3, 4];
   final List<int> hindDialOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -112,7 +112,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
         // ),
         const SizedBox(height: 2),
         Wrap(
-          spacing: 8,
+          spacing: 22,
           children: options.map((val) {
             final isSelected = selectedValue == val;
             return GestureDetector(

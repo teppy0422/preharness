@@ -85,22 +85,21 @@ class _UserIconButtonState extends State<UserIconButton> {
               height: 34,
               color: Colors.grey[300],
               child: iconData == null
-                  ? const Icon(Icons.person, color: Colors.white, size: 32)
-                  : Icon(iconData, size: 32, color: Colors.blueAccent),
+                  ? const Icon(Icons.person, color: Colors.white, size: 28)
+                  : Icon(iconData, size: 28, color: Colors.blueAccent),
             ),
           ),
-          if (_username != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 0),
-              child: Text(
-                _username!,
-                style: const TextStyle(
-                  fontSize: 9,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+          Padding(
+            padding: const EdgeInsets.only(top: 0),
+            child: Text(
+              _username == null ? "未ログイン" : _username!,
+              style: TextStyle(
+                fontSize: _username == null ? 7 : 8,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
+          ),
         ],
       ),
     );

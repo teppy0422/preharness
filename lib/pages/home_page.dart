@@ -51,6 +51,12 @@ class HomePage extends StatelessWidget {
                   description: 'import',
                   routeName: AppRoutes.import,
                 ),
+                _FeatureCard(
+                  icon: Icons.music_note,
+                  title: 'リズムゲーム',
+                  description: 'Pata-Pon!',
+                  routeName: AppRoutes.rhythmGame,
+                ),
               ],
             ),
           ],
