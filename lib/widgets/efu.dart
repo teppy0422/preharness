@@ -48,7 +48,7 @@ Map<String, dynamic> parseDateCode(String dateCode) {
   final month = safeSubstringToInt(dateCode, 2, 4);
   final day = safeSubstringToInt(dateCode, 4, 6);
   if (year == null || month == null || day == null) {
-    throw ArgumentError("日付コードが不正です");
+    throw ArgumentError("日付コードが不正です$dateCode");
   }
   final fullYear = 2000 + year;
   final date = DateTime(fullYear, month, day);
@@ -97,7 +97,7 @@ List<String> buildFixedList(List<String?> values, {int length = 5}) {
   return list.take(length).toList();
 }
 
-class InstructionSheetHeader extends StatelessWidget {
+class EfuPage extends StatelessWidget {
   final String lot_num;
   final String p_number;
   final String eng_change;
@@ -124,32 +124,32 @@ class InstructionSheetHeader extends StatelessWidget {
   final String delivery_date;
   final Function(Map<String, dynamic>) onBlockTapped; // コールバックを追加
 
-  const InstructionSheetHeader({
+  const EfuPage({
     super.key,
-    required this.lot_num,
-    required this.p_number,
-    required this.eng_change,
-    required this.cfg_no,
-    required this.subAssy,
-    required this.wire_type,
-    required this.wire_size,
-    required this.wire_color,
-    required this.wire_len,
-    required this.circuit_1,
-    required this.circuit_2,
-    required this.term_proc_inst_1,
-    required this.term_proc_inst_2,
-    required this.mark_color_1,
-    required this.mark_color_2,
-    required this.strip_len_1,
-    required this.strip_len_2,
-    required this.term_part_no_1,
-    required this.term_part_no_2,
-    required this.add_parts_1,
-    required this.add_parts_2,
-    required this.cut_code,
-    required this.wire_cnt,
-    required this.delivery_date,
+    this.lot_num = "",
+    this.p_number = "",
+    this.eng_change = "",
+    this.cfg_no = "",
+    this.subAssy = "",
+    this.wire_type = "",
+    this.wire_size = "",
+    this.wire_color = "",
+    this.wire_len = "",
+    this.circuit_1 = "",
+    this.circuit_2 = "",
+    this.term_proc_inst_1 = "",
+    this.term_proc_inst_2 = "",
+    this.mark_color_1 = "",
+    this.mark_color_2 = "",
+    this.strip_len_1 = "",
+    this.strip_len_2 = "",
+    this.term_part_no_1 = "",
+    this.term_part_no_2 = "",
+    this.add_parts_1 = "",
+    this.add_parts_2 = "",
+    this.cut_code = "",
+    this.wire_cnt = "",
+    this.delivery_date = "",
     required this.onBlockTapped, // コールバックを必須引数に
   });
 

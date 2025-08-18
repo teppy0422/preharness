@@ -114,10 +114,11 @@ commit 017
 Fix layout of work40_page.dart
 
 commit 018
+Changed to show empty ef if before search
+commit 019
 
 #### now
 
-検索前なら空エフを表示
 加工条件詳細を修正
 規格データを追加
 

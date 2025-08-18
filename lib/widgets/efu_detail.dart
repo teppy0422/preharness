@@ -43,6 +43,12 @@ class EfuDetailPage extends StatelessWidget {
             ),
 
             const Divider(height: 20, thickness: 1),
+            Text("${blockInfo['terminals'][0]}"),
+            Text(
+              '${processingConditions['wire_type']}/${processingConditions['wire_size']}',
+            ),
+
+            const Divider(height: 20, thickness: 1),
             const Text('全体情報:', style: TextStyle(fontWeight: FontWeight.bold)),
             Text('電線タイプ: ${processingConditions['wire_type']}'),
             Text('電線サイズ: ${processingConditions['wire_size']}'),

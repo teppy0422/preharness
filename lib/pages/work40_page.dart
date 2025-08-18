@@ -4,12 +4,8 @@ import 'package:preharness/widgets/efu.dart';
 import 'package:preharness/widgets/efu_detail.dart'; // 詳細ページをインポート
 import 'package:preharness/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
-import 'package:preharness/utils/user_login_manager.dart';
-import 'package:intl/intl.dart';
 
 import 'package:preharness/widgets/measurement.dart';
-import 'package:preharness/widgets/dial_selector.dart'; // DialSelectorをインポート
-import 'package:preharness/widgets/dial_selector_with_db.dart'; // DialSelectorWithDbをインポート
 
 class Work40Page extends StatefulWidget {
   const Work40Page({super.key});
@@ -109,116 +105,106 @@ class _Work40PageState extends State<Work40Page> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  if (_processingConditions != null)
-                    _isDetailView
-                        ? EfuDetailPage(
-                            processingConditions: _processingConditions!,
-                            blockInfo: _selectedBlockInfo!,
-                            onBack: _handleBackFromDetail,
-                          )
-                        : InstructionSheetHeader(
-                            lot_num:
-                                _processingConditions!['lot_num']?.toString() ??
-                                '',
-                            p_number:
-                                _processingConditions!['p_number']
-                                    ?.toString() ??
-                                '',
-                            eng_change:
-                                _processingConditions!['eng_change']
-                                    ?.toString() ??
-                                '',
-                            cfg_no:
-                                _processingConditions!['cfg_no']?.toString() ??
-                                '',
-                            subAssy:
-                                _processingConditions!['sub_assy']
-                                    ?.toString() ??
-                                '',
-                            wire_type:
-                                _processingConditions!['wire_type']
-                                    ?.toString() ??
-                                '',
-                            wire_size:
-                                _processingConditions!['wire_size']
-                                    ?.toString() ??
-                                '',
-                            wire_color:
-                                _processingConditions!['wire_color']
-                                    ?.toString() ??
-                                '',
-                            wire_len:
-                                _processingConditions!['wire_len']
-                                    ?.toString() ??
-                                '',
-                            circuit_1:
-                                _processingConditions!['circuit_1']
-                                    ?.toString() ??
-                                '',
-                            circuit_2:
-                                _processingConditions!['circuit_2']
-                                    ?.toString() ??
-                                '',
-                            term_proc_inst_1:
-                                _processingConditions!['term_proc_inst_1']
-                                    ?.toString() ??
-                                '',
-                            term_proc_inst_2:
-                                _processingConditions!['term_proc_inst_2']
-                                    ?.toString() ??
-                                '',
-                            mark_color_1:
-                                (_processingConditions?['mark_color_1']
-                                            ?.toString() ??
-                                        "")
-                                    .isNotEmpty
-                                ? "ﾏｼﾞｯｸ_${_processingConditions!['mark_color_1']}"
-                                : "",
-                            mark_color_2:
-                                (_processingConditions?['mark_color_2']
-                                            ?.toString() ??
-                                        "")
-                                    .isNotEmpty
-                                ? "ﾏｼﾞｯｸ_${_processingConditions!['mark_color_2']}"
-                                : "",
-                            strip_len_1:
-                                _processingConditions!['strip_len_1']
-                                    ?.toString() ??
-                                '',
-                            strip_len_2:
-                                _processingConditions!['strip_len_2']
-                                    ?.toString() ??
-                                '',
-                            term_part_no_1:
-                                _processingConditions!['term_part_no_1']
-                                    ?.toString() ??
-                                '',
-                            term_part_no_2:
-                                _processingConditions!['term_part_no_2']
-                                    ?.toString() ??
-                                '',
-                            add_parts_1:
-                                _processingConditions!['add_parts_1']
-                                    ?.toString() ??
-                                '',
-                            add_parts_2:
-                                _processingConditions!['add_parts_2']
-                                    ?.toString() ??
-                                '',
-                            cut_code:
-                                _processingConditions!['cut_code']
-                                    ?.toString() ??
-                                '',
-                            wire_cnt:
-                                _processingConditions!['wire_cnt']
-                                    ?.toString() ??
-                                '',
-                            delivery_date:
-                                _processingConditions!['delivery_date']
-                                    ?.toString() ??
-                                '',
-                            onBlockTapped: _handleBlockTapped,
-                          ),
+                  _isDetailView
+                      ? EfuDetailPage(
+                          processingConditions: _processingConditions!,
+                          blockInfo: _selectedBlockInfo!,
+                          onBack: _handleBackFromDetail,
+                        )
+                      : EfuPage(
+                          lot_num:
+                              _processingConditions?['lot_num']?.toString() ??
+                              '',
+                          p_number:
+                              _processingConditions?['p_number']?.toString() ??
+                              '',
+                          eng_change:
+                              _processingConditions?['eng_change']
+                                  ?.toString() ??
+                              '',
+                          cfg_no:
+                              _processingConditions?['cfg_no']?.toString() ??
+                              '',
+                          subAssy:
+                              _processingConditions?['sub_assy']?.toString() ??
+                              '',
+                          wire_type:
+                              _processingConditions?['wire_type']?.toString() ??
+                              '',
+                          wire_size:
+                              _processingConditions?['wire_size']?.toString() ??
+                              '',
+                          wire_color:
+                              _processingConditions?['wire_color']
+                                  ?.toString() ??
+                              '',
+                          wire_len:
+                              _processingConditions?['wire_len']?.toString() ??
+                              '',
+                          circuit_1:
+                              _processingConditions?['circuit_1']?.toString() ??
+                              '',
+                          circuit_2:
+                              _processingConditions?['circuit_2']?.toString() ??
+                              '',
+                          term_proc_inst_1:
+                              _processingConditions?['term_proc_inst_1']
+                                  ?.toString() ??
+                              '',
+                          term_proc_inst_2:
+                              _processingConditions?['term_proc_inst_2']
+                                  ?.toString() ??
+                              '',
+                          mark_color_1:
+                              (_processingConditions?['mark_color_1']
+                                          ?.toString() ??
+                                      "")
+                                  .isNotEmpty
+                              ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_1']}"
+                              : "",
+                          mark_color_2:
+                              (_processingConditions?['mark_color_2']
+                                          ?.toString() ??
+                                      "")
+                                  .isNotEmpty
+                              ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_2']}"
+                              : "",
+                          strip_len_1:
+                              _processingConditions?['strip_len_1']
+                                  ?.toString() ??
+                              '',
+                          strip_len_2:
+                              _processingConditions?['strip_len_2']
+                                  ?.toString() ??
+                              '',
+                          term_part_no_1:
+                              _processingConditions?['term_part_no_1']
+                                  ?.toString() ??
+                              '',
+                          term_part_no_2:
+                              _processingConditions?['term_part_no_2']
+                                  ?.toString() ??
+                              '',
+                          add_parts_1:
+                              _processingConditions?['add_parts_1']
+                                  ?.toString() ??
+                              '',
+                          add_parts_2:
+                              _processingConditions?['add_parts_2']
+                                  ?.toString() ??
+                              '',
+                          cut_code:
+                              _processingConditions?['cut_code']?.toString() ??
+                              '',
+                          wire_cnt:
+                              _processingConditions?['wire_cnt']?.toString() ??
+                              '',
+                          delivery_date:
+                              _processingConditions?['delivery_date']
+                                  ?.toString() ??
+                              '200101',
+                          onBlockTapped: _handleBlockTapped,
+                        ),
                 ],
               ),
             ),
@@ -300,7 +286,6 @@ class _EquipmentInfoCard extends StatelessWidget {
 class _SearchCard extends StatefulWidget {
   final Function(String) onSearch;
   const _SearchCard({required this.onSearch});
-
   @override
   State<_SearchCard> createState() => _SearchCardState();
 }
@@ -309,7 +294,6 @@ class _SearchCardState extends State<_SearchCard> {
   final TextEditingController _searchController = TextEditingController(
     text: 'N712/5M39255551780700186821616BP80D011N712/94.54.5325184039',
   );
-
   @override
   void dispose() {
     _searchController.dispose();
