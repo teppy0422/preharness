@@ -23,6 +23,7 @@ class _ImportPageState extends State<ImportPage> {
   double? freeSpaceGB;
   double? totalSpaceGB;
   bool _isFetchingSpace = false;
+  bool _isImporting = false;
 
   @override
   void initState() {
@@ -173,18 +174,34 @@ class _ImportPageState extends State<ImportPage> {
             Text('Path01: ${path01 ?? '読み込み中...'}'),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () async {
-                final code = await ApiService.sendPath01ToServer();
-                final message = _messageFromCode(code);
+              onPressed: _isImporting
+                  ? null
+                  : () async {
+                      setState(() {
+                        _isImporting = true;
+                      });
+                      try {
+                        final code = await ApiService.sendPath01ToServer();
+                        final message = _messageFromCode(code);
 
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(message)));
-                }
-              },
-              child: const Text('ファイルインポート実行'),
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(message)));
+                        }
+                      } finally {
+                        setState(() {
+                          _isImporting = false;
+                        });
+                      }
+                    },
+              child: _isImporting
+                  ? const CircularProgressIndicator()
+                  : const Text('ファイルインポート実行'),
             ),
+            Text("CH→ch_list"),
+            Text("Rlg29*→m_processing_confitions"),
+            Text("kanban*→m_processing_confitions"),
             ElevatedButton(
               onPressed: () async {
                 showDialog(

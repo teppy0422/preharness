@@ -111,11 +111,13 @@ Change position on dial_selector.
 
 commit 017
 
-Fix layout of work40_page.dart
+Fixed layout of work40_page.dart
 
 commit 018
 Changed to show empty ef if before search
 commit 019
+Fixed button cannot be pressed again during import
+commit 020
 
 #### now
 
