@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:preharness/widgets/dial_selector_with_db.dart';
+import 'package:preharness/widgets/measurement.dart';
 
 class EfuDetailPage extends StatelessWidget {
   final Map<String, dynamic> processingConditions;
@@ -28,10 +29,6 @@ class EfuDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DialSelectorWithDb(
-              processingConditions: processingConditions,
-              blockInfo: blockInfo,
-            ),
             const Divider(height: 20, thickness: 1),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -47,31 +44,47 @@ class EfuDetailPage extends StatelessWidget {
                 ),
               ],
             ),
-
             const Divider(height: 20, thickness: 1),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("${blockInfo['terminals'][0]}"),
-                Text(
-                  '${processingConditions['wire_type']}/${processingConditions['wire_size']}',
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Divider(height: 20, thickness: 1),
+                      Text('製品品番: ${processingConditions['p_number']}'),
+                      Text('設変: ${processingConditions['eng_change']}'),
+                      Text('構成No: ${processingConditions['cfg_no']}'),
+                      Text('数量: ${processingConditions['wire_cnt']}'),
+                      const Divider(height: 20, thickness: 1),
+
+                      const Text(
+                        'ブロック詳細:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text('端子部品番号: ${blockInfo['terminals'][0]}'),
+                      Text('付加部品: ${blockInfo['terminals'][1]}'),
+                      const Divider(height: 20, thickness: 1),
+
+                      DialSelectorWithDb(
+                        processingConditions: processingConditions,
+                        blockInfo: blockInfo,
+                      ),
+                    ],
+                  ),
                 ),
-                Text('${processingConditions['wire_cnt']}本'),
+                const SizedBox(width: 16),
+                Column(
+                  children: [
+                    Text(
+                      '${blockInfo['terminals'][0]}${processingConditions['wire_type']}/${processingConditions['wire_size']}',
+                    ),
+                    Measurement(chListData: chListData),
+                  ],
+                ),
               ],
             ),
-
-            const Divider(height: 20, thickness: 1),
-            const Text('全体情報:', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text('電線タイプ: ${processingConditions['wire_type']}'),
-            Text('電線サイズ: ${processingConditions['wire_size']}'),
-            Text('数量: ${processingConditions['wire_cnt']}'),
-            const Divider(height: 20, thickness: 1),
-            const Text(
-              'ブロック詳細:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text('端子部品番号: ${blockInfo['terminals'][0]}'),
-            Text('付加部品: ${blockInfo['terminals'][1]}'),
             const Divider(height: 20, thickness: 1),
             const Text(
               'CH List Data:',
@@ -97,4 +110,21 @@ class EfuDetailPage extends StatelessWidget {
       ),
     );
   }
+}
+
+void showCustomDialog(BuildContext context, Widget child) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierColor: Colors.black54,
+    builder: (context) {
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.of(context).pop(),
+        child: Center(
+          child: GestureDetector(onTap: () {}, child: child),
+        ),
+      );
+    },
+  );
 }

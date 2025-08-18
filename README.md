@@ -123,10 +123,10 @@ commit 021
 規格データの検索を追加
 検索条件に付属部品を追加
 commit 022
+Change machining condition details
+commit 023
 
 #### now
-
-加工条件詳細を修正
 
 #### next
 

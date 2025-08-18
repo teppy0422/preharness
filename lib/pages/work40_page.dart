@@ -76,9 +76,14 @@ class _Work40PageState extends State<Work40Page> {
 
     try {
       final thin = blockInfo['terminals'][0] as String;
-      final fhin = blockInfo['terminals'][1] as String;
+      var fhin = blockInfo['terminals'][1] as String;
       final hin1 = _processingConditions!['wire_type'] as String;
       final size1 = _processingConditions!['wire_size'] as String;
+
+      // fhin が "" のときは "@@@" に置き換え
+      if (fhin.isEmpty) {
+        fhin = "@@@";
+      }
 
       final data = await ApiService.searchChList(
         thin: thin,
@@ -129,10 +134,10 @@ class _Work40PageState extends State<Work40Page> {
           ),
           // 状態に応じて表示を切り替える
           Positioned(
-            top: 200,
+            top: 180,
             left: 10,
             right: 10,
-            bottom: 80,
+            bottom: 10,
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -243,30 +248,6 @@ class _Work40PageState extends State<Work40Page> {
               ),
             ),
           ),
-          Positioned(bottom: 20, left: 10, right: 10, child: FooterButtons()),
-        ],
-      ),
-    );
-  }
-}
-
-class FooterButtons extends StatelessWidget {
-  const FooterButtons({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 20,
-      left: 16,
-      right: 16,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              showCustomDialog(context, const Measurement());
-            },
-            child: const Text("規格測定"),
-          ),
         ],
       ),
     );
@@ -359,11 +340,16 @@ class _SearchCardState extends State<_SearchCard> {
               ),
               const SizedBox(height: 4),
               TextField(
+                style: TextStyle(fontSize: 14),
                 controller: _searchController,
                 decoration: const InputDecoration(
-                  hintText: 'ロット番号などを入力',
+                  hintText: 'エフをQRリーダーで読む or 手入力',
                   isDense: true,
                   border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
                 ),
                 onSubmitted: (_) => _handleSearch(),
               ),
@@ -374,7 +360,7 @@ class _SearchCardState extends State<_SearchCard> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
-                      vertical: 8,
+                      vertical: 6,
                     ), // 内側余白を小さく
                     minimumSize: Size.zero, // デフォルトの最小サイズを無効化
                     tapTargetSize:

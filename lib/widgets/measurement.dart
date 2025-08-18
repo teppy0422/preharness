@@ -4,7 +4,8 @@ import "package:preharness/constants/app_colors.dart";
 int? _activeIndex;
 
 class Measurement extends StatefulWidget {
-  const Measurement({super.key});
+  final List<Map<String, dynamic>>? chListData;
+  const Measurement({super.key, this.chListData});
 
   @override
   State<Measurement> createState() => _StandardInfoCardState();
@@ -49,6 +50,16 @@ class _StandardInfoCardState extends State<Measurement> {
     super.dispose();
   }
 
+  double _parseToDouble(dynamic value, {double defaultValue = 0.0}) {
+    if (value == null) return defaultValue;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      return double.tryParse(value) ?? defaultValue;
+    }
+    return defaultValue;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -62,16 +73,39 @@ class _StandardInfoCardState extends State<Measurement> {
     final highLightColor = AppColors.getHighLightColor(context); // ← 1回だけ取得
 
     // ラベルと規格値のリスト
-    final rows = [
-      {"label": "前足C/H", "min": 0.900, "max": 1.000},
-      {"label": "後足C/H", "min": 2.200, "max": 2.300},
-      {"label": "前足C/W", "min": 1.350, "max": 1.550},
-      {"label": "後足C/W", "min": 2.150, "max": 2.350},
-    ];
+    final rows = (widget.chListData != null && widget.chListData!.isNotEmpty)
+        ? [
+            {
+              "label": "前足C/H",
+              "min": _parseToDouble(widget.chListData![0]['chff']),
+              "max": _parseToDouble(widget.chListData![0]['chft']),
+            },
+            {
+              "label": "後足C/H",
+              "min": _parseToDouble(widget.chListData![0]['chrf']),
+              "max": _parseToDouble(widget.chListData![0]['chrt']),
+            },
+            {
+              "label": "前足C/W",
+              "min": _parseToDouble(widget.chListData![0]['cwff']),
+              "max": _parseToDouble(widget.chListData![0]['cwft']),
+            },
+            {
+              "label": "後足C/W",
+              "min": _parseToDouble(widget.chListData![0]['cw1rf']),
+              "max": _parseToDouble(widget.chListData![0]['cw1rt']),
+            },
+          ]
+        : [
+            {"label": "前足C/H", "min": 0.900, "max": 1.000},
+            {"label": "後足C/H", "min": 2.200, "max": 2.300},
+            {"label": "前足C/W", "min": 1.350, "max": 1.550},
+            {"label": "後足C/W", "min": 2.150, "max": 2.350},
+          ];
 
     return Center(
       child: SizedBox(
-        width: 320,
+        width: 220,
         child: Container(
           decoration: BoxDecoration(
             color: cardColor,
@@ -148,44 +182,47 @@ class _StandardInfoCardState extends State<Measurement> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                width: 100,
-                child: Text(
-                  label,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: activeIndex,
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 100,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 0,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    "${minValue.toStringAsFixed(3)}～${maxValue.toStringAsFixed(3)}",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: fieldTextColor,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 50,
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: activeIndex,
+                      ),
                     ),
                   ),
-                ),
+                  SizedBox(
+                    width: 100,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        "${minValue.toStringAsFixed(3)}～${maxValue.toStringAsFixed(3)}",
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: fieldTextColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
+
               const SizedBox(height: 0),
               Row(
                 children: [
                   SizedBox(
-                    width: 100,
+                    width: 150,
                     child: TextField(
                       controller: controller,
                       focusNode: focusNode,
