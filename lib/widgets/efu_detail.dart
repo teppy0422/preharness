@@ -5,12 +5,18 @@ class EfuDetailPage extends StatelessWidget {
   final Map<String, dynamic> processingConditions;
   final Map<String, dynamic> blockInfo;
   final VoidCallback onBack;
+  final List<Map<String, dynamic>>? chListData;
+  final bool isLoadingChList;
+  final String? chListError;
 
   const EfuDetailPage({
     super.key,
     required this.processingConditions,
     required this.blockInfo,
     required this.onBack,
+    this.chListData,
+    this.isLoadingChList = false,
+    this.chListError,
   });
 
   @override
@@ -65,7 +71,27 @@ class EfuDetailPage extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text('端子部品番号: ${blockInfo['terminals'][0]}'),
-            Text('付加部品: ${blockInfo['terminals'][2]}'),
+            Text('付加部品: ${blockInfo['terminals'][1]}'),
+            const Divider(height: 20, thickness: 1),
+            const Text(
+              'CH List Data:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            if (isLoadingChList)
+              const CircularProgressIndicator()
+            else if (chListError != null)
+              Text('Error: $chListError')
+            else if (chListData != null && chListData!.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: chListData!
+                    .map(
+                      (item) => Text(item.toString()),
+                    ) // Adjust display as needed
+                    .toList(),
+              )
+            else
+              const Text('No CH list data found.'),
           ],
         ),
       ),

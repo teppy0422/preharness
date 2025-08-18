@@ -85,15 +85,11 @@ String formatCode(String code) {
 List<String> buildFixedList(List<String?> values, {int length = 5}) {
   final list = <String>[];
   for (var v in values) {
-    if (v != null && v.isNotEmpty) {
-      list.add(v);
-    }
+    list.add(v ?? ""); // null は "" に変換して追加
   }
-  // 足りない分を "" で埋める
   while (list.length < length) {
     list.add("");
   }
-  // もし length を超えたら切り捨て
   return list.take(length).toList();
 }
 
@@ -165,11 +161,11 @@ class EfuPage extends StatelessWidget {
     final stripLen1 = mmToCm(strip_len_1);
     final stripLen2 = mmToCm(strip_len_2);
 
-    final termPartNo1 = formatCode(term_part_no_1);
-    final termPartNo2 = formatCode(term_part_no_2);
+    final termPartNo1 = term_part_no_1;
+    final termPartNo2 = term_part_no_2;
 
-    final addParts1 = formatCode(add_parts_1);
-    final addParts2 = formatCode(add_parts_2);
+    final addParts1 = add_parts_1;
+    final addParts2 = add_parts_2;
 
     String markString1 = "";
     if (mark_color_1 != "") {
@@ -179,10 +175,10 @@ class EfuPage extends StatelessWidget {
     if (mark_color_2 != "") {
       markString2 = "ﾏｼﾞｯｸ";
     }
-    final blockList1_1 = buildFixedList([termProcInt1, markString1]);
-    final blockList1_2 = buildFixedList([termPartNo1, mark_color_1, addParts1]);
-    final blockList2_1 = buildFixedList([termProcInt2, markString2]);
-    final blockList2_2 = buildFixedList([termPartNo2, mark_color_2, addParts2]);
+    final blockList1_1 = buildFixedList([termProcInt1, "", markString1]);
+    final blockList1_2 = buildFixedList([termPartNo1, addParts1, mark_color_1]);
+    final blockList2_1 = buildFixedList([termProcInt2, "", markString2]);
+    final blockList2_2 = buildFixedList([termPartNo2, addParts2, mark_color_2]);
     return LayoutBuilder(
       builder: (context, constraints) {
         // 高さ固定（例: 400）にしたい場合

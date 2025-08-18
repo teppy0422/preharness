@@ -128,4 +128,47 @@ class ApiService {
       return null;
     }
   }
+
+  static Future<List<Map<String, dynamic>>?> searchChList({
+    required String thin,
+    required String fhin,
+    required String hin1,
+    required String size1,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final mainPath = prefs.getString('main_path');
+
+    if (mainPath == null || mainPath.isEmpty) {
+      log('main_path が設定されていません');
+      throw Exception('サーバーパスが設定されていません。');
+    }
+
+    final ip = mainPath.replaceAll(r'\\', '').replaceAll('//', '');
+    final url = Uri.parse(
+      'http://$ip:3000/api/ch_list/search?thin=$thin&fhin=$fhin&hin1=$hin1&size1=$size1',
+    );
+
+    try {
+      final response = await http.get(url);
+
+      log('Response status for ch_list: ${response.statusCode}');
+      log('Response body for ch_list: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final List<dynamic> jsonList = jsonDecode(decodedBody);
+
+        if (jsonList.isNotEmpty && jsonList.first is Map<String, dynamic>) {
+          return List<Map<String, dynamic>>.from(jsonList);
+        }
+        return []; // Return empty list if no data or wrong format
+      } else {
+        log('サーバーエラー (ch_list): ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      log('通信エラー (ch_list): $e');
+      return null;
+    }
+  }
 }

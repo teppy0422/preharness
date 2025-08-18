@@ -18,6 +18,9 @@ class _Work40PageState extends State<Work40Page> {
   Map<String, dynamic>? _processingConditions;
   bool _isDetailView = false;
   Map<String, dynamic>? _selectedBlockInfo;
+  List<Map<String, dynamic>>? _chListData;
+  bool _isLoadingChList = false;
+  String? _chListError;
 
   void _onSearch(String query) async {
     String? pNumber;
@@ -62,11 +65,39 @@ class _Work40PageState extends State<Work40Page> {
     }
   }
 
-  void _handleBlockTapped(Map<String, dynamic> blockInfo) {
+  void _handleBlockTapped(Map<String, dynamic> blockInfo) async {
     setState(() {
       _selectedBlockInfo = blockInfo;
       _isDetailView = true;
+      _isLoadingChList = true;
+      _chListError = null;
+      _chListData = null;
     });
+
+    try {
+      final thin = blockInfo['terminals'][0] as String;
+      final fhin = blockInfo['terminals'][1] as String;
+      final hin1 = _processingConditions!['wire_type'] as String;
+      final size1 = _processingConditions!['wire_size'] as String;
+
+      final data = await ApiService.searchChList(
+        thin: thin,
+        fhin: fhin,
+        hin1: hin1,
+        size1: size1,
+      );
+      setState(() {
+        _chListData = data;
+      });
+    } catch (e) {
+      setState(() {
+        _chListError = 'CHリストの読み込みに失敗しました: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoadingChList = false;
+      });
+    }
   }
 
   void _handleBackFromDetail() {
@@ -110,6 +141,9 @@ class _Work40PageState extends State<Work40Page> {
                           processingConditions: _processingConditions!,
                           blockInfo: _selectedBlockInfo!,
                           onBack: _handleBackFromDetail,
+                          chListData: _chListData,
+                          isLoadingChList: _isLoadingChList,
+                          chListError: _chListError,
                         )
                       : EfuPage(
                           lot_num:
@@ -315,7 +349,7 @@ class _SearchCardState extends State<_SearchCard> {
       ),
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.all(0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -337,8 +371,20 @@ class _SearchCardState extends State<_SearchCard> {
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ), // 内側余白を小さく
+                    minimumSize: Size.zero, // デフォルトの最小サイズを無効化
+                    tapTargetSize:
+                        MaterialTapTargetSize.shrinkWrap, // タップ領域を必要最小限に
+                  ),
                   onPressed: _handleSearch,
-                  child: const Text('検索'),
+                  child: const Text(
+                    '検索',
+                    style: TextStyle(fontSize: 14), // フォントも少し小さめに
+                  ),
                 ),
               ),
             ],

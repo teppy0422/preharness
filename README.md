@@ -120,11 +120,13 @@ Fixed button cannot be pressed again during import
 commit 020
 Display progress counts during import
 commit 021
+規格データの検索を追加
+検索条件に付属部品を追加
+commit 022
 
 #### now
 
 加工条件詳細を修正
-規格データを追加
 
 #### next
 
