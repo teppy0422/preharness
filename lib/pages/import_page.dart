@@ -7,6 +7,7 @@ import 'package:preharness/routes/app_routes.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import "package:preharness/widgets/user_list_modal.dart";
+import 'dart:async';
 
 double? freeSpaceGB;
 
@@ -24,6 +25,8 @@ class _ImportPageState extends State<ImportPage> {
   double? totalSpaceGB;
   bool _isFetchingSpace = false;
   bool _isImporting = false;
+  int _elapsedSeconds = 0;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -179,6 +182,14 @@ class _ImportPageState extends State<ImportPage> {
                   : () async {
                       setState(() {
                         _isImporting = true;
+                        _elapsedSeconds = 0;
+                      });
+                      _timer = Timer.periodic(const Duration(seconds: 1), (
+                        timer,
+                      ) {
+                        setState(() {
+                          _elapsedSeconds++;
+                        });
                       });
                       try {
                         final code = await ApiService.sendPath01ToServer();
@@ -190,13 +201,24 @@ class _ImportPageState extends State<ImportPage> {
                           ).showSnackBar(SnackBar(content: Text(message)));
                         }
                       } finally {
+                        _timer?.cancel();
                         setState(() {
                           _isImporting = false;
+                          _elapsedSeconds = 0;
                         });
                       }
                     },
               child: _isImporting
-                  ? const CircularProgressIndicator()
+                  ? Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        const CircularProgressIndicator(),
+                        Text(
+                          '$_elapsedSeconds s',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    )
                   : const Text('ファイルインポート実行'),
             ),
             Text("CH→ch_list"),

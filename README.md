@@ -118,6 +118,8 @@ Changed to show empty ef if before search
 commit 019
 Fixed button cannot be pressed again during import
 commit 020
+Display progress counts during import
+commit 021
 
 #### now
 
@@ -126,6 +128,7 @@ commit 020
 
 #### next
 
+ファイルインポートの速度向上
 ファイルインポートのプログレスバーを追加
 
 #### base
