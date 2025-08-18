@@ -21,9 +21,20 @@ class DialSelectorPage extends StatefulWidget {
 
 class _DialSelectorPageState extends State<DialSelectorPage> {
   // ダイヤル選択肢
-  final List<String> topDialOptions = ['0.35', '0.5', '0.85', '1.25', '2.0'];
+  final List<String> topDialOptions = ['0.2/0.3', '0.5', '0.85', '1.25', '2.0'];
   final List<String> bottomDialOptions = ['1', '2', '3', '4'];
-  final List<String> hindDialOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  final List<String> hindDialOptions = [
+    '0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+  ];
 
   // 選択状態
   late String selectedTopDial;
@@ -34,8 +45,10 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
   void initState() {
     super.initState();
     selectedTopDial = widget.initialTopDialOptions?.first ?? topDialOptions[0];
-    selectedBottomDial = widget.initialBottomDialOptions?.first ?? bottomDialOptions[0];
-    selectedHindDial = widget.initialHindDialOptions?.first ?? hindDialOptions[0];
+    selectedBottomDial =
+        widget.initialBottomDialOptions?.first ?? bottomDialOptions[0];
+    selectedHindDial =
+        widget.initialHindDialOptions?.first ?? hindDialOptions[0];
   }
 
   @override
@@ -68,7 +81,11 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                     setState(() {
                       selectedTopDial = val;
                     });
-                    widget.onChanged(selectedTopDial, selectedBottomDial, selectedHindDial);
+                    widget.onChanged(
+                      selectedTopDial,
+                      selectedBottomDial,
+                      selectedHindDial,
+                    );
                   },
                   labelColor: labelColor,
                 ),
@@ -81,7 +98,11 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                     setState(() {
                       selectedBottomDial = val;
                     });
-                    widget.onChanged(selectedTopDial, selectedBottomDial, selectedHindDial);
+                    widget.onChanged(
+                      selectedTopDial,
+                      selectedBottomDial,
+                      selectedHindDial,
+                    );
                   },
                   labelColor: labelColor,
                 ),
@@ -94,7 +115,11 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                     setState(() {
                       selectedHindDial = val;
                     });
-                    widget.onChanged(selectedTopDial, selectedBottomDial, selectedHindDial);
+                    widget.onChanged(
+                      selectedTopDial,
+                      selectedBottomDial,
+                      selectedHindDial,
+                    );
                   },
                   labelColor: labelColor,
                 ),
