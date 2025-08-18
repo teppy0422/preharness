@@ -98,7 +98,7 @@ class _Work40PageState extends State<Work40Page> {
           ),
           // 状態に応じて表示を切り替える
           Positioned(
-            top: 230,
+            top: 200,
             left: 10,
             right: 10,
             bottom: 80,
@@ -273,8 +273,8 @@ class _EquipmentInfoCard extends StatelessWidget {
               Text("【設備情報】", style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 4),
               Text("号機: 5号機"),
-              Text("機種: XYZ-100"),
-              Text("管理ナンバー: EQ-123456"),
+              Text("機種: CM20"),
+              Text("管理ナンバー: 3456"),
             ],
           ),
         ),
@@ -323,7 +323,7 @@ class _SearchCardState extends State<_SearchCard> {
                 "【データ検索】",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               TextField(
                 controller: _searchController,
                 decoration: const InputDecoration(
@@ -333,7 +333,7 @@ class _SearchCardState extends State<_SearchCard> {
                 ),
                 onSubmitted: (_) => _handleSearch(),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 0),
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(

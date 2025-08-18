@@ -32,7 +32,7 @@ class EfuDetailPage extends StatelessWidget {
               children: [
                 const Text(
                   '■ 加工条件詳細',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton.icon(
                   onPressed: onBack,
@@ -43,9 +43,15 @@ class EfuDetailPage extends StatelessWidget {
             ),
 
             const Divider(height: 20, thickness: 1),
-            Text("${blockInfo['terminals'][0]}"),
-            Text(
-              '${processingConditions['wire_type']}/${processingConditions['wire_size']}',
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("${blockInfo['terminals'][0]}"),
+                Text(
+                  '${processingConditions['wire_type']}/${processingConditions['wire_size']}',
+                ),
+                Text('${processingConditions['wire_cnt']}本'),
+              ],
             ),
 
             const Divider(height: 20, thickness: 1),
