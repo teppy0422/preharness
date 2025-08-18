@@ -172,12 +172,10 @@ class InstructionSheetHeader extends StatelessWidget {
     final addParts2 = formatCode(add_parts_2);
 
     String markString1 = "";
-    Colors? markColor1;
     if (mark_color_1 != "") {
       markString1 = "ﾏｼﾞｯｸ";
     }
     String markString2 = "";
-    Colors? markColor2;
     if (mark_color_2 != "") {
       markString2 = "ﾏｼﾞｯｸ";
     }
@@ -911,7 +909,6 @@ class InstructionSheetHeader extends StatelessWidget {
     double overFlowTop = 0,
     bool showQR = false,
     bool blinking = false,
-    Color markColor = Colors.transparent,
   }) {
     final Color effectiveLabelColor = labelColor ?? getLabelColor(context);
     final Color effectiveValueColor = valueColor ?? getValueColor(context);
@@ -960,7 +957,7 @@ class InstructionSheetHeader extends StatelessWidget {
     // 値用
     final valueWidget = value != null
         ? Stack(
-            clipBehavior: Clip.none, // ← これが重要！
+            clipBehavior: Clip.none,
             children: [
               if (blinking)
                 _BlinkWrapper(

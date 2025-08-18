@@ -8,7 +8,8 @@ import 'package:preharness/utils/user_login_manager.dart';
 import 'package:intl/intl.dart';
 
 import 'package:preharness/widgets/measurement.dart';
-import 'package:preharness/widgets/dial_selector.dart';
+import 'package:preharness/widgets/dial_selector.dart'; // DialSelectorをインポート
+import 'package:preharness/widgets/dial_selector_with_db.dart'; // DialSelectorWithDbをインポート
 
 class Work40Page extends StatefulWidget {
   const Work40Page({super.key});
@@ -86,34 +87,28 @@ class _Work40PageState extends State<Work40Page> {
       currentPage: AppRoutes.work40,
       child: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
+          Positioned(
+            top: 60,
+            left: 10,
+            right: 10,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 2, child: _EquipmentInfoCard()),
+                const SizedBox(width: 16),
+                Expanded(flex: 2, child: _SearchCard(onSearch: _onSearch)),
+              ],
+            ),
+          ),
+          // 状態に応じて表示を切り替える
+          Positioned(
+            top: 230,
+            left: 10,
+            right: 10,
+            bottom: 80,
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  const SizedBox(height: 50),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 2, child: _EquipmentInfoCard()),
-                      const SizedBox(width: 16),
-                      if (_isDetailView) ...[
-                        Expanded(
-                          flex: 4,
-                          child: DialSelectorPage(
-                            onChanged: (top, bottom, hind) {},
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-                      Expanded(
-                        flex: 2,
-                        child: _SearchCard(onSearch: _onSearch),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // 状態に応じて表示を切り替える
                   if (_processingConditions != null)
                     _isDetailView
                         ? EfuDetailPage(
@@ -224,12 +219,11 @@ class _Work40PageState extends State<Work40Page> {
                                 '',
                             onBlockTapped: _handleBlockTapped,
                           ),
-                  const SizedBox(height: 100),
                 ],
               ),
             ),
           ),
-          const FooterButtons(),
+          Positioned(bottom: 20, left: 10, right: 10, child: FooterButtons()),
         ],
       ),
     );
@@ -247,16 +241,6 @@ class FooterButtons extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          ElevatedButton(
-            onPressed: () {
-              showCustomDialog(
-                context,
-                DialSelectorPage(onChanged: (top, bottom, hind) {}),
-              );
-            },
-            child: const Text("ダイヤル調整"),
-          ),
-          const SizedBox(width: 8),
           ElevatedButton(
             onPressed: () {
               showCustomDialog(context, const Measurement());

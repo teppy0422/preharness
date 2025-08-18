@@ -91,6 +91,7 @@ copy 013 1720MB
 
 ### 2025-08-17
 
+Response is displayed below the network status icon.
 Start using Gemini_cli.
 
 deploy 014
@@ -104,9 +105,23 @@ copy 015
 Added Dial value local storage.
 
 commit 016
-copy 016
+copy 016 1810MB
 
-Response is displayed below the network status icon
+Change position on dial_selector.
+
+commit 017
+
+Fix layout of work40_page.dart
+
+commit 018
+
+#### now
+
+検索前なら空エフを表示
+加工条件詳細を修正
+規格データを追加
+
+#### next
 
 ファイルインポートのプログレスバーを追加
 
