@@ -4,6 +4,9 @@ import 'package:http/http.dart' as http; // Added missing import
 import 'package:shared_preferences/shared_preferences.dart'; // Added
 import 'dart:convert'; // Added
 import 'dart:developer'; // Added for debugPrint
+import 'package:hive/hive.dart'; // Added for Hive
+import 'package:preharness/models/color_entry.dart'; // Added for ColorEntry
+import 'package:collection/collection.dart'; // Added for firstWhereOrNull
 
 class ApiTestPage extends StatefulWidget {
   const ApiTestPage({super.key});
@@ -86,22 +89,96 @@ class _ApiTestPageState extends State<ApiTestPage> {
       final res = await http.get(url);
       if (res.statusCode == 200) {
         final List<dynamic> data = json.decode(res.body);
+        final List<ColorEntry> colorEntries = data.map((item) {
+          final String colorNum = item['color_num']?.toString() ?? '';
+          final int backColorInt =
+              int.tryParse(item['back_color_int']?.toString() ?? '') ?? 0;
+          final int foreColorInt =
+              int.tryParse(item['fore_color_int']?.toString() ?? '') ?? 0;
+          return ColorEntry(
+            colorNum: colorNum,
+            backColor: convertIntToColor(backColorInt),
+            foreColor: convertIntToColor(foreColorInt),
+          );
+        }).toList();
+
         setState(() {
-          _users = List<Map<String, dynamic>>.from(data);
+          _users = List<Map<String, dynamic>>.from(
+            data,
+          ); // Keep original data for display
           _response =
               'color_list:\n${const JsonEncoder.withIndent('  ').convert(_users)}';
         });
+
+        // Save to Hive
+        await _saveColorEntriesToHive(colorEntries);
       } else {
         throw Exception("HTTP error: ${res.statusCode}");
       }
     } catch (e) {
-      debugPrint("Error loading users: $e");
+      debugPrint("Error loading color list: $e");
       setState(() {
         _response = '取得エラー: $e';
       });
     } finally {
       setState(() {
         _usersLoading = false;
+      });
+    }
+  }
+
+  Future<void> _saveColorEntriesToHive(List<ColorEntry> colorEntries) async {
+    setState(() {
+      _response = 'Hiveに保存中...';
+    });
+    try {
+      final box = await Hive.openBox<ColorEntry>('colorEntryBox');
+      await box.clear(); // Clear previous data
+      for (var entry in colorEntries) {
+        await box.add(entry); // Add each ColorEntry
+      }
+      setState(() {
+        _response = 'Hiveに保存しました: ${colorEntries.length}件';
+      });
+    } catch (e) {
+      setState(() {
+        _response = 'Hive保存エラー: $e';
+      });
+    }
+  }
+
+  Future<void> _loadColorEntriesFromHive() async {
+    setState(() {
+      _response = 'Hiveから読み込み中...';
+    });
+    try {
+      final box = await Hive.openBox<ColorEntry>('colorEntryBox');
+      final List<ColorEntry> storedColorEntries = box.values.toList();
+
+      String displayMessage = 'Hiveから読み込みました: ${storedColorEntries.length}件\n';
+
+      // Example: Lookup colorNum = "A1"
+      const String lookupColorNum = "A1";
+      final ColorEntry? foundEntry = storedColorEntries.firstWhereOrNull(
+        (entry) => entry.colorNum == lookupColorNum,
+      );
+
+      if (foundEntry != null) {
+        displayMessage += '\ncolor_num $lookupColorNum の色:\n';
+        displayMessage +=
+            '  背景色: 0x${foundEntry.backColor.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+        displayMessage +=
+            '  前景色: 0x${foundEntry.foreColor.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+      } else {
+        displayMessage += '\ncolor_num $lookupColorNum は見つかりませんでした。\n';
+      }
+
+      setState(() {
+        _response = displayMessage;
+      });
+    } catch (e) {
+      setState(() {
+        _response = 'Hive読み込みエラー: $e';
       });
     }
   }
@@ -165,6 +242,35 @@ class _ApiTestPageState extends State<ApiTestPage> {
                       : _fetchColorList,
                   child: const Text('Fetch ColorList'),
                 ),
+                ElevatedButton(
+                  onPressed: _isLoading || _usersLoading
+                      ? null
+                      : () {
+                          // Assuming _users holds the fetched color data in the original JSON format
+                          final List<ColorEntry> colorEntries = _users.map((
+                            item,
+                          ) {
+                            final String colorNum = item['color_num']?.toString() ?? '';
+                            final int backColorInt =
+                                int.tryParse(item['back_color_int']?.toString() ?? '') ?? 0;
+                            final int foreColorInt =
+                                int.tryParse(item['fore_color_int']?.toString() ?? '') ?? 0;
+                            return ColorEntry(
+                              colorNum: colorNum,
+                              backColor: convertIntToColor(backColorInt),
+                              foreColor: convertIntToColor(foreColorInt),
+                            );
+                          }).toList();
+                          _saveColorEntriesToHive(colorEntries);
+                        },
+                  child: const Text('Save Colors to Hive'),
+                ),
+                ElevatedButton(
+                  onPressed: _isLoading || _usersLoading
+                      ? null
+                      : _loadColorEntriesFromHive,
+                  child: const Text('Load Colors from Hive'),
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -189,4 +295,12 @@ class _ApiTestPageState extends State<ApiTestPage> {
       ),
     );
   }
+}
+
+Color convertIntToColor(int dbValue) {
+  int r = dbValue & 0xFF;
+  int g = (dbValue >> 8) & 0xFF;
+  int b = (dbValue >> 16) & 0xFF;
+
+  return Color.fromARGB(0xFF, r, g, b);
 }

@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:preharness/constants/app_colors.dart';
 import 'routes/app_routes.dart';
-
 import 'package:preharness/utils/user_login_manager.dart'; // ← あなたのloginコードをここに入れる想定
+import 'package:hive/hive.dart'; // Added for Hive
+import 'package:hive_flutter/hive_flutter.dart'; // Added for Hive
+import 'package:preharness/adapters/color_adapter.dart'; // Added for ColorAdapter
+import 'package:preharness/models/color_entry.dart'; // Added for ColorEntry
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.system);
 
-void main() {
+Future<void> main() async { // Made main() async
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter binding is initialized
+  await Hive.initFlutter(); // Initialize Hive
+  Hive.registerAdapter(ColorAdapter()); // Register ColorAdapter
+  Hive.registerAdapter(ColorEntryAdapter()); // Register ColorEntryAdapter
+
   runApp(
     ValueListenableBuilder<ThemeMode>(
       valueListenable: themeNotifier,

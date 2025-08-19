@@ -138,14 +138,18 @@ Change machining condition details.
 
 commit 023
 
-ダイヤル履歴が無い場合にそれが分かるようにする
-debug_page に API テストの追加
+Changed so that if there is no dialing history, it will be known.
+Added API tests to debug_page.
 
 commit 024
 
-#### now
+Added process to receive colorList as json.
+Convert int 30 to Color.(0xFF000000) and save in hive.
+Support for calling from hive with 30.
 
-colorList を json で受け取って int を Color(0xFF000000)に変換して hive で保存.
+commit 025
+
+#### now
 
 #### next
 
