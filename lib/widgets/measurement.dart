@@ -109,7 +109,7 @@ class _StandardInfoCardState extends State<Measurement> {
         child: Container(
           decoration: BoxDecoration(
             color: cardColor,
-            border: Border.all(color: Colors.white, width: 0.3),
+            border: Border.all(color: Colors.white, width: 0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Card(

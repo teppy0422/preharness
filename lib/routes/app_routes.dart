@@ -6,6 +6,7 @@ import 'package:preharness/pages/work40_page.dart';
 import 'package:preharness/pages/temp_page.dart';
 import 'package:preharness/pages/rhythm_game_page.dart';
 import 'package:preharness/pages/debug_page.dart';
+import 'package:preharness/pages/api_test_page.dart';
 
 class AppRoutes {
   static const home = '/home';
@@ -15,6 +16,7 @@ class AppRoutes {
   static const temp = '/temp';
   static const rhythmGame = '/rhythm_game'; // 新しいルート
   static const debug = '/debug';
+  static const apiTest = '/api_test'; // Add new route for API Test Page
 
   static Map<String, WidgetBuilder> routes = {
     home: (context) => const HomePage(),
@@ -24,5 +26,6 @@ class AppRoutes {
     temp: (context) => const TempPage(),
     rhythmGame: (context) => const RhythmGamePage(), // 新しいマッピング
     debug: (context) => const DebugPage(),
+    apiTest: (context) => const ApiTestPage(), // Add mapping for API Test Page
   };
 }

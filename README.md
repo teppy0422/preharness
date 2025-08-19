@@ -111,29 +111,48 @@ Change position on dial_selector.
 
 commit 017
 
-Fixed layout of work40_page.dart
+Fixed layout of work40_page.dart.
 
 commit 018
-Changed to show empty ef if before search
+
+Changed to show empty ef if before search.
+
 commit 019
-Fixed button cannot be pressed again during import
+
+Fixed button cannot be pressed again during import.
+
 commit 020
-Display progress counts during import
+
+Display progress counts during import.
+
 commit 021
-規格データの検索を追加
-検索条件に付属部品を追加
+
+### 2025-08-18
+
+Standards data search added.
+Add accessory parts to search criteria.
+
 commit 022
-Change machining condition details
+
+Change machining condition details.
+
 commit 023
 
+ダイヤル履歴が無い場合にそれが分かるようにする
+debug_page に API テストの追加
+
+commit 024
+
 #### now
+
+colorList を json で受け取って int を Color(0xFF000000)に変換して hive で保存.
 
 #### next
 
 ファイルインポートの速度向上
 ファイルインポートのプログレスバーを追加
 
-#### base
+#### prompt
 
 あなたは、Flutter/Dart の専門家として、以下のプロジェクト概要を
 理解し、今後の開発に関する質問に答えられるように準備してくださ
@@ -198,6 +217,7 @@ utter 製クロスプラットフォームアプリケーション「PreHarnessP
   - アプリの起動、テーマ (ThemeNotifier)
     の設定、初期ルートとルーティングの定義。
   - 起動時に UserLoginManager でログイン状態を復元。
+  - 起動時に colorList を hive でローカル保存
 
 - ルーティング (`lib/routes/app_routes.dart`):
 

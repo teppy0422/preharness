@@ -6,6 +6,7 @@ class DialSelectorPage extends StatefulWidget {
   final List<String>? initialTopDialOptions;
   final List<String>? initialBottomDialOptions;
   final List<String>? initialHindDialOptions;
+  final bool valuesAreFromDb;
 
   const DialSelectorPage({
     super.key,
@@ -13,6 +14,7 @@ class DialSelectorPage extends StatefulWidget {
     this.initialTopDialOptions,
     this.initialBottomDialOptions,
     this.initialHindDialOptions,
+    this.valuesAreFromDb = true,
   });
 
   @override
@@ -40,6 +42,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
   late String selectedTopDial;
   late String selectedBottomDial;
   late String selectedHindDial;
+  late bool _isInitialState;
 
   @override
   void initState() {
@@ -49,6 +52,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
         widget.initialBottomDialOptions?.first ?? bottomDialOptions[0];
     selectedHindDial =
         widget.initialHindDialOptions?.first ?? hindDialOptions[0];
+    _isInitialState = true;
   }
 
   @override
@@ -57,9 +61,6 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
 
     final cardColor = isDark ? AppColors.black : AppColors.paperWhite;
     final labelColor = isDark ? Colors.white70 : Colors.black87;
-    final fieldBgColor = isDark ? AppColors.paperBlack : Colors.white;
-    final fieldTextColor = isDark ? Colors.white : Colors.black87;
-    final hintColor = isDark ? Colors.grey[400]! : Colors.grey;
     return Center(
       child: SizedBox(
         child: Container(
@@ -78,6 +79,11 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                   options: topDialOptions,
                   selectedValue: selectedTopDial,
                   onTap: (val) {
+                    if (_isInitialState) {
+                      setState(() {
+                        _isInitialState = false;
+                      });
+                    }
                     setState(() {
                       selectedTopDial = val;
                     });
@@ -95,6 +101,11 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                   options: bottomDialOptions,
                   selectedValue: selectedBottomDial,
                   onTap: (val) {
+                    if (_isInitialState) {
+                      setState(() {
+                        _isInitialState = false;
+                      });
+                    }
                     setState(() {
                       selectedBottomDial = val;
                     });
@@ -112,6 +123,11 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                   options: hindDialOptions,
                   selectedValue: selectedHindDial,
                   onTap: (val) {
+                    if (_isInitialState) {
+                      setState(() {
+                        _isInitialState = false;
+                      });
+                    }
                     setState(() {
                       selectedHindDial = val;
                     });
@@ -151,15 +167,24 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
         // ),
         const SizedBox(height: 2),
         Wrap(
-          spacing: 22,
+          spacing: 12,
           children: options.map((val) {
             final isSelected = selectedValue == val;
+            final Color buttonColor;
+            if (isSelected) {
+              buttonColor = widget.valuesAreFromDb
+                  ? AppColors.neonGreen
+                  : AppColors.red;
+            } else {
+              buttonColor = Colors.grey[300]!;
+            }
+
             return GestureDetector(
               onTap: () => onTap(val),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.neonGreen : Colors.grey[300],
+                  color: buttonColor,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.black26),
                 ),

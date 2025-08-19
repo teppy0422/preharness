@@ -23,6 +23,7 @@ class _DialSelectorWithDbState extends State<DialSelectorWithDb> {
   String? _initialTopDial;
   String? _initialBottomDial;
   String? _initialHindDial;
+  bool _hasExistingData = false;
 
   @override
   void initState() {
@@ -50,6 +51,9 @@ class _DialSelectorWithDbState extends State<DialSelectorWithDb> {
           _initialTopDial = existingData.topDial;
           _initialBottomDial = existingData.bottomDial;
           _initialHindDial = existingData.hindDial;
+          _hasExistingData = true;
+        } else {
+          _hasExistingData = false;
         }
         _isLoading = false;
       });
@@ -90,10 +94,17 @@ class _DialSelectorWithDbState extends State<DialSelectorWithDb> {
       return const Center(child: CircularProgressIndicator());
     }
     return DialSelectorPage(
-      initialTopDialOptions: _initialTopDial != null ? [_initialTopDial!] : null,
-      initialBottomDialOptions: _initialBottomDial != null ? [_initialBottomDial!] : null,
-      initialHindDialOptions: _initialHindDial != null ? [_initialHindDial!] : null,
+      initialTopDialOptions: _initialTopDial != null
+          ? [_initialTopDial!]
+          : null,
+      initialBottomDialOptions: _initialBottomDial != null
+          ? [_initialBottomDial!]
+          : null,
+      initialHindDialOptions: _initialHindDial != null
+          ? [_initialHindDial!]
+          : null,
       onChanged: _saveDialValues,
+      valuesAreFromDb: _hasExistingData,
     );
   }
 }

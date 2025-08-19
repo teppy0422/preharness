@@ -19,13 +19,16 @@ class DebugPage extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => DriftDbViewer(db),
-                  ),
-                );
+                Navigator.of(context).push( MaterialPageRoute( builder: (context) => DriftDbViewer(db), ), );
               },
               child: const Text('データベースを閲覧'),
+            ),
+            const SizedBox(height: 16.0), // Add some spacing
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.apiTest);
+              },
+              child: const Text('APIテスト'),
             ),
           ],
         ),

@@ -5,8 +5,6 @@ import 'package:preharness/widgets/efu_detail.dart'; // 詳細ページをイン
 import 'package:preharness/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
 
-import 'package:preharness/widgets/measurement.dart';
-
 class Work40Page extends StatefulWidget {
   const Work40Page({super.key});
 
