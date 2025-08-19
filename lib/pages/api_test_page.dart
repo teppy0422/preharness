@@ -7,6 +7,7 @@ import 'dart:developer'; // Added for debugPrint
 import 'package:hive/hive.dart'; // Added for Hive
 import 'package:preharness/models/color_entry.dart'; // Added for ColorEntry
 import 'package:collection/collection.dart'; // Added for firstWhereOrNull
+import 'package:preharness/utils/color_utils.dart';
 
 class ApiTestPage extends StatefulWidget {
   const ApiTestPage({super.key});
@@ -270,6 +271,44 @@ class _ApiTestPageState extends State<ApiTestPage> {
                       ? null
                       : _loadColorEntriesFromHive,
                   child: const Text('Load Colors from Hive'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    setState(() {
+                      _response = "Searching for color 'A8'";
+                    });
+                    final Color? foundColor = await getColorFromHive('A8');
+                    if (foundColor != null) {
+                      setState(() {
+                        _response =
+                            "Found color for 'A8': ${foundColor.toString()}";
+                      });
+                    } else {
+                      setState(() {
+                        _response = "Color 'A8' not found.";
+                      });
+                    }
+                  },
+                  child: const Text('Test getColorFromHive(\'A8\')'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    setState(() {
+                      _response = "Searching for forecolor of \'A8\'...";
+                    });
+                    final Color? foundColor = await getColorFromHive('A8', getForeColor: true);
+                    if (foundColor != null) {
+                      setState(() {
+                        _response =
+                            "Found forecolor for \'A8\': ${foundColor.toString()}";
+                      });
+                    } else {
+                      setState(() {
+                        _response = "Color \'A8\' not found.";
+                      });
+                    }
+                  },
+                  child: const Text('Test getForeColor(\'A8\')'),
                 ),
               ],
             ),

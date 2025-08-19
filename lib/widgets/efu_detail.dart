@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:preharness/widgets/dial_selector_with_db.dart';
 import 'package:preharness/widgets/measurement.dart';
 import 'package:preharness/utils/global.dart';
+import 'package:preharness/utils/color_utils.dart'; // Added
 
-class EfuDetailPage extends StatelessWidget {
+class EfuDetailPage extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
   final Map<String, dynamic> blockInfo;
   final VoidCallback onBack;
@@ -20,6 +21,37 @@ class EfuDetailPage extends StatelessWidget {
     this.isLoadingChList = false,
     this.chListError,
   });
+
+  @override
+  State<EfuDetailPage> createState() => _EfuDetailPageState();
+}
+
+class _EfuDetailPageState extends State<EfuDetailPage> {
+  Color? _containerColor; // Added
+  Color? _containerForeColor; // Added
+
+  @override
+  void initState() {
+    super.initState();
+    _loadColor(); // Call a method to load the color
+  }
+
+  Future<void> _loadColor() async {
+    final String colorNum = widget.processingConditions['wire_color'];
+    final Color? loadedBackColor = await getColorFromHive(colorNum);
+    final Color? loadedForeColor = await getColorFromHive(
+      colorNum,
+      getForeColor: true,
+    );
+    if (mounted) {
+      setState(() {
+        _containerColor =
+            loadedBackColor; // Assign backColor to _containerColor
+        _containerForeColor =
+            loadedForeColor; // Assign foreColor to _containerForeColor
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +71,7 @@ class EfuDetailPage extends StatelessWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton.icon(
-                  onPressed: onBack,
+                  onPressed: widget.onBack,
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('戻る'),
                 ),
@@ -67,12 +99,12 @@ class EfuDetailPage extends StatelessWidget {
                                   children: [
                                     _buildLabelValue(
                                       '製品品番:',
-                                      processingConditions['p_number'],
+                                      widget.processingConditions['p_number'],
                                       valueFont: 28,
                                     ),
                                     _buildLabelValue(
                                       'ロットNo:',
-                                      processingConditions['lot_num'],
+                                      widget.processingConditions['lot_num'],
                                       valueFont: 28,
                                     ),
                                   ],
@@ -82,22 +114,20 @@ class EfuDetailPage extends StatelessWidget {
                                   children: [
                                     _buildLabelValue(
                                       '設変:',
-                                      processingConditions['eng_change'],
+                                      widget.processingConditions['eng_change'],
                                     ),
                                     _buildLabelValue(
                                       '構成No:',
-                                      processingConditions['cfg_no'],
+                                      widget.processingConditions['cfg_no'],
                                     ),
                                   ],
                                 ),
                                 SizedBox(height: 5),
-
                                 Row(
                                   children: [
                                     _buildLabelValue(
                                       '色:',
-                                      processingConditions['wire_color'],
-                                      color: "70",
+                                      widget.processingConditions['wire_color'],
                                     ),
                                   ],
                                 ),
@@ -106,11 +136,12 @@ class EfuDetailPage extends StatelessWidget {
                                   children: [
                                     _buildLabelValue(
                                       '準完日:',
-                                      processingConditions['delivery_date'],
+                                      widget
+                                          .processingConditions['delivery_date'],
                                     ),
                                     _buildLabelValue(
                                       '数量:',
-                                      processingConditions['wire_cnt'],
+                                      widget.processingConditions['wire_cnt'],
                                       valueFont: 30,
                                     ),
                                   ],
@@ -127,8 +158,8 @@ class EfuDetailPage extends StatelessWidget {
                           // 右側: DialSelectorWithDb
                           Expanded(
                             child: DialSelectorWithDb(
-                              processingConditions: processingConditions,
-                              blockInfo: blockInfo,
+                              processingConditions: widget.processingConditions,
+                              blockInfo: widget.blockInfo,
                             ),
                           ),
                         ],
@@ -140,10 +171,10 @@ class EfuDetailPage extends StatelessWidget {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        '端子部品番号: ${formatCode(blockInfo['terminals'][0], "-")}',
+                        '端子部品番号: ${formatCode(widget.blockInfo['terminals'][0], "-")}',
                       ),
                       Text(
-                        '付加部品: ${formatCode(blockInfo['terminals'][1], "-")}',
+                        '付加部品: ${formatCode(widget.blockInfo['terminals'][1], "-")}',
                       ),
                       const Divider(height: 20, thickness: 1),
                     ],
@@ -153,9 +184,14 @@ class EfuDetailPage extends StatelessWidget {
                 Column(
                   children: [
                     Text(
-                      '${formatCode(blockInfo['terminals'][0], "-")}   ${processingConditions['wire_type']}/${processingConditions['wire_size']}',
+                      formatCode(widget.blockInfo['terminals'][0], "-"),
+                      style: TextStyle(fontSize: 20),
                     ),
-                    Measurement(chListData: chListData),
+                    Text(
+                      '${widget.processingConditions['wire_type']} / ${widget.processingConditions['wire_size']}',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Measurement(chListData: widget.chListData),
                   ],
                 ),
               ],
@@ -165,14 +201,14 @@ class EfuDetailPage extends StatelessWidget {
               'CH List Data:',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            if (isLoadingChList)
+            if (widget.isLoadingChList)
               const CircularProgressIndicator()
-            else if (chListError != null)
-              Text('Error: $chListError')
-            else if (chListData != null && chListData!.isNotEmpty)
+            else if (widget.chListError != null)
+              Text('Error: ${widget.chListError}')
+            else if (widget.chListData != null && widget.chListData!.isNotEmpty)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: chListData!
+                children: widget.chListData!
                     .map(
                       (item) => Text(item.toString()),
                     ) // Adjust display as needed
@@ -185,60 +221,65 @@ class EfuDetailPage extends StatelessWidget {
       ),
     );
   }
-}
 
-Widget _buildLabelValue(
-  String label,
-  String value, {
-  double labelFont = 11,
-  double valueFont = 24,
-  String color = "",
-}) {
-  return Expanded(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(label, style: TextStyle(fontSize: labelFont, height: 1.0)),
-        Row(
-          children: [
-            if (color != "") ...[
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  // 背景の赤いボックス
-                  Container(
-                    width: 16,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      border: Border.all(color: Colors.white, width: 0.5),
-                    ),
-                  ),
-                  // 斜め線を描画
-                  ClipRect(
-                    child: CustomPaint(
-                      size: const Size(16, 22),
-                      painter: DiagonalLinePainter(),
-                    ),
-                  ),
-                ],
-              ),
+  Widget _buildLabelValue(
+    String label,
+    String value, {
+    double labelFont = 11,
+    double valueFont = 24,
+  }) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label, style: TextStyle(fontSize: labelFont, height: 1.0)),
+          Row(
+            children: [
+              Text(value, style: TextStyle(fontSize: valueFont, height: 1.0)),
               SizedBox(width: 2),
+              if (label == '色:') ...[
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // 背景色
+                    Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: _containerColor ?? Colors.red,
+                        border: Border.all(color: Colors.white, width: 0.5),
+                      ),
+                    ),
+                    // 斜め線を描画
+                    ClipRect(
+                      child: CustomPaint(
+                        size: const Size(22, 22),
+                        painter: DiagonalLinePainter(
+                          lineColor: _containerForeColor ?? Colors.red,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
-            Text(value, style: TextStyle(fontSize: valueFont, height: 1.0)),
-          ],
-        ),
-      ],
-    ),
-  );
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class DiagonalLinePainter extends CustomPainter {
+  final Color lineColor;
+
+  DiagonalLinePainter({required this.lineColor});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white
+      ..color = lineColor
       ..strokeWidth = 5
       ..strokeCap = StrokeCap.round;
 

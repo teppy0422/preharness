@@ -138,6 +138,8 @@ Change machining condition details.
 
 commit 023
 
+### 2025-08-19
+
 Changed so that if there is no dialing history, it will be known.
 Added API tests to debug_page.
 
@@ -148,6 +150,11 @@ Convert int 30 to Color.(0xFF000000) and save in hive.
 Support for calling from hive with 30.
 
 commit 025
+
+グローバルに hive から色を取得を追加
+efu_detail.dart に 色取得を追加
+
+commit 026
 
 #### now
 
