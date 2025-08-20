@@ -17,161 +17,168 @@ samples, guidance on mobile development, and a full API reference.
 
 ### 2025-07-23
 
-Download flutter
-Move to c:/dev/flutter
-Add System path c:/dev/flutter/bin
+- Download flutter
+- Move to c:/dev/flutter
+- Add System path c:/dev/flutter/bin
 
-Installed vs sdk & android sdk
+- Installed vs sdk & android sdk
 
-jdk17 をインストールしたあとにターミナルで r 押したらリロードされたけど、jdk17 のインストールが関係あったかは不明
+- jdk17 をインストールしたあとにターミナルで r 押したらリロードされたけど、jdk17 のインストールが関係あったかは不明
 
 ### 2025-07-24
 
-Add settings_page.
+- Add settings_page.
 
 ### 2025-07-25
 
-Add save/load setting_Path to setting_page.
-Add NotoSansJp font.
-copy 001 636MB
-Add filepider 10.2.0
-Added server path field.
-Added display of directory dialog from server path
-copy 002 688MB
+- Add save/load setting_Path to setting_page.
+- Add NotoSansJp font.
+- copy 001 636MB
+- Add filepider 10.2.0
+- Added server path field.
+- Added display of directory dialog from server path
+- copy 002 688MB
 
-copy 003 692MB
+- copy 003 692MB
 
-Hot reloads don't work.
-Added message when file is missing on import.
-copy 004 692MB
+- Hot reloads don't work.
+- Added message when file is missing on import.
+- copy 004 692MB
 
-Added efu to work40_page.
-copy 005 689MB
+- Added efu to work40_page.
+- copy 005 689MB
 
-flutter pub add flutter_svg
-Added feltPen at efu.
-Added darkmode to efu.
-copy 006 773MB
+<pre>flutter pub add flutter_svg </pre>
 
-Added key Input to standard_info_card.
-fixed notice.
-copy 007 775MB
+- Added feltPen at efu.
+- Added darkmode to efu.
+- copy 006 773MB
 
-Intentions for mac environment
-copy 008 1420MB
+- Added key Input to standard_info_card.
+- fixed notice.
+- copy 007 775MB
 
-Added UserResiter.
-copy 009 1420MB
+- Intentions for mac environment
+- copy 008 1420MB
 
-Cange static NotoSansJPfont.
-Added UserList, PrintUserCard, Delete User.
-copy 010 1670MB
+- Added UserResiter.
+- copy 009 1420MB
+
+- Cange static NotoSansJPfont.
+- Added UserList, PrintUserCard, Delete User.
+- copy 010 1670MB
 
 ### 2025-08-05
 
-Added EditUser.
-Added Login modal.
-deploy 0001
-copy 011 1660MB
+- Added EditUser.
+- Added Login modal.
+- deploy 0001
+- copy 011 1660MB
 
 ### 2025-08-06
 
-Added Icon picker.
-Fixed that used Icon cannot be selected.
-deploy 0002
-copy 012 1710MB
+- Added Icon picker.
+- Fixed that used Icon cannot be selected.
+- deploy 0002
+- copy 012 1710MB
 
 ### 2025-08-07
 
-Modified to allow some browsing when server connection is not available.
-Iconic display of connection status to Nas.
-Add icon animation with littie
-deploy 013
-copy 013 1720MB
+- Modified to allow some browsing when server connection is not available.
+- Iconic display of connection status to Nas.
+- Add icon animation with littie
+- deploy 013
+- copy 013 1720MB
 
 ### 2025-08-17
 
-Response is displayed below the network status icon.
-Start using Gemini_cli.
-
-deploy 014
-copy 014 1710MB
-
-Create new page efu_detail.dart.
+- Response is displayed below the network status icon.
+- Start using Gemini_cli.
+- deploy 014
+- copy 014 1710MB
+- Create new page efu_detail.dart.
 
 #### commit 015
 
-copy 015
+- copy 015
 
-Added Dial value local storage.
+- Added Dial value local storage.
 
 #### commit 016
 
-copy 016 1810MB
+- copy 016 1810MB
 
-Change position on dial_selector.
+- Change position on dial_selector.
 
 #### commit 017
 
-Fixed layout of work40_page.dart.
+- Fixed layout of work40_page.dart.
 
 #### commit 018
 
-Changed to show empty ef if before search.
+- Changed to show empty ef if before search.
 
 #### commit 019
 
-Fixed button cannot be pressed again during import.
+- Fixed button cannot be pressed again during import.
 
 #### commit 020
 
-Display progress counts during import.
+- Display progress counts during import.
 
 #### commit 021
 
 ### 2025-08-18
 
-Standards data search added.
-Add accessory parts to search criteria.
+- Standards data search added.
+- Add accessory parts to search criteria.
 
 #### commit 022
 
-Change machining condition details.
+- Change machining condition details.
 
 #### commit 023
 
 ### 2025-08-19
 
-Changed so that if there is no dialing history, it will be known.
-Added API tests to debug_page.
+- Changed so that if there is no dialing history, it will be known.
+- Added API tests to debug_page.
 
 ##### commit 024
 
-Added process to receive colorList as json.
-Convert int 30 to Color.(0xFF000000) and save in hive.
-Support for calling from hive with 30.
+- Added process to receive colorList as json.
+- Convert int 30 to Color.(0xFF000000) and save in hive.
+- Support for calling from hive with 30.
 
 #### commit 025
 
-Add get colors from hive to api_test_page.dart.
-Added color acquisition to efu_detail.dart.
+- Add get colors from hive to api_test_page.dart.
+- Added color acquisition to efu_detail.dart.
 
 #### commit 026
 
 ### 2025-08-20
 
-Fix ColorList in api_test_page.dart.
-Added WireColorBox to global.dart.
+- Fix ColorList in api_test_page.dart.
+- Added WireColorBox to global.dart.
 
 #### commit 027
+
+---
 
 ### now
 
 ### next
 
-起動時に ch_list をローカル更新する
-ファイルインポートの速度向上
-ファイルインポートのプログレスバーを追加
+- インデックス検索
+
+- 起動時に ch_list をローカル更新する
+- ファイルインポートの速度向上
+- ファイルインポートのプログレスバーを追加
+
+#### memo
+
+---
 
 ### prompt
 
@@ -292,10 +299,6 @@ utter 製クロスプラットフォームアプリケーション「PreHarnessP
 
 チャットルール:
 提案するコードの先頭にはファイルパスを記載して
-
-####
-
-インデックス検索
 
 #### Nas セットアップ
 
