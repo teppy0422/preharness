@@ -170,11 +170,15 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 028
 
+- Support for tapping without searching for ef conditions.
+- Once efu.dart is active, make it active with all data retrieval text selected.
+- Add button to activate data search.
+
+#### commit 029
+
 ---
 
 ### now
-
-- エフの条件を検索してない状態でのタップに対応
 
 ### next
 

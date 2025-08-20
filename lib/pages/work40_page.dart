@@ -19,6 +19,33 @@ class _Work40PageState extends State<Work40Page> {
   List<Map<String, dynamic>>? _chListData;
   bool _isLoadingChList = false;
   String? _chListError;
+  final FocusNode _searchFocusNode = FocusNode();
+  final TextEditingController _searchController = TextEditingController(
+    text: 'N712/5M39255551780700186821616BP80D011N712/94.54.5325184039',
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _focusAndSelectSearchText(); // 初期表示時にもフォーカス
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _focusAndSelectSearchText() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_searchFocusNode);
+      _searchController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _searchController.text.length,
+      );
+    });
+  }
 
   void _onSearch(String query) async {
     String? pNumber;
@@ -43,6 +70,7 @@ class _Work40PageState extends State<Work40Page> {
         _processingConditions = result;
         _isDetailView = false; // 新しい検索をしたら一覧に戻す
       });
+      _focusAndSelectSearchText(); // 検索後にフォーカス
 
       if (result != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -108,6 +136,7 @@ class _Work40PageState extends State<Work40Page> {
       _isDetailView = false;
       _selectedBlockInfo = null;
     });
+    _focusAndSelectSearchText(); // 詳細から戻った時にフォーカス
   }
 
   @override
@@ -126,7 +155,15 @@ class _Work40PageState extends State<Work40Page> {
               children: [
                 Expanded(flex: 2, child: _EquipmentInfoCard()),
                 const SizedBox(width: 16),
-                Expanded(flex: 2, child: _SearchCard(onSearch: _onSearch)),
+                Expanded(
+                  flex: 2,
+                  child: _SearchCard(
+                    onSearch: _onSearch,
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    onSelectAll: _focusAndSelectSearchText,
+                  ),
+                ),
               ],
             ),
           ),
@@ -151,95 +188,95 @@ class _Work40PageState extends State<Work40Page> {
                       : EfuPage(
                           lot_num:
                               _processingConditions?['lot_num']?.toString() ??
-                              '',
+                                  '',
                           p_number:
                               _processingConditions?['p_number']?.toString() ??
-                              '',
+                                  '',
                           eng_change:
                               _processingConditions?['eng_change']
-                                  ?.toString() ??
-                              '',
+                                      ?.toString() ??
+                                  '',
                           cfg_no:
                               _processingConditions?['cfg_no']?.toString() ??
-                              '',
+                                  '',
                           subAssy:
                               _processingConditions?['sub_assy']?.toString() ??
-                              '',
+                                  '',
                           wire_type:
                               _processingConditions?['wire_type']?.toString() ??
-                              '',
+                                  '',
                           wire_size:
                               _processingConditions?['wire_size']?.toString() ??
-                              '',
+                                  '',
                           wire_color:
                               _processingConditions?['wire_color']
-                                  ?.toString() ??
-                              '',
+                                      ?.toString() ??
+                                  '',
                           wire_len:
                               _processingConditions?['wire_len']?.toString() ??
-                              '',
+                                  '',
                           circuit_1:
                               _processingConditions?['circuit_1']?.toString() ??
-                              '',
+                                  '',
                           circuit_2:
                               _processingConditions?['circuit_2']?.toString() ??
-                              '',
+                                  '',
                           term_proc_inst_1:
                               _processingConditions?['term_proc_inst_1']
-                                  ?.toString() ??
-                              '',
+                                      ?.toString() ??
+                                  '',
                           term_proc_inst_2:
                               _processingConditions?['term_proc_inst_2']
-                                  ?.toString() ??
-                              '',
+                                      ?.toString() ??
+                                  '',
                           mark_color_1:
                               (_processingConditions?['mark_color_1']
-                                          ?.toString() ??
-                                      "")
-                                  .isNotEmpty
-                              ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_1']}"
-                              : "",
+                                              ?.toString() ??
+                                          "")
+                                      .isNotEmpty
+                                  ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_1']}"
+                                  : "",
                           mark_color_2:
                               (_processingConditions?['mark_color_2']
-                                          ?.toString() ??
-                                      "")
-                                  .isNotEmpty
-                              ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_2']}"
-                              : "",
+                                              ?.toString() ??
+                                          "")
+                                      .isNotEmpty
+                                  ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_2']}"
+                                  : "",
                           strip_len_1:
                               _processingConditions?['strip_len_1']
-                                  ?.toString() ??
-                              '',
+                                      ?.toString() ??
+                                  '',
                           strip_len_2:
                               _processingConditions?['strip_len_2']
-                                  ?.toString() ??
-                              '',
+                                      ?.toString() ??
+                                  '',
                           term_part_no_1:
                               _processingConditions?['term_part_no_1']
-                                  ?.toString() ??
-                              '',
+                                      ?.toString() ??
+                                  '',
                           term_part_no_2:
                               _processingConditions?['term_part_no_2']
-                                  ?.toString() ??
-                              '',
+                                      ?.toString() ??
+                                  '',
                           add_parts_1:
                               _processingConditions?['add_parts_1']
-                                  ?.toString() ??
-                              '',
+                                      ?.toString() ??
+                                  '',
                           add_parts_2:
                               _processingConditions?['add_parts_2']
-                                  ?.toString() ??
-                              '',
+                                      ?.toString() ??
+                                  '',
                           cut_code:
                               _processingConditions?['cut_code']?.toString() ??
-                              '',
+                                  '',
                           wire_cnt:
                               _processingConditions?['wire_cnt']?.toString() ??
-                              '',
+                                  '',
                           delivery_date:
                               _processingConditions?['delivery_date']
-                                  ?.toString() ??
-                              '200101',
+                                      ?.toString() ??
+                                  '200101',
                           onBlockTapped: _handleBlockTapped,
                         ),
                 ],
@@ -298,23 +335,24 @@ class _EquipmentInfoCard extends StatelessWidget {
 
 class _SearchCard extends StatefulWidget {
   final Function(String) onSearch;
-  const _SearchCard({required this.onSearch});
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final VoidCallback onSelectAll;
+
+  const _SearchCard({
+    required this.onSearch,
+    required this.controller,
+    required this.focusNode,
+    required this.onSelectAll,
+  });
+
   @override
   State<_SearchCard> createState() => _SearchCardState();
 }
 
 class _SearchCardState extends State<_SearchCard> {
-  final TextEditingController _searchController = TextEditingController(
-    text: 'N712/5M39255551780700186821616BP80D011N712/94.54.5325184039',
-  );
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   void _handleSearch() {
-    final query = _searchController.text;
+    final query = widget.controller.text;
     if (query.isEmpty) return;
     widget.onSearch(query);
   }
@@ -338,8 +376,9 @@ class _SearchCardState extends State<_SearchCard> {
               ),
               const SizedBox(height: 4),
               TextField(
-                style: TextStyle(fontSize: 14),
-                controller: _searchController,
+                style: const TextStyle(fontSize: 14),
+                controller: widget.controller,
+                focusNode: widget.focusNode,
                 decoration: const InputDecoration(
                   hintText: 'エフをQRリーダーで読む or 手入力',
                   isDense: true,
@@ -354,21 +393,43 @@ class _SearchCardState extends State<_SearchCard> {
               const SizedBox(height: 0),
               Align(
                 alignment: Alignment.centerRight,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ), // 内側余白を小さく
-                    minimumSize: Size.zero, // デフォルトの最小サイズを無効化
-                    tapTargetSize:
-                        MaterialTapTargetSize.shrinkWrap, // タップ領域を必要最小限に
-                  ),
-                  onPressed: _handleSearch,
-                  child: const Text(
-                    '検索',
-                    style: TextStyle(fontSize: 14), // フォントも少し小さめに
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ), // 内側余白を小さく
+                        minimumSize: Size.zero, // デフォルトの最小サイズを無効化
+                        tapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap, // タップ領域を必要最小限に
+                      ),
+                      onPressed: widget.onSelectAll,
+                      child: const Text(
+                        '全選択',
+                        style: TextStyle(fontSize: 14), // フォントも少し小さめに
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ), // 内側余白を小さく
+                        minimumSize: Size.zero, // デフォルトの最小サイズを無効化
+                        tapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap, // タップ領域を必要最小限に
+                      ),
+                      onPressed: _handleSearch,
+                      child: const Text(
+                        '検索',
+                        style: TextStyle(fontSize: 14), // フォントも少し小さめに
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

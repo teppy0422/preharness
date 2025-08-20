@@ -864,15 +864,26 @@ class EfuPage extends StatelessWidget {
       cursor: SystemMouseCursors.click, // ← マウスオーバーでポインターに
       child: GestureDetector(
         onTap: () {
-          // タップされたブロックの情報をMapにまとめる
-          final blockInfo = {
-            'strip': strip,
-            'directives': directives,
-            'terminals': terminals,
-            'tubeinfo': tubeinfo,
-          };
-          // コールバックを呼び出して親ウィジェットに通知
-          onBlockTapped(blockInfo);
+          // `terminals` リストの全ての要素が空文字列かチェック
+          if (terminals.every((t) => t.trim().isEmpty)) {
+            // 空の場合、SnackBarを表示
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('データがありません'),
+                duration: Duration(seconds: 1),
+              ),
+            );
+          } else {
+            // 情報がある場合、blockInfoを作成してコールバックを呼び出す
+            final blockInfo = {
+              'strip': strip,
+              'directives': directives,
+              'terminals': terminals,
+              'tubeinfo': tubeinfo,
+            };
+            // コールバックを呼び出して親ウィジェットに通知
+            onBlockTapped(blockInfo);
+          }
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
