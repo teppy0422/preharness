@@ -81,11 +81,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
     _mainController.text = withDefault(
       settings['main_path'],
-      r'\\192.168.11.8',
+      r'\\192.168.11.11',
     );
     _pathController.text = withDefault(
       settings['path_01'],
-      r'\\192.168.11.8\g\projects\PreHarnessPro\data',
+      r'\\192.168.11.11\g\projects\PreHarnessPro\data',
     );
     _typeController.text = withDefault(settings['machine_type'], 'CM20');
     _serialController.text = withDefault(settings['machine_serial'], '0000');
@@ -214,7 +214,7 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 _buildLabeledField(
                   label: 'サーバーパス',
-                  hint: '例: \\192.168.11.8',
+                  hint: '例: \\192.168.11.11',
                   controller: _mainController,
                   errorText: _serverPathErrorText,
                 ),
