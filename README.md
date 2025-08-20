@@ -165,8 +165,8 @@ samples, guidance on mobile development, and a full API reference.
 #### commit 027
 
 - Fixing local ip.
-- Change development connection to wifi .
-- Static change of ip address in development environment. Target tablet is 192.168.11.14. Server is 192.168.11.11
+- Change development connection to wifi.
+- Static change of ip address in development environment. Target tablet is 192.168.11.14 Server is 192.168.11.11.
 
 #### commit 028
 
