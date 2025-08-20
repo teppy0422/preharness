@@ -99,71 +99,81 @@ copy 014 1710MB
 
 Create new page efu_detail.dart.
 
-commit 015
+#### commit 015
+
 copy 015
 
 Added Dial value local storage.
 
-commit 016
+#### commit 016
+
 copy 016 1810MB
 
 Change position on dial_selector.
 
-commit 017
+#### commit 017
 
 Fixed layout of work40_page.dart.
 
-commit 018
+#### commit 018
 
 Changed to show empty ef if before search.
 
-commit 019
+#### commit 019
 
 Fixed button cannot be pressed again during import.
 
-commit 020
+#### commit 020
 
 Display progress counts during import.
 
-commit 021
+#### commit 021
 
 ### 2025-08-18
 
 Standards data search added.
 Add accessory parts to search criteria.
 
-commit 022
+#### commit 022
 
 Change machining condition details.
 
-commit 023
+#### commit 023
 
 ### 2025-08-19
 
 Changed so that if there is no dialing history, it will be known.
 Added API tests to debug_page.
 
-commit 024
+##### commit 024
 
 Added process to receive colorList as json.
 Convert int 30 to Color.(0xFF000000) and save in hive.
 Support for calling from hive with 30.
 
-commit 025
+#### commit 025
 
-グローバルに hive から色を取得を追加
-efu_detail.dart に 色取得を追加
+Add get colors from hive to api_test_page.dart.
+Added color acquisition to efu_detail.dart.
 
-commit 026
+#### commit 026
 
-#### now
+### 2025-08-20
 
-#### next
+Fix ColorList in api_test_page.dart.
+Added WireColorBox to global.dart.
 
+#### commit 027
+
+### now
+
+### next
+
+起動時に ch_list をローカル更新する
 ファイルインポートの速度向上
 ファイルインポートのプログレスバーを追加
 
-#### prompt
+### prompt
 
 あなたは、Flutter/Dart の専門家として、以下のプロジェクト概要を
 理解し、今後の開発に関する質問に答えられるように準備してくださ

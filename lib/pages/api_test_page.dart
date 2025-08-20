@@ -8,6 +8,7 @@ import 'package:hive/hive.dart'; // Added for Hive
 import 'package:preharness/models/color_entry.dart'; // Added for ColorEntry
 import 'package:collection/collection.dart'; // Added for firstWhereOrNull
 import 'package:preharness/utils/color_utils.dart';
+import 'package:preharness/utils/global.dart';
 
 class ApiTestPage extends StatefulWidget {
   const ApiTestPage({super.key});
@@ -21,11 +22,13 @@ class _ApiTestPageState extends State<ApiTestPage> {
   bool _isLoading = false;
   List<Map<String, dynamic>> _users = []; // Added
   bool _usersLoading = false; // Added
+  List<Widget> _colorWidgets = [];
 
   Future<void> _runApi(Future<dynamic> apiCall) async {
     setState(() {
       _isLoading = true;
       _response = '実行中...';
+      _colorWidgets = [];
     });
     try {
       final result = await apiCall;
@@ -48,6 +51,7 @@ class _ApiTestPageState extends State<ApiTestPage> {
     setState(() {
       _usersLoading = true;
       _response = '取得中...';
+      _colorWidgets = [];
     });
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -81,6 +85,7 @@ class _ApiTestPageState extends State<ApiTestPage> {
     setState(() {
       _usersLoading = true;
       _response = '取得中...';
+      _colorWidgets = [];
     });
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -131,6 +136,7 @@ class _ApiTestPageState extends State<ApiTestPage> {
   Future<void> _saveColorEntriesToHive(List<ColorEntry> colorEntries) async {
     setState(() {
       _response = 'Hiveに保存中...';
+      _colorWidgets = [];
     });
     try {
       final box = await Hive.openBox<ColorEntry>('colorEntryBox');
@@ -148,188 +154,192 @@ class _ApiTestPageState extends State<ApiTestPage> {
     }
   }
 
-  Future<void> _loadColorEntriesFromHive() async {
+  Future<void> _generateColorWidgets() async {
     setState(() {
-      _response = 'Hiveから読み込み中...';
+      _isLoading = true;
+      _response = '';
+      _colorWidgets = [];
     });
     try {
       final box = await Hive.openBox<ColorEntry>('colorEntryBox');
       final List<ColorEntry> storedColorEntries = box.values.toList();
+      final List<Widget> widgets = [];
 
-      String displayMessage = 'Hiveから読み込みました: ${storedColorEntries.length}件\n';
-
-      // Example: Lookup colorNum = "A1"
-      const String lookupColorNum = "A1";
-      final ColorEntry? foundEntry = storedColorEntries.firstWhereOrNull(
-        (entry) => entry.colorNum == lookupColorNum,
+      widgets.add(
+        Text(
+          "colorList stored in hive.\nAfter converting from the actual values to x0 format for easier viewing.\n",
+        ),
       );
 
-      if (foundEntry != null) {
-        displayMessage += '\ncolor_num $lookupColorNum の色:\n';
-        displayMessage +=
-            '  背景色: 0x${foundEntry.backColor.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
-        displayMessage +=
-            '  前景色: 0x${foundEntry.foreColor.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
-      } else {
-        displayMessage += '\ncolor_num $lookupColorNum は見つかりませんでした。\n';
+      for (final entry in storedColorEntries) {
+        final String colorNum = entry.colorNum;
+        final Color backColor = entry.backColor;
+        final Color foreColor = entry.foreColor;
+
+        widgets.add(
+          Row(
+            children: [
+              Text('color_num: $colorNum'),
+              const SizedBox(width: 4),
+              WireColorBox(
+                width: 14,
+                height: 14,
+                color: backColor,
+                lineColor: foreColor,
+              ),
+            ],
+          ),
+        );
+        widgets.add(
+          Row(
+            children: [
+              Text(
+                '  back_color: 0x${backColor.value.toRadixString(16).padLeft(8, '0').toUpperCase()}',
+              ),
+              const SizedBox(width: 4),
+              WireColorBox(
+                width: 14,
+                height: 14,
+                color: backColor,
+                lineColor: backColor,
+              ),
+            ],
+          ),
+        );
+        widgets.add(
+          Row(
+            children: [
+              Text(
+                '  fore_color: 0x${foreColor.value.toRadixString(16).padLeft(8, '0').toUpperCase()}',
+              ),
+              const SizedBox(width: 4),
+              WireColorBox(
+                width: 7,
+                height: 14,
+                color: foreColor,
+                lineColor: foreColor,
+              ),
+            ],
+          ),
+        );
+        widgets.add(const SizedBox(height: 16)); // Add space between entries
       }
 
       setState(() {
-        _response = displayMessage;
+        _colorWidgets = widgets;
       });
     } catch (e) {
       setState(() {
         _response = 'Hive読み込みエラー: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('APIテスト')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Wrap(
-              spacing: 8.0,
-              runSpacing: 8.0,
-              children: [
-                ElevatedButton(
-                  onPressed: _isLoading || _usersLoading
-                      ? null
-                      : () => _runApi(ApiService.sendPath01ToServerOld()),
-                  child: const Text('sendPath01ToServerOld'),
-                ),
-                ElevatedButton(
-                  onPressed: _isLoading || _usersLoading
-                      ? null
-                      : () => _runApi(ApiService.sendPath01ToServer()),
-                  child: const Text('sendPath01ToServer'),
-                ),
-                ElevatedButton(
-                  onPressed: _isLoading || _usersLoading
-                      ? null
-                      : () => _runApi(
-                          ApiService.fetchProcessingConditions(
-                            pNumber: '123', // テスト用の固定値
-                            cfgNo: '456', // テスト用の固定値
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.apply(
+          fontFamily: 'RobotoMono', // ← ここで指定
+        ),
+      ),
+      child: Scaffold(
+        appBar: AppBar(title: const Text('APIテスト')),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: [
+                  ElevatedButton(
+                    onPressed: _isLoading || _usersLoading
+                        ? null
+                        : () => _runApi(ApiService.sendPath01ToServerOld()),
+                    child: const Text('sendPath01ToServerOld'),
+                  ),
+                  ElevatedButton(
+                    onPressed: _isLoading || _usersLoading
+                        ? null
+                        : () => _runApi(ApiService.sendPath01ToServer()),
+                    child: const Text('sendPath01ToServer'),
+                  ),
+                  ElevatedButton(
+                    onPressed: _isLoading || _usersLoading
+                        ? null
+                        : () => _runApi(
+                            ApiService.fetchProcessingConditions(
+                              pNumber: '123', // テスト用の固定値
+                              cfgNo: '456', // テスト用の固定値
+                            ),
                           ),
-                        ),
-                  child: const Text('fetchProcessingConditions (test)'),
-                ),
-                ElevatedButton(
-                  onPressed: _isLoading || _usersLoading
-                      ? null
-                      : () => _runApi(
-                          ApiService.searchChList(
-                            thin: 'thin_val', // テスト用の固定値
-                            fhin: 'fhin_val', // テスト用の固定値
-                            hin1: 'hin1_val', // テスト用の固定値
-                            size1: 'size1_val', // テスト用の固定値
+                    child: const Text('fetchProcessingConditions (test)'),
+                  ),
+                  ElevatedButton(
+                    onPressed: _isLoading || _usersLoading
+                        ? null
+                        : () => _runApi(
+                            ApiService.searchChList(
+                              thin: 'thin_val', // テスト用の固定値
+                              fhin: 'fhin_val', // テスト用の固定値
+                              hin1: 'hin1_val', // テスト用の固定値
+                              size1: 'size1_val', // テスト用の固定値
+                            ),
                           ),
-                        ),
-                  child: const Text('searchChList (test)'),
-                ),
-                ElevatedButton(
-                  onPressed: _isLoading || _usersLoading ? null : _fetchUsers,
-                  child: const Text('Fetch Users'),
-                ),
-                ElevatedButton(
-                  onPressed: _isLoading || _usersLoading
-                      ? null
-                      : _fetchColorList,
-                  child: const Text('Fetch ColorList'),
-                ),
-                ElevatedButton(
-                  onPressed: _isLoading || _usersLoading
-                      ? null
-                      : () {
-                          // Assuming _users holds the fetched color data in the original JSON format
-                          final List<ColorEntry> colorEntries = _users.map((
-                            item,
-                          ) {
-                            final String colorNum = item['color_num']?.toString() ?? '';
-                            final int backColorInt =
-                                int.tryParse(item['back_color_int']?.toString() ?? '') ?? 0;
-                            final int foreColorInt =
-                                int.tryParse(item['fore_color_int']?.toString() ?? '') ?? 0;
-                            return ColorEntry(
-                              colorNum: colorNum,
-                              backColor: convertIntToColor(backColorInt),
-                              foreColor: convertIntToColor(foreColorInt),
-                            );
-                          }).toList();
-                          _saveColorEntriesToHive(colorEntries);
-                        },
-                  child: const Text('Save Colors to Hive'),
-                ),
-                ElevatedButton(
-                  onPressed: _isLoading || _usersLoading
-                      ? null
-                      : _loadColorEntriesFromHive,
-                  child: const Text('Load Colors from Hive'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    setState(() {
-                      _response = "Searching for color 'A8'";
-                    });
-                    final Color? foundColor = await getColorFromHive('A8');
-                    if (foundColor != null) {
-                      setState(() {
-                        _response =
-                            "Found color for 'A8': ${foundColor.toString()}";
-                      });
-                    } else {
-                      setState(() {
-                        _response = "Color 'A8' not found.";
-                      });
-                    }
-                  },
-                  child: const Text('Test getColorFromHive(\'A8\')'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    setState(() {
-                      _response = "Searching for forecolor of \'A8\'...";
-                    });
-                    final Color? foundColor = await getColorFromHive('A8', getForeColor: true);
-                    if (foundColor != null) {
-                      setState(() {
-                        _response =
-                            "Found forecolor for \'A8\': ${foundColor.toString()}";
-                      });
-                    } else {
-                      setState(() {
-                        _response = "Color \'A8\' not found.";
-                      });
-                    }
-                  },
-                  child: const Text('Test getForeColor(\'A8\')'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            const Text('レスポンス:', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(4.0),
-                ),
-                child: SingleChildScrollView(
-                  child: (_isLoading || _usersLoading)
+                    child: const Text('searchChList (test)'),
+                  ),
+                  ElevatedButton(
+                    onPressed: _isLoading || _usersLoading ? null : _fetchUsers,
+                    child: const Text('Fetch Users'),
+                  ),
+                  ElevatedButton(
+                    onPressed: _isLoading || _usersLoading
+                        ? null
+                        : _fetchColorList,
+                    child: const Text('Fetch ColorList'),
+                  ),
+
+                  ElevatedButton(
+                    onPressed: _isLoading || _usersLoading
+                        ? null
+                        : _generateColorWidgets,
+                    child: const Text('Generate Color Widgets'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'response:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  child: (_isLoading)
                       ? const Center(child: CircularProgressIndicator())
-                      : Text(_response),
+                      : (_colorWidgets.isNotEmpty)
+                      ? SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: _colorWidgets,
+                          ),
+                        )
+                      : SingleChildScrollView(child: Text(_response)),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -142,7 +142,9 @@ flutter:
     - family: Inter
       fonts:
         - asset: assets/fonts/Inter-VariableFont_opsz,wght.ttf
-
+    - family: RobotoMono
+      fonts:
+        - asset: assets/fonts/RobotoMono-Medium.ttf
   assets:
     - assets/images/tearDrop.svg
     - assets/images/character.svg

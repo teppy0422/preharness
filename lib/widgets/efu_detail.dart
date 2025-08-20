@@ -239,28 +239,11 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               Text(value, style: TextStyle(fontSize: valueFont, height: 1.0)),
               SizedBox(width: 2),
               if (label == '色:') ...[
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // 背景色
-                    Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: _containerColor ?? Colors.red,
-                        border: Border.all(color: Colors.white, width: 0.5),
-                      ),
-                    ),
-                    // 斜め線を描画
-                    ClipRect(
-                      child: CustomPaint(
-                        size: const Size(22, 22),
-                        painter: DiagonalLinePainter(
-                          lineColor: _containerForeColor ?? Colors.red,
-                        ),
-                      ),
-                    ),
-                  ],
+                WireColorBox(
+                  width: 22,
+                  height: 22,
+                  color: _containerColor ?? Colors.transparent,
+                  lineColor: _containerForeColor ?? Colors.transparent,
                 ),
               ],
             ],
