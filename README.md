@@ -182,6 +182,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 030
 
+- Add animation for successful searches to settings
+
+#### commit 031
+
 ---
 
 ### now

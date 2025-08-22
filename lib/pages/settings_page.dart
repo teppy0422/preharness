@@ -56,6 +56,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   final _service = SettingsService();
   String? _serverPathErrorText; // サーバーパス用エラーメッセージ
+  String _selectedAnimation = 'none';
 
   @override
   void initState() {
@@ -90,6 +91,9 @@ class _SettingsPageState extends State<SettingsPage> {
     _typeController.text = withDefault(settings['machine_type'], 'CM20');
     _serialController.text = withDefault(settings['machine_serial'], '0000');
     _workNameController.text = withDefault(settings['work_name'], '手圧着');
+
+    _selectedAnimation = await _service.loadAnimationType();
+    setState(() {});
   }
 
   Future<void> _saveSettings() async {
@@ -100,6 +104,7 @@ class _SettingsPageState extends State<SettingsPage> {
       machineSerial: _serialController.text,
       workName: _workNameController.text,
     );
+    await _service.saveAnimationType(_selectedAnimation);
 
     if (!mounted) return;
     ScaffoldMessenger.of(
@@ -239,7 +244,44 @@ class _SettingsPageState extends State<SettingsPage> {
                   hint: '例: 圧着',
                   controller: _workNameController,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minWidth: 300, maxWidth: 600),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('検索結果アニメーション'),
+                        const SizedBox(height: 4),
+                        DropdownButtonFormField<String>(
+                          value: _selectedAnimation,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'none',
+                              child: Text('なし'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'flip',
+                              child: Text('フリップ'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _selectedAnimation = value;
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Align(
                   alignment: Alignment.center,
                   child: ElevatedButton.icon(

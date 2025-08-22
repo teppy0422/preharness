@@ -23,6 +23,16 @@ class SettingsService {
     await prefs.setString(_keyWorkName, workName);
   }
 
+  Future<void> saveAnimationType(String animationType) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('animationType', animationType);
+  }
+
+  Future<String> loadAnimationType() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('animationType') ?? 'none';
+  }
+
   Future<Map<String, String>> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     return {

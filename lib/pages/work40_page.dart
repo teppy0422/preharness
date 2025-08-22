@@ -7,6 +7,8 @@ import 'package:preharness/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
 import 'package:preharness/utils/global.dart';
 import "package:preharness/constants/app_colors.dart";
+import 'package:preharness/services/settings_service.dart';
+import 'package:preharness/widgets/flip_animation.dart';
 
 class Work40Page extends StatefulWidget {
   const Work40Page({super.key});
@@ -15,7 +17,7 @@ class Work40Page extends StatefulWidget {
   State<Work40Page> createState() => _Work40PageState();
 }
 
-class _Work40PageState extends State<Work40Page> {
+class _Work40PageState extends State<Work40Page> with SingleTickerProviderStateMixin {
   Map<String, dynamic>? _processingConditions;
   bool _isDetailView = false;
   Map<String, dynamic>? _selectedBlockInfo;
@@ -27,16 +29,33 @@ class _Work40PageState extends State<Work40Page> {
     text: 'N712/ 5M39255551780700186821616BP80D011N712/94.54.5325184039',
   );
 
+  late final AnimationController _animationController;
+  String _animationType = 'none';
+  final _settingsService = SettingsService();
+
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _loadSettings();
     _focusAndSelectSearchText(); // 初期表示時にもフォーカス
+  }
+
+  Future<void> _loadSettings() async {
+    _animationType = await _settingsService.loadAnimationType();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
     _searchFocusNode.dispose();
     _searchController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -73,6 +92,11 @@ class _Work40PageState extends State<Work40Page> {
         _processingConditions = result;
         _isDetailView = false; // 新しい検索をしたら一覧に戻す
       });
+
+      if (_animationType == 'flip') {
+        _animationController.forward(from: 0.0);
+      }
+
       _focusAndSelectSearchText(); // 検索後にフォーカス
 
       if (result != null) {
@@ -189,100 +213,7 @@ class _Work40PageState extends State<Work40Page> {
                           isLoadingChList: _isLoadingChList,
                           chListError: _chListError,
                         )
-                      : EfuPage(
-                          lot_num:
-                              _processingConditions?['lot_num']?.toString() ??
-                              '',
-                          p_number:
-                              _processingConditions?['p_number']?.toString() ??
-                              '',
-                          eng_change:
-                              _processingConditions?['eng_change']
-                                  ?.toString() ??
-                              '',
-                          cfg_no:
-                              _processingConditions?['cfg_no']?.toString() ??
-                              '',
-                          subAssy:
-                              _processingConditions?['sub_assy']?.toString() ??
-                              '',
-                          wire_type:
-                              _processingConditions?['wire_type']?.toString() ??
-                              '',
-                          wire_size:
-                              _processingConditions?['wire_size']?.toString() ??
-                              '',
-                          wire_color:
-                              _processingConditions?['wire_color']
-                                  ?.toString() ??
-                              '',
-                          wire_len:
-                              _processingConditions?['wire_len']?.toString() ??
-                              '',
-                          circuit_1:
-                              _processingConditions?['circuit_1']?.toString() ??
-                              '',
-                          circuit_2:
-                              _processingConditions?['circuit_2']?.toString() ??
-                              '',
-                          term_proc_inst_1:
-                              _processingConditions?['term_proc_inst_1']
-                                  ?.toString() ??
-                              '',
-                          term_proc_inst_2:
-                              _processingConditions?['term_proc_inst_2']
-                                  ?.toString() ??
-                              '',
-                          mark_color_1:
-                              (_processingConditions?['mark_color_1']
-                                          ?.toString() ??
-                                      "")
-                                  .isNotEmpty
-                              ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_1']}"
-                              : "",
-                          mark_color_2:
-                              (_processingConditions?['mark_color_2']
-                                          ?.toString() ??
-                                      "")
-                                  .isNotEmpty
-                              ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_2']}"
-                              : "",
-                          strip_len_1:
-                              _processingConditions?['strip_len_1']
-                                  ?.toString() ??
-                              '',
-                          strip_len_2:
-                              _processingConditions?['strip_len_2']
-                                  ?.toString() ??
-                              '',
-                          term_part_no_1:
-                              _processingConditions?['term_part_no_1']
-                                  ?.toString() ??
-                              '',
-                          term_part_no_2:
-                              _processingConditions?['term_part_no_2']
-                                  ?.toString() ??
-                              '',
-                          add_parts_1:
-                              _processingConditions?['add_parts_1']
-                                  ?.toString() ??
-                              '',
-                          add_parts_2:
-                              _processingConditions?['add_parts_2']
-                                  ?.toString() ??
-                              '',
-                          cut_code:
-                              _processingConditions?['cut_code']?.toString() ??
-                              '',
-                          wire_cnt:
-                              _processingConditions?['wire_cnt']?.toString() ??
-                              '',
-                          delivery_date:
-                              _processingConditions?['delivery_date']
-                                  ?.toString() ??
-                              '200101',
-                          onBlockTapped: _handleBlockTapped,
-                        ),
+                      : _buildEfuPage(),
                 ],
               ),
             ),
@@ -290,6 +221,48 @@ class _Work40PageState extends State<Work40Page> {
         ],
       ),
     );
+  }
+
+  Widget _buildEfuPage() {
+    final efuPage = EfuPage(
+      lot_num: _processingConditions?['lot_num']?.toString() ?? '',
+      p_number: _processingConditions?['p_number']?.toString() ?? '',
+      eng_change: _processingConditions?['eng_change']?.toString() ?? '',
+      cfg_no: _processingConditions?['cfg_no']?.toString() ?? '',
+      subAssy: _processingConditions?['sub_assy']?.toString() ?? '',
+      wire_type: _processingConditions?['wire_type']?.toString() ?? '',
+      wire_size: _processingConditions?['wire_size']?.toString() ?? '',
+      wire_color: _processingConditions?['wire_color']?.toString() ?? '',
+      wire_len: _processingConditions?['wire_len']?.toString() ?? '',
+      circuit_1: _processingConditions?['circuit_1']?.toString() ?? '',
+      circuit_2: _processingConditions?['circuit_2']?.toString() ?? '',
+      term_proc_inst_1: _processingConditions?['term_proc_inst_1']?.toString() ?? '',
+      term_proc_inst_2: _processingConditions?['term_proc_inst_2']?.toString() ?? '',
+      mark_color_1: (_processingConditions?['mark_color_1']?.toString() ?? "").isNotEmpty
+          ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_1']}"
+          : "",
+      mark_color_2: (_processingConditions?['mark_color_2']?.toString() ?? "").isNotEmpty
+          ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_2']}"
+          : "",
+      strip_len_1: _processingConditions?['strip_len_1']?.toString() ?? '',
+      strip_len_2: _processingConditions?['strip_len_2']?.toString() ?? '',
+      term_part_no_1: _processingConditions?['term_part_no_1']?.toString() ?? '',
+      term_part_no_2: _processingConditions?['term_part_no_2']?.toString() ?? '',
+      add_parts_1: _processingConditions?['add_parts_1']?.toString() ?? '',
+      add_parts_2: _processingConditions?['add_parts_2']?.toString() ?? '',
+      cut_code: _processingConditions?['cut_code']?.toString() ?? '',
+      wire_cnt: _processingConditions?['wire_cnt']?.toString() ?? '',
+      delivery_date: _processingConditions?['delivery_date']?.toString() ?? '200101',
+      onBlockTapped: _handleBlockTapped,
+    );
+
+    if (_animationType == 'flip') {
+      return FlipAnimation(
+        controller: _animationController,
+        child: efuPage,
+      );
+    }
+    return efuPage;
   }
 }
 
