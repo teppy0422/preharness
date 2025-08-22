@@ -17,7 +17,8 @@ class Work40Page extends StatefulWidget {
   State<Work40Page> createState() => _Work40PageState();
 }
 
-class _Work40PageState extends State<Work40Page> with SingleTickerProviderStateMixin {
+class _Work40PageState extends State<Work40Page>
+    with SingleTickerProviderStateMixin {
   Map<String, dynamic>? _processingConditions;
   bool _isDetailView = false;
   Map<String, dynamic>? _selectedBlockInfo;
@@ -119,6 +120,10 @@ class _Work40PageState extends State<Work40Page> with SingleTickerProviderStateM
   }
 
   void _handleBlockTapped(Map<String, dynamic> blockInfo) async {
+    if (_animationType == 'flip') {
+      _animationController.forward(from: 0.0);
+    }
+
     setState(() {
       _selectedBlockInfo = blockInfo;
       _isDetailView = true;
@@ -163,6 +168,9 @@ class _Work40PageState extends State<Work40Page> with SingleTickerProviderStateM
       _isDetailView = false;
       _selectedBlockInfo = null;
     });
+    // if (_animationType == 'flip') {
+    //   _animationController.forward(from: 0.0);
+    // }
     _focusAndSelectSearchText(); // 詳細から戻った時にフォーカス
   }
 
@@ -236,31 +244,35 @@ class _Work40PageState extends State<Work40Page> with SingleTickerProviderStateM
       wire_len: _processingConditions?['wire_len']?.toString() ?? '',
       circuit_1: _processingConditions?['circuit_1']?.toString() ?? '',
       circuit_2: _processingConditions?['circuit_2']?.toString() ?? '',
-      term_proc_inst_1: _processingConditions?['term_proc_inst_1']?.toString() ?? '',
-      term_proc_inst_2: _processingConditions?['term_proc_inst_2']?.toString() ?? '',
-      mark_color_1: (_processingConditions?['mark_color_1']?.toString() ?? "").isNotEmpty
+      term_proc_inst_1:
+          _processingConditions?['term_proc_inst_1']?.toString() ?? '',
+      term_proc_inst_2:
+          _processingConditions?['term_proc_inst_2']?.toString() ?? '',
+      mark_color_1:
+          (_processingConditions?['mark_color_1']?.toString() ?? "").isNotEmpty
           ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_1']}"
           : "",
-      mark_color_2: (_processingConditions?['mark_color_2']?.toString() ?? "").isNotEmpty
+      mark_color_2:
+          (_processingConditions?['mark_color_2']?.toString() ?? "").isNotEmpty
           ? "ﾏｼﾞｯｸ_${_processingConditions?['mark_color_2']}"
           : "",
       strip_len_1: _processingConditions?['strip_len_1']?.toString() ?? '',
       strip_len_2: _processingConditions?['strip_len_2']?.toString() ?? '',
-      term_part_no_1: _processingConditions?['term_part_no_1']?.toString() ?? '',
-      term_part_no_2: _processingConditions?['term_part_no_2']?.toString() ?? '',
+      term_part_no_1:
+          _processingConditions?['term_part_no_1']?.toString() ?? '',
+      term_part_no_2:
+          _processingConditions?['term_part_no_2']?.toString() ?? '',
       add_parts_1: _processingConditions?['add_parts_1']?.toString() ?? '',
       add_parts_2: _processingConditions?['add_parts_2']?.toString() ?? '',
       cut_code: _processingConditions?['cut_code']?.toString() ?? '',
       wire_cnt: _processingConditions?['wire_cnt']?.toString() ?? '',
-      delivery_date: _processingConditions?['delivery_date']?.toString() ?? '200101',
+      delivery_date:
+          _processingConditions?['delivery_date']?.toString() ?? '200101',
       onBlockTapped: _handleBlockTapped,
     );
 
     if (_animationType == 'flip') {
-      return FlipAnimation(
-        controller: _animationController,
-        child: efuPage,
-      );
+      return FlipAnimation(controller: _animationController, child: efuPage);
     }
     return efuPage;
   }

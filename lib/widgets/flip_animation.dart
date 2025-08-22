@@ -52,14 +52,15 @@ class _FlipAnimationState extends State<FlipAnimation> {
           transform: transform,
           alignment: Alignment.center,
           child: isFront
-              ? widget.child
+              ? child
               : Transform(
                   transform: Matrix4.identity()..rotateY(math.pi), // Flip back
                   alignment: Alignment.center,
-                  child: widget.child,
+                  child: child,
                 ),
         );
       },
+      child: widget.child,
     );
   }
 }

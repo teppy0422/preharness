@@ -186,6 +186,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 031
 
+- Optimizing flip animations
+
+#### commit 032
+
 ---
 
 ### now
