@@ -388,6 +388,21 @@ class EfuPage extends StatelessWidget {
                                   ),
                                 ),
                                 Expanded(
+                                  flex: 3,
+                                  child: _buildCell(
+                                    context: context,
+                                    label: '色',
+                                    labelAlignment: Alignment.center,
+                                    value: wire_color,
+                                    valueFontSize: 30,
+                                    overFlowTop: -12,
+                                    left: BorderSide.none,
+                                    bottom: BorderSide.none,
+                                    lefthalfborder: true,
+                                    right: BorderSide.none,
+                                  ),
+                                ),
+                                Expanded(
                                   flex: 6,
                                   child: _buildCell(
                                     context: context,
@@ -410,17 +425,6 @@ class EfuPage extends StatelessWidget {
                                     overFlowTop: -10,
                                     bottom: BorderSide.none,
                                     right: BorderSide.none,
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 12,
-                                  child: _buildCell(
-                                    context: context,
-                                    label: ' ',
-                                    labelAlignment: Alignment.center,
-                                    value: "$circuit_1   $circuit_2",
-                                    valueColor: Colors.grey,
-                                    bottom: BorderSide.none,
                                   ),
                                 ),
                               ],
@@ -719,146 +723,6 @@ class EfuPage extends StatelessWidget {
         ),
       );
     }
-    // チューブ
-    bool isBlinking = tubeinfo[0].isNotEmpty;
-    rows.add(
-      Row(
-        children: [
-          Expanded(
-            flex: 4,
-            child: _buildCell(
-              context: context,
-              label: "チューブ",
-              value: null,
-              top: BorderSide(color: getLineColor(context), width: 0.5),
-              bottom: BorderSide.none,
-              right: BorderSide.none,
-              horizontal: true,
-            ),
-          ),
-          Expanded(
-            flex: 4,
-            child: _buildCell(
-              context: context,
-              label: null,
-              value: tubeinfo[0],
-              top: BorderSide(color: getLineColor(context), width: 0.5),
-              bottom: BorderSide.none,
-              left: BorderSide(color: getLineColor(context), width: 0.5),
-              right: BorderSide.none,
-              horizontal: true,
-              blinking: isBlinking,
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: _buildCell(
-              context: context,
-              label: null,
-              value: tubeinfo[1],
-              top: BorderSide(color: getLineColor(context), width: 0.5),
-              left: BorderSide.none,
-              right: BorderSide.none,
-              bottom: BorderSide.none,
-              horizontal: true,
-              lefthalfborder: true,
-              blinking: isBlinking,
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: _buildCell(
-              context: context,
-              label: null,
-              value: tubeinfo[2],
-              top: BorderSide(color: getLineColor(context), width: 0.5),
-              left: BorderSide.none,
-              right: BorderSide.none,
-              bottom: BorderSide.none,
-              horizontal: true,
-              lefthalfborder: true,
-              blinking: isBlinking,
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: _buildCell(
-              context: context,
-              label: null,
-              value: tubeinfo[3],
-              top: BorderSide(color: getLineColor(context), width: 0.5),
-              left: BorderSide.none,
-              right: BorderSide.none,
-              bottom: BorderSide.none,
-              horizontal: true,
-              lefthalfborder: true,
-              blinking: isBlinking,
-            ),
-          ),
-        ],
-      ),
-    );
-    // チューブ長さ
-    rows.add(
-      Row(
-        children: [
-          Expanded(
-            flex: 6,
-            child: _buildCell(
-              context: context,
-              label: "長さ",
-              value: null,
-              top: BorderSide(color: getLineColor(context), width: 0.5),
-              bottom: BorderSide.none,
-              right: BorderSide.none,
-              horizontal: true,
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: _buildCell(
-              context: context,
-              label: null,
-              value: "",
-              top: BorderSide(color: getLineColor(context), width: 0.5),
-              left: BorderSide.none,
-              right: BorderSide.none,
-              bottom: BorderSide.none,
-              horizontal: true,
-              lefthalfborder: true,
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: _buildCell(
-              context: context,
-              label: null,
-              value: "",
-              top: BorderSide(color: getLineColor(context), width: 0.5),
-              left: BorderSide.none,
-              right: BorderSide.none,
-              bottom: BorderSide.none,
-              horizontal: true,
-              lefthalfborder: true,
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: _buildCell(
-              context: context,
-              label: null,
-              value: "",
-              top: BorderSide(color: getLineColor(context), width: 0.5),
-              left: BorderSide.none,
-              right: BorderSide.none,
-              bottom: BorderSide.none,
-              horizontal: true,
-              lefthalfborder: true,
-            ),
-          ),
-        ],
-      ),
-    );
 
     return MouseRegion(
       cursor: SystemMouseCursors.click, // ← マウスオーバーでポインターに

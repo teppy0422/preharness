@@ -198,6 +198,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 034
 
+- efu.dart のレイアウトをより見やすく修正
+
+#### commit 035
+
 ---
 
 ### now

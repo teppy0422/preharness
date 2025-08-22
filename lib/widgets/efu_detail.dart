@@ -254,30 +254,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   }
 }
 
-class DiagonalLinePainter extends CustomPainter {
-  final Color lineColor;
-
-  DiagonalLinePainter({required this.lineColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = lineColor
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round;
-
-    // 左上から右下に線を引く
-    canvas.drawLine(
-      Offset(size.width, 0), // 右上
-      Offset(0, size.height), // 左下
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
 void showCustomDialog(BuildContext context, Widget child) {
   showDialog(
     context: context,
