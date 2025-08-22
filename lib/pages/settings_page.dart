@@ -268,6 +268,10 @@ class _SettingsPageState extends State<SettingsPage> {
                               value: 'flip',
                               child: Text('フリップ'),
                             ),
+                            DropdownMenuItem(
+                              value: 'slide',
+                              child: Text('スライド'),
+                            ),
                           ],
                           onChanged: (value) {
                             if (value != null) {

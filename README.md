@@ -177,25 +177,28 @@ samples, guidance on mobile development, and a full API reference.
 #### commit 029
 
 - Add code to make keystrokes half-width.
-- Addition of QR reader input mode
-- Layout correction for work40_page.dart
+- Addition of QR reader input mode.
+- Layout correction for work40_page.dart.
 
 #### commit 030
 
-- Add animation for successful searches to settings
+- Add animation for successful searches to settings.
 
 #### commit 031
 
-- Optimizing flip animations
+- Optimizing flip animations.
 
 #### commit 032
+
+- Added slide animation.
+
+#### commit 033
 
 ---
 
 ### now
 
-- work40_page.dart の検索ヒット時に efu.dart にアニメーションを追加
-  ダイヤル値の保存条件にマジックを排除
+ダイヤル値の保存条件にマジックを排除
 
 ### next
 

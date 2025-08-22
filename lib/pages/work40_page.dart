@@ -9,6 +9,7 @@ import 'package:preharness/utils/global.dart';
 import "package:preharness/constants/app_colors.dart";
 import 'package:preharness/services/settings_service.dart';
 import 'package:preharness/widgets/flip_animation.dart';
+import 'package:preharness/widgets/slide_animation.dart';
 
 class Work40Page extends StatefulWidget {
   const Work40Page({super.key});
@@ -94,7 +95,8 @@ class _Work40PageState extends State<Work40Page>
         _isDetailView = false; // 新しい検索をしたら一覧に戻す
       });
 
-      if (_animationType == 'flip') {
+      if (_animationType == 'flip' || _animationType == 'slide') {
+        _animationController.reset();
         _animationController.forward(from: 0.0);
       }
 
@@ -120,7 +122,8 @@ class _Work40PageState extends State<Work40Page>
   }
 
   void _handleBlockTapped(Map<String, dynamic> blockInfo) async {
-    if (_animationType == 'flip') {
+    if (_animationType == 'flip' || _animationType == 'slide') {
+      _animationController.reset();
       _animationController.forward(from: 0.0);
     }
 
@@ -168,9 +171,10 @@ class _Work40PageState extends State<Work40Page>
       _isDetailView = false;
       _selectedBlockInfo = null;
     });
-    // if (_animationType == 'flip') {
-    //   _animationController.forward(from: 0.0);
-    // }
+    if (_animationType == 'flip' || _animationType == 'slide') {
+      _animationController.reset();
+      _animationController.forward(from: 0.0);
+    }
     _focusAndSelectSearchText(); // 詳細から戻った時にフォーカス
   }
 
@@ -273,6 +277,8 @@ class _Work40PageState extends State<Work40Page>
 
     if (_animationType == 'flip') {
       return FlipAnimation(controller: _animationController, child: efuPage);
+    } else if (_animationType == 'slide') {
+      return SlideAnimation(controller: _animationController, child: efuPage);
     }
     return efuPage;
   }
