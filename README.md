@@ -194,6 +194,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 033
 
+- キーボード切り替えボタンの削除 ← 手入力モードに一度したらキーボードが常時表示されるようになる
+
+#### commit 034
+
 ---
 
 ### now

@@ -349,7 +349,7 @@ class _SearchCardState extends State<_SearchCard> {
   // QRリーダーからの入力を保持する変数
   String _inputText = '';
   // ソフトキーボードモードが有効かどうかを管理する状態変数
-  bool _isKeyboardEnabled = false;
+  final bool _isKeyboardEnabled = false;
   // 検索が実行された直後かどうかを判断するフラグ
   bool _justSearched = false;
 
@@ -501,28 +501,30 @@ class _SearchCardState extends State<_SearchCard> {
               // モードに応じて表示するウィジェットを切り替え
               Row(
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      _isKeyboardEnabled
-                          ? Icons.qr_code_scanner
-                          : Icons.keyboard,
-                    ),
-                    tooltip: _isKeyboardEnabled
-                        ? 'QRリーダーモードに切り替え'
-                        : '手入力モードに切り替え',
-                    onPressed: () {
-                      setState(() {
-                        _isKeyboardEnabled = !_isKeyboardEnabled;
-                        // モード切替時にテキストを同期
-                        if (_isKeyboardEnabled) {
-                          widget.controller.text = _inputText;
-                        } else {
-                          _inputText = widget.controller.text;
-                        }
-                      });
-                      widget.focusNode.requestFocus();
-                    },
-                  ),
+                  // IconButton(
+                  //   icon: Icon(
+                  //     _isKeyboardEnabled
+                  //         ? Icons.qr_code_scanner
+                  //         : Icons.keyboard,
+                  //   ),
+                  //   tooltip: _isKeyboardEnabled
+                  //       ? 'QRリーダーモードに切り替え'
+                  //       : '手入力モードに切り替え',
+                  //   onPressed: () {
+                  //     setState(() {
+                  //       _isKeyboardEnabled = !_isKeyboardEnabled;
+                  //       // モード切替時にテキストを同期
+                  //       if (_isKeyboardEnabled) {
+                  //         widget.controller.text = _inputText;
+                  //       } else {
+                  //         _inputText = widget.controller.text;
+                  //         widget.controller.text = ''; // TextFieldのテキストをクリア
+                  //         widget.focusNode.unfocus(); // キーボードを閉じる
+                  //       }
+                  //     });
+                  //     widget.focusNode.requestFocus();
+                  //   },
+                  // ),
                   Expanded(
                     child: _isKeyboardEnabled
                         ? _buildTextField()
