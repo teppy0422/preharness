@@ -176,9 +176,18 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 029
 
+- Add code to make keystrokes half-width.
+- work40_page.dart のデータ検索を QR リーダーと手入力に対応
+- Addition of QR reader input mode
+- Layout correction for work40_page.dart
+
+#### commit 030
+
 ---
 
 ### now
+
+ダイヤル値の保存条件にマジックを排除
 
 ### next
 

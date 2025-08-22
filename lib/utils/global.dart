@@ -1,4 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+// 全角を半角に変換するTextInputFormatter
+class HalfWidthTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String newText = _toHalfWidth(newValue.text);
+    return TextEditingValue(
+      text: newText,
+      selection: newValue.selection,
+    );
+  }
+
+  String _toHalfWidth(String s) {
+    return s.replaceAllMapped(RegExp(r'[Ａ-Ｚａ-ｚ０-９　]'), (match) {
+      final char = match.group(0)!;
+      switch (char) {
+        case '　':
+          return ' ';
+        default:
+          return String.fromCharCode(char.codeUnitAt(0) - 0xFEE0);
+      }
+    });
+  }
+}
 
 // 部品品番の表示
 String formatCode(String value, String sep) {

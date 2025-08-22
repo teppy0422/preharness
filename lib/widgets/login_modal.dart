@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:preharness/utils/user_login_manager.dart';
-import "package:preharness/widgets/icon_picker_modal.dart";
+import 'package:preharness/widgets/icon_picker_modal.dart';
+import 'package:preharness/utils/global.dart';
 
 class QrLoginModal extends StatefulWidget {
   const QrLoginModal({super.key});
@@ -87,6 +89,7 @@ class _QrLoginModalState extends State<QrLoginModal> {
           autofocus: true,
           keyboardType: TextInputType.text,
           decoration: const InputDecoration(hintText: 'ユーザーIDを入力'),
+          inputFormatters: [HalfWidthTextInputFormatter()],
         ),
         ElevatedButton.icon(
           onPressed: _loading
