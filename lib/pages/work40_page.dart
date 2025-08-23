@@ -216,7 +216,7 @@ class _Work40PageState extends State<Work40Page>
           ),
           // 状態に応じて表示を切り替える
           Positioned(
-            top: 150,
+            top: 70,
             left: 10,
             right: 10,
             child: SingleChildScrollView(
@@ -326,11 +326,14 @@ class _EquipmentInfoCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
-              Text("【設備情報】", style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 4),
-              Text("号機: 5号機"),
-              Text("機種: CM20"),
-              Text("管理ナンバー: 3456"),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(child: Text("号機: 5号機")),
+                  Expanded(child: Text("機種: CM20")),
+                  Expanded(child: Text("管理No: 3456")),
+                ],
+              ),
             ],
           ),
         ),
@@ -497,76 +500,67 @@ class _SearchCardState extends State<_SearchCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: .5),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          // モードに応じて表示するウィジェットを切り替え
+          Row(
             children: [
-              const SizedBox(height: 4),
-              // モードに応じて表示するウィジェットを切り替え
-              Row(
-                children: [
-                  // IconButton(
-                  //   icon: Icon(
-                  //     _isKeyboardEnabled
-                  //         ? Icons.qr_code_scanner
-                  //         : Icons.keyboard,
-                  //   ),
-                  //   tooltip: _isKeyboardEnabled
-                  //       ? 'QRリーダーモードに切り替え'
-                  //       : '手入力モードに切り替え',
-                  //   onPressed: () {
-                  //     setState(() {
-                  //       _isKeyboardEnabled = !_isKeyboardEnabled;
-                  //       // モード切替時にテキストを同期
-                  //       if (_isKeyboardEnabled) {
-                  //         widget.controller.text = _inputText;
-                  //       } else {
-                  //         _inputText = widget.controller.text;
-                  //         widget.controller.text = ''; // TextFieldのテキストをクリア
-                  //         widget.focusNode.unfocus(); // キーボードを閉じる
-                  //       }
-                  //     });
-                  //     widget.focusNode.requestFocus();
-                  //   },
-                  // ),
-                  Expanded(
-                    child: _isKeyboardEnabled
-                        ? _buildTextField()
-                        : _buildRawKeyboardReader(),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 6,
-                      ),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: _handleSearch,
-                    child: const Text('検索', style: TextStyle(fontSize: 14)),
-                  ),
-                ],
+              // IconButton(
+              //   icon: Icon(
+              //     _isKeyboardEnabled
+              //         ? Icons.qr_code_scanner
+              //         : Icons.keyboard,
+              //   ),
+              //   tooltip: _isKeyboardEnabled
+              //       ? 'QRリーダーモードに切り替え'
+              //       : '手入力モードに切り替え',
+              //   onPressed: () {
+              //     setState(() {
+              //       _isKeyboardEnabled = !_isKeyboardEnabled;
+              //       // モード切替時にテキストを同期
+              //       if (_isKeyboardEnabled) {
+              //         widget.controller.text = _inputText;
+              //       } else {
+              //         _inputText = widget.controller.text;
+              //         widget.controller.text = ''; // TextFieldのテキストをクリア
+              //         widget.focusNode.unfocus(); // キーボードを閉じる
+              //       }
+              //     });
+              //     widget.focusNode.requestFocus();
+              //   },
+              // ),
+              Expanded(
+                child: _isKeyboardEnabled
+                    ? _buildTextField()
+                    : _buildRawKeyboardReader(),
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // モード切り替えボタン
-                  ],
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 6,
+                  ),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
+                onPressed: _handleSearch,
+                child: const Text('検索', style: TextStyle(fontSize: 14)),
               ),
             ],
           ),
-        ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // モード切り替えボタン
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

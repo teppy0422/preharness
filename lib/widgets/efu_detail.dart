@@ -75,181 +75,221 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Column(
               children: [
-                const Text(
-                  '■ 加工条件詳細',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    try {
-                      widget.onBack();
-                    } catch (e) {
-                      print('Error in onBack: $e');
-                      // エラーが発生した場合、Navigatorで直接戻る
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('戻る'),
-                ),
-              ],
-            ),
-            const Divider(height: 20, thickness: .5, color: Colors.white),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Rowで左右に分割
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 左側: 情報グループ
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    _buildLabelValue(
-                                      '製品品番:',
-                                      widget.processingConditions['p_number'],
-                                      valueFont: 28,
-                                    ),
-                                    _buildLabelValue(
-                                      'ロットNo:',
-                                      widget.processingConditions['lot_num'],
-                                      valueFont: 28,
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 5),
-                                Row(
-                                  children: [
-                                    _buildLabelValue(
-                                      '設変:',
-                                      widget.processingConditions['eng_change'],
-                                    ),
-                                    _buildLabelValue(
-                                      '構成No:',
-                                      widget.processingConditions['cfg_no'],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 5),
-                                Row(
-                                  children: [
-                                    _buildLabelValue(
-                                      '色:',
-                                      widget.processingConditions['wire_color'],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 5),
-                                Row(
-                                  children: [
-                                    _buildLabelValue(
-                                      '準完日:',
-                                      widget
-                                          .processingConditions['delivery_date'],
-                                    ),
-                                    _buildLabelValue(
-                                      '数量:',
-                                      widget.processingConditions['wire_cnt'],
-                                      valueFont: 30,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(width: 0), // 左右の間隔
-
-                          Expanded(
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        formatCode(
-                                          widget.blockInfo['terminals'][0],
-                                          "-",
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Divider(
+                      height: 1,
+                      thickness: .5,
+                      color: Colors.white,
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Rowで左右に分割
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // 左側: 情報グループ
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            _buildLabelValue(
+                                              '製品品番:',
+                                              widget
+                                                  .processingConditions['p_number'],
+                                              valueFont: 28,
+                                            ),
+                                            _buildLabelValue(
+                                              'ロットNo:',
+                                              widget
+                                                  .processingConditions['lot_num'],
+                                              valueFont: 28,
+                                            ),
+                                          ],
                                         ),
-                                        style: TextStyle(fontSize: 20),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        '${widget.processingConditions['wire_type']} / ${widget.processingConditions['wire_size']}',
-                                        style: TextStyle(fontSize: 20),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        formatCode(
-                                          widget.blockInfo['terminals'][1],
-                                          "-",
+                                        SizedBox(height: 5),
+                                        Row(
+                                          children: [
+                                            _buildLabelValue(
+                                              '設変:',
+                                              widget
+                                                  .processingConditions['eng_change'],
+                                            ),
+                                            _buildLabelValue(
+                                              '構成No:',
+                                              widget
+                                                  .processingConditions['cfg_no'],
+                                            ),
+                                          ],
                                         ),
-                                        style: TextStyle(fontSize: 20),
-                                        textAlign: TextAlign.left,
-                                      ),
+                                        SizedBox(height: 5),
+                                        Row(
+                                          children: [
+                                            _buildLabelValue(
+                                              '色:',
+                                              widget
+                                                  .processingConditions['wire_color'],
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 5),
+                                        Row(
+                                          children: [
+                                            _buildLabelValue(
+                                              '準完日:',
+                                              widget
+                                                  .processingConditions['delivery_date'],
+                                            ),
+                                            _buildLabelValue(
+                                              '数量:',
+                                              widget
+                                                  .processingConditions['wire_cnt'],
+                                              valueFont: 30,
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            ElevatedButton.icon(
+                                              onPressed: () {
+                                                try {
+                                                  widget.onBack();
+                                                } catch (e) {
+                                                  print('Error in onBack: $e');
+                                                  // エラーが発生した場合、Navigatorで直接戻る
+                                                  Navigator.of(context).pop();
+                                                }
+                                              },
+                                              icon: const Icon(
+                                                Icons.arrow_back,
+                                              ),
+                                              label: const Text('戻る'),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                    Expanded(child: Text("")),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                DialSelectorWithDb(
-                                  processingConditions:
-                                      widget.processingConditions,
-                                  blockInfo: widget.blockInfo,
-                                ),
-                              ],
-                            ),
+                                  ),
+
+                                  const SizedBox(width: 0), // 左右の間隔
+
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        DialSelectorWithDb(
+                                          processingConditions:
+                                              widget.processingConditions,
+                                          blockInfo: widget.blockInfo,
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                formatCode(
+                                                  widget
+                                                      .blockInfo['terminals'][0],
+                                                  "-",
+                                                ),
+                                                style: TextStyle(fontSize: 20),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                '${widget.processingConditions['wire_type']} / ${widget.processingConditions['wire_size']}',
+                                                style: TextStyle(fontSize: 20),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                formatCode(
+                                                  widget
+                                                      .blockInfo['terminals'][1],
+                                                  "-",
+                                                ),
+                                                style: TextStyle(fontSize: 20),
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                            Expanded(child: Text("")),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          children: [
+                            Measurement(chListData: widget.chListData),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    const Divider(height: 10, thickness: 1),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) {
+                                  return _FullScreenImageView(
+                                    imagePath: 'assets/images/71144020-2.jpg',
+                                  );
+                                },
+                            transitionsBuilder:
+                                (
+                                  context,
+                                  animation,
+                                  secondaryAnimation,
+                                  child,
+                                ) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                          ),
+                        );
+                      },
+                      child: SizedBox(
+                        height: 150,
+                        child: Image.asset(
+                          'assets/images/71144020-2.jpg',
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Column(children: [Measurement(chListData: widget.chListData)]),
               ],
             ),
-            const Divider(height: 20, thickness: 1),
-            const Text(
-              'CH List Data:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            if (widget.isLoadingChList)
-              const CircularProgressIndicator()
-            else if (widget.chListError != null)
-              Text('Error: ${widget.chListError}')
-            else if (widget.chListData != null && widget.chListData!.isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: widget.chListData!
-                    .map(
-                      (item) => Text(item.toString()),
-                    ) // Adjust display as needed
-                    .toList(),
-              )
-            else
-              const Text('No CH list data found.'),
           ],
         ),
       ),
@@ -283,6 +323,23 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FullScreenImageView extends StatelessWidget {
+  final String imagePath;
+
+  const _FullScreenImageView({required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Center(child: Image.asset(imagePath, fit: BoxFit.contain)),
       ),
     );
   }

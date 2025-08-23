@@ -148,6 +148,7 @@ flutter:
   assets:
     - assets/images/tearDrop.svg
     - assets/images/character.svg
+    - assets/images/71144020-2.jpg
     - assets/fonts/MaterialIcons-Regular.ttf
 
     - assets/lottie/network_ok.json

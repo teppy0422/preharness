@@ -204,6 +204,9 @@ samples, guidance on mobile development, and a full API reference.
 
 - Change dial storage conditions.
 - Change Design efu.dart and efu_detail.dart.
+- For now, added the specification table layout.
+
+#### commit 036
 
 ---
 
