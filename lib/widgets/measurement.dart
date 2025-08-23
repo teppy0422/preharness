@@ -122,7 +122,7 @@ class _StandardInfoCardState extends State<Measurement> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 0),
                   for (int i = 0; i < rows.length; i++)
                     _buildRow(
                       rows[i]["label"] as String,

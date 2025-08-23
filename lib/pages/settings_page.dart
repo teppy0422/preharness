@@ -272,6 +272,10 @@ class _SettingsPageState extends State<SettingsPage> {
                               value: 'slide',
                               child: Text('スライド'),
                             ),
+                            DropdownMenuItem(
+                              value: 'fade_scale',
+                              child: Text('フェード＆スケール'),
+                            ),
                           ],
                           onChanged: (value) {
                             if (value != null) {

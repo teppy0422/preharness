@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:preharness/utils/color_utils.dart';
 
 // 全角を半角に変換するTextInputFormatter
 class HalfWidthTextInputFormatter extends TextInputFormatter {
@@ -9,10 +10,7 @@ class HalfWidthTextInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     String newText = _toHalfWidth(newValue.text);
-    return TextEditingValue(
-      text: newText,
-      selection: newValue.selection,
-    );
+    return TextEditingValue(text: newText, selection: newValue.selection);
   }
 
   String _toHalfWidth(String s) {
@@ -104,4 +102,37 @@ class WireColorLine extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// wire_colorから背景色と前景色を取得するヘルパー関数
+///
+/// [wireColorCode] wire_colorの値
+/// 戻り値: {backColor: Color?, foreColor: Color?} のMap
+Future<Map<String, Color?>> getWireColorsFromHive(String wireColorCode) async {
+  final backColor = await getColorFromHive(wireColorCode);
+  final foreColor = await getColorFromHive(wireColorCode, getForeColor: true);
+  return {'backColor': backColor, 'foreColor': foreColor};
+}
+
+/// wire_colorに基づいてWireColorBoxウィジェットを作成するヘルパー関数
+///
+/// [wireColorCode] wire_colorの値
+/// [width] WireColorBoxの幅 (デフォルト: 22)
+/// [height] WireColorBoxの高さ (デフォルト: 22)
+/// [strokeWidth] ラインの太さ (デフォルト: 5)
+/// 戻り値: Future<WireColorBox>
+Future<WireColorBox> createWireColorBox(
+  String wireColorCode, {
+  double width = 22,
+  double height = 22,
+  double strokeWidth = 5,
+}) async {
+  final colors = await getWireColorsFromHive(wireColorCode);
+  return WireColorBox(
+    width: width,
+    height: height,
+    color: colors['backColor'] ?? Colors.transparent,
+    lineColor: colors['foreColor'] ?? Colors.transparent,
+    strokeWidth: strokeWidth,
+  );
 }

@@ -37,19 +37,34 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   }
 
   Future<void> _loadColor() async {
-    final String colorNum = widget.processingConditions['wire_color'];
-    final Color? loadedBackColor = await getColorFromHive(colorNum);
-    final Color? loadedForeColor = await getColorFromHive(
-      colorNum,
-      getForeColor: true,
-    );
-    if (mounted) {
-      setState(() {
-        _containerColor =
-            loadedBackColor; // Assign backColor to _containerColor
-        _containerForeColor =
-            loadedForeColor; // Assign foreColor to _containerForeColor
-      });
+    try {
+      final String colorNum = widget.processingConditions['wire_color'] ?? '';
+      if (colorNum.isEmpty) {
+        print('wire_color is empty in efu_detail');
+        return;
+      }
+
+      final Color? loadedBackColor = await getColorFromHive(colorNum);
+      final Color? loadedForeColor = await getColorFromHive(
+        colorNum,
+        getForeColor: true,
+      );
+
+      if (mounted) {
+        setState(() {
+          _containerColor = loadedBackColor;
+          _containerForeColor = loadedForeColor;
+        });
+      }
+    } catch (e) {
+      print('Error in _loadColor (efu_detail): $e');
+      // エラー時はデフォルト色を設定
+      if (mounted) {
+        setState(() {
+          _containerColor = Colors.white;
+          _containerForeColor = Colors.black;
+        });
+      }
     }
   }
 
@@ -58,11 +73,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     return Card(
       elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Divider(height: 20, thickness: 1),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -71,13 +85,21 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton.icon(
-                  onPressed: widget.onBack,
+                  onPressed: () {
+                    try {
+                      widget.onBack();
+                    } catch (e) {
+                      print('Error in onBack: $e');
+                      // エラーが発生した場合、Navigatorで直接戻る
+                      Navigator.of(context).pop();
+                    }
+                  },
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('戻る'),
                 ),
               ],
             ),
-            const Divider(height: 20, thickness: 1),
+            const Divider(height: 20, thickness: .5, color: Colors.white),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -85,7 +107,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Divider(height: 20, thickness: 1),
                       // Rowで左右に分割
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,54 +167,67 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                     ),
                                   ],
                                 ),
-                                Row(children: [
-                               
-                                  ],
-                                ),
                               ],
                             ),
                           ),
 
                           const SizedBox(width: 0), // 左右の間隔
-                          // 右側: DialSelectorWithDb
+
                           Expanded(
-                            child: DialSelectorWithDb(
-                              processingConditions: widget.processingConditions,
-                              blockInfo: widget.blockInfo,
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        formatCode(
+                                          widget.blockInfo['terminals'][0],
+                                          "-",
+                                        ),
+                                        style: TextStyle(fontSize: 20),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        '${widget.processingConditions['wire_type']} / ${widget.processingConditions['wire_size']}',
+                                        style: TextStyle(fontSize: 20),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        formatCode(
+                                          widget.blockInfo['terminals'][1],
+                                          "-",
+                                        ),
+                                        style: TextStyle(fontSize: 20),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                    Expanded(child: Text("")),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                DialSelectorWithDb(
+                                  processingConditions:
+                                      widget.processingConditions,
+                                  blockInfo: widget.blockInfo,
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-
-                      const Divider(height: 20, thickness: 1),
-                      const Text(
-                        'ブロック詳細:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        '端子部品番号: ${formatCode(widget.blockInfo['terminals'][0], "-")}',
-                      ),
-                      Text(
-                        '付加部品: ${formatCode(widget.blockInfo['terminals'][1], "-")}',
-                      ),
-                      const Divider(height: 20, thickness: 1),
                     ],
                   ),
                 ),
                 const SizedBox(width: 16),
-                Column(
-                  children: [
-                    Text(
-                      formatCode(widget.blockInfo['terminals'][0], "-"),
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    Text(
-                      '${widget.processingConditions['wire_type']} / ${widget.processingConditions['wire_size']}',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    Measurement(chListData: widget.chListData),
-                  ],
-                ),
+                Column(children: [Measurement(chListData: widget.chListData)]),
               ],
             ),
             const Divider(height: 20, thickness: 1),

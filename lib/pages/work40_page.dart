@@ -10,6 +10,7 @@ import "package:preharness/constants/app_colors.dart";
 import 'package:preharness/services/settings_service.dart';
 import 'package:preharness/widgets/flip_animation.dart';
 import 'package:preharness/widgets/slide_animation.dart';
+import 'package:preharness/widgets/fade_scale_animation.dart';
 
 class Work40Page extends StatefulWidget {
   const Work40Page({super.key});
@@ -95,7 +96,9 @@ class _Work40PageState extends State<Work40Page>
         _isDetailView = false; // 新しい検索をしたら一覧に戻す
       });
 
-      if (_animationType == 'flip' || _animationType == 'slide') {
+      if (_animationType == 'flip' ||
+          _animationType == 'slide' ||
+          _animationType == 'fade_scale') {
         _animationController.reset();
         _animationController.forward(from: 0.0);
       }
@@ -122,7 +125,9 @@ class _Work40PageState extends State<Work40Page>
   }
 
   void _handleBlockTapped(Map<String, dynamic> blockInfo) async {
-    if (_animationType == 'flip' || _animationType == 'slide') {
+    if (_animationType == 'flip' ||
+        _animationType == 'slide' ||
+        _animationType == 'fade_scale') {
       _animationController.reset();
       _animationController.forward(from: 0.0);
     }
@@ -171,7 +176,9 @@ class _Work40PageState extends State<Work40Page>
       _isDetailView = false;
       _selectedBlockInfo = null;
     });
-    if (_animationType == 'flip' || _animationType == 'slide') {
+    if (_animationType == 'flip' ||
+        _animationType == 'slide' ||
+        _animationType == 'fade_scale') {
       _animationController.reset();
       _animationController.forward(from: 0.0);
     }
@@ -193,7 +200,7 @@ class _Work40PageState extends State<Work40Page>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 5,
+                  flex: 6,
                   child: _SearchCard(
                     onSearch: _onSearch,
                     controller: _searchController,
@@ -202,17 +209,16 @@ class _Work40PageState extends State<Work40Page>
                   ),
                 ),
                 const SizedBox(width: 10),
-                Expanded(flex: 2, child: _EquipmentInfoCard()),
+                Expanded(flex: 3, child: _EquipmentInfoCard()),
                 const SizedBox(width: 72),
               ],
             ),
           ),
           // 状態に応じて表示を切り替える
           Positioned(
-            top: 180,
+            top: 150,
             left: 10,
             right: 10,
-            bottom: 10,
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -279,6 +285,11 @@ class _Work40PageState extends State<Work40Page>
       return FlipAnimation(controller: _animationController, child: efuPage);
     } else if (_animationType == 'slide') {
       return SlideAnimation(controller: _animationController, child: efuPage);
+    } else if (_animationType == 'fade_scale') {
+      return FadeScaleAnimation(
+        controller: _animationController,
+        child: efuPage,
+      );
     }
     return efuPage;
   }

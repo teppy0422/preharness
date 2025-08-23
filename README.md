@@ -198,15 +198,16 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 034
 
-- efu.dart のレイアウトをより見やすく修正
+- Revised the layout of efu.dart to make it easier to read.
 
 #### commit 035
+
+- Change dial storage conditions.
+- Change Design efu.dart and efu_detail.dart.
 
 ---
 
 ### now
-
-ダイヤル値の保存条件にマジックを排除
 
 ### next
 

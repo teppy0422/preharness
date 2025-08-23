@@ -36,7 +36,7 @@ class _DialSelectorWithDbState extends State<DialSelectorWithDb> {
     final wireType = widget.processingConditions['wire_type']?.toString() ?? '';
     final wireSize = widget.processingConditions['wire_size']?.toString() ?? '';
     final termPartNo = widget.blockInfo['terminals'][0]?.toString() ?? '';
-    final addParts = widget.blockInfo['terminals'][2]?.toString() ?? '';
+    final addParts = widget.blockInfo['terminals'][1]?.toString() ?? '';
 
     final existingData = await _db.getCondition(
       wireType: wireType,
@@ -64,7 +64,7 @@ class _DialSelectorWithDbState extends State<DialSelectorWithDb> {
     final wireType = widget.processingConditions['wire_type']?.toString() ?? '';
     final wireSize = widget.processingConditions['wire_size']?.toString() ?? '';
     final termPartNo = widget.blockInfo['terminals'][0]?.toString() ?? '';
-    final addParts = widget.blockInfo['terminals'][2]?.toString() ?? '';
+    final addParts = widget.blockInfo['terminals'][1]?.toString() ?? '';
 
     final entry = LocalProcessingConditionsCompanion(
       wireType: drift.Value(wireType),
