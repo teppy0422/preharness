@@ -274,10 +274,14 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                             );
                                           },
                                           child: SizedBox(
-                                            height: 150,
-                                            child: Image.asset(
-                                              'assets/images/71144020-2.jpg',
-                                              fit: BoxFit.contain,
+                                            height: 250,
+                                            child: InteractiveViewer(
+                                              minScale: 0.5,
+                                              maxScale: 3.0,
+                                              child: Image.asset(
+                                                'assets/images/71144020-2.jpg',
+                                                fit: BoxFit.contain,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -350,13 +354,31 @@ class _FullScreenImageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: InteractiveViewer(
-          minScale: 0.5,
-          maxScale: 4.0,
-          child: Center(child: Image.asset(imagePath, fit: BoxFit.contain)),
-        ),
+      body: Stack(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Center(child: Image.asset(imagePath, fit: BoxFit.contain)),
+            ),
+          ),
+          Positioned(
+            top: 10,
+            left: 0,
+            right: 0,
+            child: Text(
+              'タップして戻る / ピンチで拡大縮小',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
       ),
     );
   }

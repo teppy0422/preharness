@@ -186,20 +186,9 @@ class _StandardInfoCardState extends State<Measurement> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(width: 30, child: Text("")),
                   SizedBox(
-                    width: 50,
-                    child: Text(
-                      label,
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: activeIndex,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 100,
+                    width: 120,
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4),
@@ -208,7 +197,7 @@ class _StandardInfoCardState extends State<Measurement> {
                         "${minValue.toStringAsFixed(3)}～${maxValue.toStringAsFixed(3)}",
                         textAlign: TextAlign.right,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: fieldTextColor,
                         ),
@@ -221,62 +210,90 @@ class _StandardInfoCardState extends State<Measurement> {
               const SizedBox(height: 0),
               Row(
                 children: [
-                  SizedBox(
-                    width: 150,
-                    child: TextField(
-                      controller: controller,
-                      focusNode: focusNode,
-                      // readOnly: true,
-                      showCursor: true,
-                      textAlign: TextAlign.right,
-                      keyboardType: TextInputType.none,
-                      style: TextStyle(color: fieldTextColor),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        filled: true,
-                        fillColor: fieldBgColor,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
-                        ),
-                        hintText: '',
-                        hintStyle: TextStyle(color: hintColor, fontSize: 12),
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: highLightColor,
-                            width: 2.0,
+                  Stack(
+                    children: [
+                      SizedBox(
+                        width: 150,
+                        child: TextField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          // readOnly: true,
+                          showCursor: true,
+                          textAlign: TextAlign.right,
+                          keyboardType: TextInputType.none,
+                          style: TextStyle(color: fieldTextColor),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            filled: true,
+                            fillColor: fieldBgColor,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 8,
+                            ),
+                            hintText: '',
+                            hintStyle: TextStyle(
+                              color: hintColor,
+                              fontSize: 12,
+                            ),
+                            border: OutlineInputBorder(),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: highLightColor,
+                                width: 2.0,
+                              ),
+                            ),
                           ),
+                          onSubmitted: (_) {
+                            final input = double.tryParse(controller.text);
+                            if (input != null &&
+                                input >= minValue &&
+                                input <= maxValue) {
+                              setState(() {
+                                _statuses[index] = "OK";
+                              });
+                              if (index + 1 < _focusNodes.length) {
+                                FocusScope.of(
+                                  context,
+                                ).requestFocus(_focusNodes[index + 1]);
+                              } else {
+                                focusNode.unfocus();
+                              }
+                            } else {
+                              setState(() {
+                                _statuses[index] = "NG";
+                              });
+                              // フォーカスを当ててテキストを選択状態にする
+                              focusNode.requestFocus();
+                              controller.selection = TextSelection(
+                                baseOffset: 0,
+                                extentOffset: controller.text.length,
+                              );
+                            }
+                          },
                         ),
                       ),
-                      onSubmitted: (_) {
-                        final input = double.tryParse(controller.text);
-                        if (input != null &&
-                            input >= minValue &&
-                            input <= maxValue) {
-                          setState(() {
-                            _statuses[index] = "OK";
-                          });
-                          if (index + 1 < _focusNodes.length) {
-                            FocusScope.of(
-                              context,
-                            ).requestFocus(_focusNodes[index + 1]);
-                          } else {
-                            focusNode.unfocus();
-                          }
-                        } else {
-                          setState(() {
-                            _statuses[index] = "NG";
-                          });
-                          // フォーカスを当ててテキストを選択状態にする
-                          focusNode.requestFocus();
-                          controller.selection = TextSelection(
-                            baseOffset: 0,
-                            extentOffset: controller.text.length,
-                          );
-                        }
-                      },
-                    ),
+                      SizedBox(
+                        width: 50,
+                        height: 40,
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              top: 2,
+                              left: 4,
+                              child: Text(
+                                label,
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: activeIndex,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(width: 4),
                   SizedBox(

@@ -170,6 +170,8 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 028
 
+### 2025-08-21
+
 - Support for tapping without searching for ef conditions.
 - Once efu.dart is active, make it active with all data retrieval text selected.
 - Add button to activate data search.
@@ -181,6 +183,8 @@ samples, guidance on mobile development, and a full API reference.
 - Layout correction for work40_page.dart.
 
 #### commit 030
+
+### 2025-08-22
 
 - Add animation for successful searches to settings.
 
@@ -198,6 +202,8 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 034
 
+### 2025-08-23
+
 - Revised the layout of efu.dart to make it easier to read.
 
 #### commit 035
@@ -212,15 +218,23 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 037
 
+### 2025-08-24
+
+- Added Highlight block Y in efu.dart
 - Change design efu.dart and efu_detail.dart.
 
 #### commit 038
+
+- フルスクリーン前の画像も操作出来るように変更
+- measurement.dart のデザイン修正
+
+#### commit 039
 
 ---
 
 ### now
 
-efu.dart で Y のブロックをハイライト
+- measurement.dart でエラーになった場合の処理を追加
 
 ### next
 
