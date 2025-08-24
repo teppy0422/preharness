@@ -7,6 +7,7 @@ class DialSelectorPage extends StatefulWidget {
   final List<String>? initialBottomDialOptions;
   final List<String>? initialHindDialOptions;
   final bool valuesAreFromDb;
+  final String? recommendedHindDial;
 
   const DialSelectorPage({
     super.key,
@@ -15,6 +16,7 @@ class DialSelectorPage extends StatefulWidget {
     this.initialBottomDialOptions,
     this.initialHindDialOptions,
     this.valuesAreFromDb = true,
+    this.recommendedHindDial,
   });
 
   @override
@@ -26,7 +28,6 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
   final List<String> topDialOptions = ['0.2/0.3', '0.5', '0.85', '1.25', '2.0'];
   final List<String> bottomDialOptions = ['1', '2', '3', '4'];
   final List<String> hindDialOptions = [
-    '0',
     '1',
     '2',
     '3',
@@ -36,6 +37,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
     '7',
     '8',
     '9',
+    '10',
   ];
 
   // 選択状態
@@ -138,6 +140,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                     );
                   },
                   labelColor: labelColor,
+                  recommendedValue: widget.recommendedHindDial,
                 ),
               ],
             ),
@@ -153,6 +156,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
     required String selectedValue,
     required void Function(String) onTap,
     required Color labelColor,
+    String? recommendedValue,
   }) {
     return Column(
       children: [
@@ -170,13 +174,25 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
           spacing: 12,
           children: options.map((val) {
             final isSelected = selectedValue == val;
+            final isRecommended = recommendedValue == val;
             final Color buttonColor;
+            final Color borderColor;
+            final Color fontColor;
+
             if (isSelected) {
               buttonColor = widget.valuesAreFromDb
-                  ? AppColors.neonGreen
+                  ? AppColors.getHighLightColor(context)
                   : AppColors.red;
+              borderColor = AppColors.getHighLightColor(context);
+              fontColor = AppColors.paperBlack;
+            } else if (isRecommended) {
+              buttonColor = Colors.grey[900]!;
+              borderColor = AppColors.getHighLightColor(context);
+              fontColor = AppColors.paperWhite;
             } else {
               buttonColor = Colors.grey[300]!;
+              borderColor = Colors.grey[300]!;
+              fontColor = AppColors.paperBlack;
             }
 
             return GestureDetector(
@@ -186,7 +202,10 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                 decoration: BoxDecoration(
                   color: buttonColor,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.black26),
+                  border: Border.all(
+                    color: borderColor,
+                    width: isRecommended ? 3.0 : 3.0,
+                  ),
                 ),
                 child: Text(
                   val,
@@ -194,7 +213,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                     fontSize: 14,
                     fontFamily: "Inter",
                     fontWeight: FontWeight.w900,
-                    color: isSelected ? Colors.black : Colors.black87,
+                    color: fontColor,
                   ),
                 ),
               ),

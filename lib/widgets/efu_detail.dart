@@ -30,6 +30,8 @@ class EfuDetailPage extends StatefulWidget {
 class _EfuDetailPageState extends State<EfuDetailPage> {
   Color? _containerColor; // Added
   Color? _containerForeColor; // Added
+  String? _recommendedHindDial; // 推奨後足ダイヤル値
+  String _currentHindDial = '5'; // 現在の後足ダイヤル値
 
   @override
   void initState() {
@@ -69,6 +71,18 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     }
   }
 
+  void _onHindDialRecommendation(String recommendedDial) {
+    setState(() {
+      _recommendedHindDial = recommendedDial;
+    });
+  }
+
+  void _onDialChanged(String top, String bottom, String hind) {
+    setState(() {
+      _currentHindDial = hind;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -101,38 +115,51 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                 children: [
                                   // 左側: 情報グループ
                                   Expanded(
+                                    flex: 5,
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
-                                            _buildLabelValue(
-                                              '製品品番:',
-                                              widget
-                                                  .processingConditions['p_number'],
-                                              valueFont: 28,
+                                            Expanded(
+                                              flex: 5,
+                                              child: _buildLabelValue(
+                                                '製品品番:',
+                                                widget
+                                                    .processingConditions['p_number'],
+                                                valueFont: 28,
+                                              ),
                                             ),
-                                            _buildLabelValue(
-                                              'ロットNo:',
-                                              widget
-                                                  .processingConditions['lot_num'],
-                                              valueFont: 28,
+                                            Expanded(
+                                              flex: 3,
+                                              child: _buildLabelValue(
+                                                'ロットNo:',
+                                                widget
+                                                    .processingConditions['lot_num'],
+                                                valueFont: 28,
+                                              ),
                                             ),
                                           ],
                                         ),
                                         SizedBox(height: 5),
                                         Row(
                                           children: [
-                                            _buildLabelValue(
-                                              '設変:',
-                                              widget
-                                                  .processingConditions['eng_change'],
+                                            Expanded(
+                                              flex: 5,
+                                              child: _buildLabelValue(
+                                                '設変:',
+                                                widget
+                                                    .processingConditions['eng_change'],
+                                              ),
                                             ),
-                                            _buildLabelValue(
-                                              '構成No:',
-                                              widget
-                                                  .processingConditions['cfg_no'],
+                                            Expanded(
+                                              flex: 3,
+                                              child: _buildLabelValue(
+                                                '構成No:',
+                                                widget
+                                                    .processingConditions['cfg_no'],
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -149,16 +176,22 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                         SizedBox(height: 5),
                                         Row(
                                           children: [
-                                            _buildLabelValue(
-                                              '準完日:',
-                                              widget
-                                                  .processingConditions['delivery_date'],
+                                            Expanded(
+                                              flex: 5,
+                                              child: _buildLabelValue(
+                                                '準完日:',
+                                                widget
+                                                    .processingConditions['delivery_date'],
+                                              ),
                                             ),
-                                            _buildLabelValue(
-                                              '数量:',
-                                              widget
-                                                  .processingConditions['wire_cnt'],
-                                              valueFont: 30,
+                                            Expanded(
+                                              flex: 3,
+                                              child: _buildLabelValue(
+                                                '数量:',
+                                                widget
+                                                    .processingConditions['wire_cnt'],
+                                                valueFont: 30,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -190,12 +223,16 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                   const SizedBox(width: 0), // 左右の間隔
 
                                   Expanded(
+                                    flex: 6,
                                     child: Column(
                                       children: [
                                         DialSelectorWithDb(
                                           processingConditions:
                                               widget.processingConditions,
                                           blockInfo: widget.blockInfo,
+                                          recommendedHindDial:
+                                              _recommendedHindDial,
+                                          onDialChanged: _onDialChanged,
                                         ),
                                         const SizedBox(height: 10),
                                         Row(
@@ -296,7 +333,12 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                         const SizedBox(width: 16),
                         Column(
                           children: [
-                            Measurement(chListData: widget.chListData),
+                            Measurement(
+                              chListData: widget.chListData,
+                              onHindDialRecommendation:
+                                  _onHindDialRecommendation,
+                              currentHindDial: _currentHindDial,
+                            ),
                           ],
                         ),
                       ],
@@ -319,28 +361,26 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     double labelFont = 11,
     double valueFont = 24,
   }) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label, style: TextStyle(fontSize: labelFont, height: 1.0)),
-          Row(
-            children: [
-              Text(value, style: TextStyle(fontSize: valueFont, height: 1.0)),
-              SizedBox(width: 2),
-              if (label == '色:') ...[
-                WireColorBox(
-                  width: 22,
-                  height: 22,
-                  color: _containerColor ?? Colors.transparent,
-                  lineColor: _containerForeColor ?? Colors.transparent,
-                ),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: TextStyle(fontSize: labelFont, height: 1.0)),
+        Row(
+          children: [
+            Text(value, style: TextStyle(fontSize: valueFont, height: 1.0)),
+            SizedBox(width: 2),
+            if (label == '色:') ...[
+              WireColorBox(
+                width: 22,
+                height: 22,
+                color: _containerColor ?? Colors.transparent,
+                lineColor: _containerForeColor ?? Colors.transparent,
+              ),
             ],
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 }

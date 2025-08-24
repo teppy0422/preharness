@@ -5,7 +5,15 @@ int? _activeIndex;
 
 class Measurement extends StatefulWidget {
   final List<Map<String, dynamic>>? chListData;
-  const Measurement({super.key, this.chListData});
+  final Function(String recommendedHindDial)? onHindDialRecommendation;
+  final String? currentHindDial;
+
+  const Measurement({
+    super.key, 
+    this.chListData,
+    this.onHindDialRecommendation,
+    this.currentHindDial,
+  });
 
   @override
   State<Measurement> createState() => _StandardInfoCardState();
@@ -58,6 +66,23 @@ class _StandardInfoCardState extends State<Measurement> {
       return double.tryParse(value) ?? defaultValue;
     }
     return defaultValue;
+  }
+
+  void _calculateRecommendedHindDial(double currentValue, double minValue, double maxValue) {
+    // 目標値を計算 (min + max) / 2
+    final targetValue = (minValue + maxValue) / 2;
+    
+    // 現在値と目標値の差分を計算
+    final difference = currentValue - targetValue;
+    
+    // 1ダイヤル上げると0.05mm増加するので、必要な調整量を計算
+    final dialAdjustment = (difference / 0.05).round();
+    
+    // 現在のダイヤル値を取得（デフォルトは中央値5）
+    final currentDial = double.tryParse(widget.currentHindDial ?? '5') ?? 5.0;
+    final recommendedDial = (currentDial - dialAdjustment).clamp(1.0, 10.0);
+    
+    widget.onHindDialRecommendation!(recommendedDial.toInt().toString());
   }
 
   @override
@@ -262,6 +287,12 @@ class _StandardInfoCardState extends State<Measurement> {
                               setState(() {
                                 _statuses[index] = "NG";
                               });
+                              
+                              // 後足C/Hの場合は推奨ダイヤル値を計算
+                              if (label == "後足C/H" && input != null && widget.onHindDialRecommendation != null) {
+                                _calculateRecommendedHindDial(input, minValue, maxValue);
+                              }
+                              
                               // フォーカスを当ててテキストを選択状態にする
                               focusNode.requestFocus();
                               controller.selection = TextSelection(

@@ -230,6 +230,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 039
 
+- measurement.dart で後足計測が NG の場合は推奨値を表示
+
+#### commit 040
+
 ---
 
 ### now

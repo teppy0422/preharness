@@ -6,11 +6,15 @@ import 'package:drift/drift.dart' as drift;
 class DialSelectorWithDb extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
   final Map<String, dynamic> blockInfo;
+  final String? recommendedHindDial;
+  final Function(String, String, String)? onDialChanged;
 
   const DialSelectorWithDb({
     super.key,
     required this.processingConditions,
     required this.blockInfo,
+    this.recommendedHindDial,
+    this.onDialChanged,
   });
 
   @override
@@ -52,6 +56,13 @@ class _DialSelectorWithDbState extends State<DialSelectorWithDb> {
           _initialBottomDial = existingData.bottomDial;
           _initialHindDial = existingData.hindDial;
           _hasExistingData = true;
+          // 初期値を親に通知（null チェック）
+          final topDial = existingData.topDial;
+          final bottomDial = existingData.bottomDial;
+          final hindDial = existingData.hindDial;
+          if (topDial != null && bottomDial != null && hindDial != null) {
+            widget.onDialChanged?.call(topDial, bottomDial, hindDial);
+          }
         } else {
           _hasExistingData = false;
         }
@@ -61,6 +72,9 @@ class _DialSelectorWithDbState extends State<DialSelectorWithDb> {
   }
 
   Future<void> _saveDialValues(String top, String bottom, String hind) async {
+    // 親コンポーネントにダイヤル値の変更を通知
+    widget.onDialChanged?.call(top, bottom, hind);
+
     final wireType = widget.processingConditions['wire_type']?.toString() ?? '';
     final wireSize = widget.processingConditions['wire_size']?.toString() ?? '';
     final termPartNo = widget.blockInfo['terminals'][0]?.toString() ?? '';
@@ -105,6 +119,7 @@ class _DialSelectorWithDbState extends State<DialSelectorWithDb> {
           : null,
       onChanged: _saveDialValues,
       valuesAreFromDb: _hasExistingData,
+      recommendedHindDial: widget.recommendedHindDial,
     );
   }
 }
