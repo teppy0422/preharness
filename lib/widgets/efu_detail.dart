@@ -32,6 +32,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   Color? _containerForeColor; // Added
   String? _recommendedHindDial; // 推奨後足ダイヤル値
   String _currentHindDial = '5'; // 現在の後足ダイヤル値
+  String? _recommendedTopDial; // 推奨上ダイヤル値
+  String? _recommendedBottomDial; // 推奨下ダイヤル値  
+  String _currentTopDial = '0.5'; // 現在の上ダイヤル値
+  String _currentBottomDial = '1'; // 現在の下ダイヤル値
 
   @override
   void initState() {
@@ -79,7 +83,16 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   void _onDialChanged(String top, String bottom, String hind) {
     setState(() {
+      _currentTopDial = top;
+      _currentBottomDial = bottom;
       _currentHindDial = hind;
+    });
+  }
+
+  void _onFrontDialRecommendation(String recommendedTopDial, String recommendedBottomDial) {
+    setState(() {
+      _recommendedTopDial = recommendedTopDial;
+      _recommendedBottomDial = recommendedBottomDial;
     });
   }
 
@@ -232,6 +245,8 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                           blockInfo: widget.blockInfo,
                                           recommendedHindDial:
                                               _recommendedHindDial,
+                                          recommendedTopDial: _recommendedTopDial,
+                                          recommendedBottomDial: _recommendedBottomDial,
                                           onDialChanged: _onDialChanged,
                                         ),
                                         const SizedBox(height: 10),
@@ -337,7 +352,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                               chListData: widget.chListData,
                               onHindDialRecommendation:
                                   _onHindDialRecommendation,
+                              onFrontDialRecommendation: _onFrontDialRecommendation,
                               currentHindDial: _currentHindDial,
+                              currentTopDial: _currentTopDial,
+                              currentBottomDial: _currentBottomDial,
                             ),
                           ],
                         ),

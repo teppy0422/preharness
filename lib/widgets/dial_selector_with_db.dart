@@ -7,6 +7,8 @@ class DialSelectorWithDb extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
   final Map<String, dynamic> blockInfo;
   final String? recommendedHindDial;
+  final String? recommendedTopDial;
+  final String? recommendedBottomDial;
   final Function(String, String, String)? onDialChanged;
 
   const DialSelectorWithDb({
@@ -14,6 +16,8 @@ class DialSelectorWithDb extends StatefulWidget {
     required this.processingConditions,
     required this.blockInfo,
     this.recommendedHindDial,
+    this.recommendedTopDial,
+    this.recommendedBottomDial,
     this.onDialChanged,
   });
 
@@ -120,6 +124,8 @@ class _DialSelectorWithDbState extends State<DialSelectorWithDb> {
       onChanged: _saveDialValues,
       valuesAreFromDb: _hasExistingData,
       recommendedHindDial: widget.recommendedHindDial,
+      recommendedTopDial: widget.recommendedTopDial,
+      recommendedBottomDial: widget.recommendedBottomDial,
     );
   }
 }

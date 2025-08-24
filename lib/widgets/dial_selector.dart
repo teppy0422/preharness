@@ -8,6 +8,8 @@ class DialSelectorPage extends StatefulWidget {
   final List<String>? initialHindDialOptions;
   final bool valuesAreFromDb;
   final String? recommendedHindDial;
+  final String? recommendedTopDial;
+  final String? recommendedBottomDial;
 
   const DialSelectorPage({
     super.key,
@@ -17,6 +19,8 @@ class DialSelectorPage extends StatefulWidget {
     this.initialHindDialOptions,
     this.valuesAreFromDb = true,
     this.recommendedHindDial,
+    this.recommendedTopDial,
+    this.recommendedBottomDial,
   });
 
   @override
@@ -96,6 +100,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                     );
                   },
                   labelColor: labelColor,
+                  recommendedValue: widget.recommendedTopDial,
                 ),
                 const SizedBox(height: 8),
                 _buildDialSection(
@@ -118,6 +123,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                     );
                   },
                   labelColor: labelColor,
+                  recommendedValue: widget.recommendedBottomDial,
                 ),
                 const Divider(thickness: 1, color: Colors.grey),
                 _buildDialSection(

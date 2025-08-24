@@ -234,6 +234,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 040
 
+- measurement.dart で後足計測が NG の場合は推奨値を表示
+
+#### commit 041
+
 ---
 
 ### now
@@ -252,7 +256,17 @@ samples, guidance on mobile development, and a full API reference.
 
 ---
 
-### prompt
+#### flutter command
+
+- 起動とか
+<pre>flutter clean<br/>
+flutter run<br/>
+flutter pub get
+</pre>
+- 無線接続の有効化(USB 接続した状態で実行)
+<pre>adb tcpip 5555</pre>
+
+### prompt 4 AI
 
 あなたは、Flutter/Dart の専門家として、以下のプロジェクト概要を
 理解し、今後の開発に関する質問に答えられるように準備してくださ
