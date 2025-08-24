@@ -201,15 +201,24 @@ class _Work40PageState extends State<Work40Page>
               children: [
                 Expanded(
                   flex: 6,
-                  child: _SearchCard(
-                    onSearch: _onSearch,
-                    controller: _searchController,
-                    focusNode: _searchFocusNode,
-                    onSelectAll: _focusAndSelectSearchText,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 0),
+                    child: _SearchCard(
+                      onSearch: _onSearch,
+                      controller: _searchController,
+                      focusNode: _searchFocusNode,
+                      onSelectAll: _focusAndSelectSearchText,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
-                Expanded(flex: 3, child: _EquipmentInfoCard()),
+                Expanded(
+                  flex: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 7),
+                    child: _EquipmentInfoCard(),
+                  ),
+                ),
                 const SizedBox(width: 72),
               ],
             ),
@@ -317,25 +326,23 @@ class _EquipmentInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: .5),
-        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.getLineColor(context), width: .5),
+        borderRadius: BorderRadius.circular(4),
       ),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(child: Text("号機: 5号機")),
-                  Expanded(child: Text("機種: CM20")),
-                  Expanded(child: Text("管理No: 3456")),
-                ],
-              ),
-            ],
-          ),
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(child: Text("号機: 5号機")),
+                Expanded(child: Text("機種: CM20")),
+                Expanded(child: Text("管理No: 3456")),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -459,7 +466,7 @@ class _SearchCardState extends State<_SearchCard> {
           decoration: BoxDecoration(
             border: Border.all(
               color: widget.focusNode.hasFocus
-                  ? AppColors.neonGreen
+                  ? AppColors.getHighLightColor(context)
                   : Colors.grey,
               width: widget.focusNode.hasFocus ? 2.0 : 1.0,
             ),
@@ -500,68 +507,57 @@ class _SearchCardState extends State<_SearchCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 4),
-          // モードに応じて表示するウィジェットを切り替え
-          Row(
-            children: [
-              // IconButton(
-              //   icon: Icon(
-              //     _isKeyboardEnabled
-              //         ? Icons.qr_code_scanner
-              //         : Icons.keyboard,
-              //   ),
-              //   tooltip: _isKeyboardEnabled
-              //       ? 'QRリーダーモードに切り替え'
-              //       : '手入力モードに切り替え',
-              //   onPressed: () {
-              //     setState(() {
-              //       _isKeyboardEnabled = !_isKeyboardEnabled;
-              //       // モード切替時にテキストを同期
-              //       if (_isKeyboardEnabled) {
-              //         widget.controller.text = _inputText;
-              //       } else {
-              //         _inputText = widget.controller.text;
-              //         widget.controller.text = ''; // TextFieldのテキストをクリア
-              //         widget.focusNode.unfocus(); // キーボードを閉じる
-              //       }
-              //     });
-              //     widget.focusNode.requestFocus();
-              //   },
-              // ),
-              Expanded(
-                child: _isKeyboardEnabled
-                    ? _buildTextField()
-                    : _buildRawKeyboardReader(),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 6,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                onPressed: _handleSearch,
-                child: const Text('検索', style: TextStyle(fontSize: 14)),
-              ),
-            ],
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // モード切り替えボタン
-              ],
+    return Row(
+      children: [
+        // IconButton(
+        //   icon: Icon(
+        //     _isKeyboardEnabled
+        //         ? Icons.qr_code_scanner
+        //         : Icons.keyboard,
+        //   ),
+        //   tooltip: _isKeyboardEnabled
+        //       ? 'QRリーダーモードに切り替え'
+        //       : '手入力モードに切り替え',
+        //   onPressed: () {
+        //     setState(() {
+        //       _isKeyboardEnabled = !_isKeyboardEnabled;
+        //       // モード切替時にテキストを同期
+        //       if (_isKeyboardEnabled) {
+        //         widget.controller.text = _inputText;
+        //       } else {
+        //         _inputText = widget.controller.text;
+        //         widget.controller.text = ''; // TextFieldのテキストをクリア
+        //         widget.focusNode.unfocus(); // キーボードを閉じる
+        //       }
+        //     });
+        //     widget.focusNode.requestFocus();
+        //   },
+        // ),
+        Expanded(
+          child: _isKeyboardEnabled
+              ? _buildTextField()
+              : _buildRawKeyboardReader(),
+        ),
+        SizedBox(width: 10),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue, // ボタンの色
+            foregroundColor: Colors.white, // 文字色
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+            textStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
             ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8), // 角を丸く
+            ),
+            elevation: 1, // 影を付ける
+            minimumSize: const Size(60, 30), // 最低サイズを設定
           ),
-        ],
-      ),
+          onPressed: _handleSearch,
+          child: const Text('検索'),
+        ),
+      ],
     );
   }
 }

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:preharness/widgets/dial_selector_with_db.dart';
 import 'package:preharness/widgets/measurement.dart';
 import 'package:preharness/utils/global.dart';
-import 'package:preharness/utils/color_utils.dart'; // Added
+import 'package:preharness/utils/color_utils.dart';
+import 'package:preharness/constants/app_colors.dart';
 
 class EfuDetailPage extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
@@ -235,6 +236,51 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                             Expanded(child: Text("")),
                                           ],
                                         ),
+                                        Divider(
+                                          height: 20,
+                                          thickness: 0.5,
+                                          color: AppColors.getLineColor(
+                                            context,
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              PageRouteBuilder(
+                                                pageBuilder:
+                                                    (
+                                                      context,
+                                                      animation,
+                                                      secondaryAnimation,
+                                                    ) {
+                                                      return _FullScreenImageView(
+                                                        imagePath:
+                                                            'assets/images/71144020-2.jpg',
+                                                      );
+                                                    },
+                                                transitionsBuilder:
+                                                    (
+                                                      context,
+                                                      animation,
+                                                      secondaryAnimation,
+                                                      child,
+                                                    ) {
+                                                      return FadeTransition(
+                                                        opacity: animation,
+                                                        child: child,
+                                                      );
+                                                    },
+                                              ),
+                                            );
+                                          },
+                                          child: SizedBox(
+                                            height: 150,
+                                            child: Image.asset(
+                                              'assets/images/71144020-2.jpg',
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -253,39 +299,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                     ),
                     SizedBox(height: 10),
                     const Divider(height: 10, thickness: 1),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          PageRouteBuilder(
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) {
-                                  return _FullScreenImageView(
-                                    imagePath: 'assets/images/71144020-2.jpg',
-                                  );
-                                },
-                            transitionsBuilder:
-                                (
-                                  context,
-                                  animation,
-                                  secondaryAnimation,
-                                  child,
-                                ) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  );
-                                },
-                          ),
-                        );
-                      },
-                      child: SizedBox(
-                        height: 150,
-                        child: Image.asset(
-                          'assets/images/71144020-2.jpg',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ],
@@ -342,12 +355,7 @@ class _FullScreenImageView extends StatelessWidget {
         child: InteractiveViewer(
           minScale: 0.5,
           maxScale: 4.0,
-          child: Center(
-            child: Image.asset(
-              imagePath, 
-              fit: BoxFit.contain,
-            ),
-          ),
+          child: Center(child: Image.asset(imagePath, fit: BoxFit.contain)),
         ),
       ),
     );

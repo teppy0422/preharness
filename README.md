@@ -212,6 +212,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 037
 
+- Change design efu.dart and efu_detail.dart.
+
+#### commit 038
+
 ---
 
 ### now

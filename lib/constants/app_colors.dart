@@ -12,6 +12,7 @@ class AppColors {
 
   static const Color red = Color(0xFFF44336); // ラベル赤
   static const Color coralRed = Color.fromARGB(255, 225, 75, 25); //
+  static const Color highlightOrange = Color(0xFFFFA726);
 
   static const Color teal = Color(0xFF009688); //
   static const Color olive = Color(0xFF708238); //
@@ -27,6 +28,11 @@ class AppColors {
 
   static Color getHighLightColor(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? neonGreen : coralRed;
+    return isDark ? neonGreen : highlightOrange;
+  }
+
+  static Color getLineColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? paperWhite : paperBlack;
   }
 }

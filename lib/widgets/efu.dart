@@ -31,11 +31,6 @@ Color getDarkColor(BuildContext context) {
   return isDark ? AppColors.darkGreen : AppColors.deepGreen;
 }
 
-Color getHighLightColor(BuildContext context) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  return isDark ? AppColors.neonGreen : AppColors.red;
-}
-
 int? safeSubstringToInt(String source, int start, int end) {
   if (source.length < end) return null; // 範囲外
   final part = source.substring(start, end);
@@ -275,8 +270,10 @@ class _EfuPageState extends State<EfuPage> {
                                     child: _buildCell(
                                       context: context,
                                       label: '製造指示書',
-                                      showBorder: false,
                                       labelFontSize: 20,
+                                      valueHeight: 0,
+                                      showBorder: false,
+                                      value: "",
                                     ),
                                   ),
                                   Expanded(
@@ -681,6 +678,13 @@ class _EfuPageState extends State<EfuPage> {
     required BuildContext context, // ← 追加（SnackBar用に必要）
   }) {
     assert(terminals.length == 5 && directives.length == 5); // 安全チェック
+
+    bool targetFlag = directives[0] == "Y";
+    BorderSide highLightLine = BorderSide(
+      color: AppColors.getHighLightColor(context),
+      width: 2,
+    );
+    BorderSide baseLine = BorderSide(color: getLineColor(context), width: 1);
     // ヘッダー行を追加
     List<Widget> rows = [];
 
@@ -693,8 +697,10 @@ class _EfuPageState extends State<EfuPage> {
               context: context,
               label: '同時共有',
               value: null,
-              bottom: BorderSide.none,
+              top: targetFlag ? highLightLine : baseLine,
               right: BorderSide.none,
+              bottom: BorderSide.none,
+              left: targetFlag ? highLightLine : baseLine,
               lefthalfborder: true,
               horizontal: true,
             ),
@@ -705,9 +711,10 @@ class _EfuPageState extends State<EfuPage> {
               context: context,
               label: '皮',
               value: strip,
+              top: targetFlag ? highLightLine : baseLine,
+              right: BorderSide.none,
               bottom: BorderSide.none,
               left: BorderSide(color: getLineColor(context), width: 0.5),
-              right: BorderSide.none,
               lefthalfborder: true,
               horizontal: true,
             ),
@@ -719,9 +726,10 @@ class _EfuPageState extends State<EfuPage> {
               label: '作',
               cellBgColor: getLightColor(context),
               value: null,
-              left: BorderSide(color: getLineColor(context), width: 0.5),
+              top: targetFlag ? highLightLine : baseLine,
               right: BorderSide.none,
               bottom: BorderSide.none,
+              left: BorderSide(color: getLineColor(context), width: 0.5),
               horizontal: true,
             ),
           ),
@@ -731,9 +739,10 @@ class _EfuPageState extends State<EfuPage> {
               context: context,
               label: '穴位置',
               value: null,
-              left: BorderSide(color: getLineColor(context), width: 0.5),
-              bottom: BorderSide.none,
+              top: targetFlag ? highLightLine : baseLine,
               right: BorderSide.none,
+              bottom: BorderSide.none,
+              left: BorderSide(color: getLineColor(context), width: 0.5),
               horizontal: true,
             ),
           ),
@@ -743,9 +752,10 @@ class _EfuPageState extends State<EfuPage> {
               context: context,
               label: '',
               value: null,
-              left: BorderSide(color: getLineColor(context), width: 0.5),
+              top: targetFlag ? highLightLine : baseLine,
+              right: targetFlag ? highLightLine : baseLine,
               bottom: BorderSide.none,
-              right: BorderSide.none,
+              left: BorderSide(color: getLineColor(context), width: 0.5),
               horizontal: true,
             ),
           ),
@@ -766,8 +776,11 @@ class _EfuPageState extends State<EfuPage> {
                 value: "",
                 valueHeight: 35.5,
                 top: BorderSide(color: getLineColor(context), width: 0.5),
-                bottom: BorderSide.none,
                 right: BorderSide.none,
+                bottom: (i == 3 && targetFlag == true)
+                    ? highLightLine
+                    : BorderSide.none,
+                left: targetFlag ? highLightLine : baseLine,
                 horizontal: true,
               ),
             ),
@@ -781,7 +794,9 @@ class _EfuPageState extends State<EfuPage> {
                 valueFontSize: 22,
                 overFlowTop: 3,
                 top: BorderSide(color: getLineColor(context), width: 0.5),
-                bottom: BorderSide.none,
+                bottom: (i == 3 && targetFlag == true)
+                    ? highLightLine
+                    : BorderSide.none,
                 left: BorderSide(color: getLineColor(context), width: 0.5),
                 right: BorderSide.none,
                 horizontal: true,
@@ -797,9 +812,11 @@ class _EfuPageState extends State<EfuPage> {
                 valueFontSize: 22,
                 overFlowTop: 3,
                 top: BorderSide(color: getLineColor(context), width: 0.5),
+                right: targetFlag ? highLightLine : baseLine,
+                bottom: (i == 3 && targetFlag == true)
+                    ? highLightLine
+                    : BorderSide.none,
                 left: BorderSide(color: getLineColor(context), width: 0.5),
-                right: BorderSide.none,
-                bottom: BorderSide.none,
                 horizontal: true,
                 useFormatCode: true,
               ),
@@ -899,12 +916,12 @@ class _EfuPageState extends State<EfuPage> {
     final labelWidget = label != null
         ? Container(
             width: double.infinity,
+            height: horizontal ? valueHeight : null, // horizontalの場合は固定高さ
             alignment: labelAlignment,
             color: labelBgColor,
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
             child: Text(
               label,
-              maxLines: 1,
               softWrap: false,
               style: TextStyle(
                 fontSize: labelFontSize,
@@ -953,8 +970,8 @@ class _EfuPageState extends State<EfuPage> {
                             'assets/images/tearDrop.svg',
                             width: 28, // 少し大きめに
                             height: 28,
-                            colorFilter: const ColorFilter.mode(
-                              Colors.white,
+                            colorFilter: ColorFilter.mode(
+                              AppColors.getLineColor(context),
                               BlendMode.srcIn,
                             ),
                           ),
@@ -1032,7 +1049,11 @@ class _EfuPageState extends State<EfuPage> {
                 ),
             ],
           )
-        : null;
+        : Container(
+            width: double.infinity, // 横幅を持たせる
+            height: valueHeight, // 高さを確保
+            color: Colors.transparent, // 透明だけど存在する
+          );
 
     return Container(
       decoration: BoxDecoration(color: cellBgColor, border: borderDecoration),
@@ -1043,13 +1064,13 @@ class _EfuPageState extends State<EfuPage> {
           ? Row(
               children: [
                 if (labelWidget != null) Expanded(child: labelWidget),
-                if (valueWidget != null) Expanded(child: valueWidget),
+                if (value != null) Expanded(child: valueWidget),
               ],
             )
           : Column(
               children: [
                 if (labelWidget != null) ...[labelWidget],
-                if (valueWidget != null) ...[valueWidget],
+                ...[valueWidget],
               ],
             ),
     );

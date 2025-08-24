@@ -9,7 +9,8 @@ import 'package:preharness/models/color_entry.dart'; // Added for ColorEntry
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.system);
 
-Future<void> main() async { // Made main() async
+Future<void> main() async {
+  // Made main() async
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter binding is initialized
   await Hive.initFlutter(); // Initialize Hive
   Hive.registerAdapter(ColorAdapter()); // Register ColorAdapter
@@ -59,7 +60,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         brightness: Brightness.light,
         fontFamily: 'NotoSansJP',
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: AppColors.paperWhite,
         textTheme: const TextTheme(
           bodyLarge: TextStyle(fontWeight: FontWeight.w900),
           bodyMedium: TextStyle(fontWeight: FontWeight.w600),
