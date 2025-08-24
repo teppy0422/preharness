@@ -280,7 +280,7 @@ class _EfuPageState extends State<EfuPage> {
                                     ),
                                   ),
                                   Expanded(
-                                    flex: 3,
+                                    flex: 4,
                                     child: _buildCell(
                                       context: context,
                                       label: 'ロットNo.',
@@ -443,7 +443,7 @@ class _EfuPageState extends State<EfuPage> {
                                     ),
                                   ),
                                   Expanded(
-                                    flex: 3,
+                                    flex: 8,
                                     child: _buildCell(
                                       context: context,
                                       label: '色',
@@ -457,7 +457,7 @@ class _EfuPageState extends State<EfuPage> {
                                     ),
                                   ),
                                   Expanded(
-                                    flex: 3,
+                                    flex: 4,
                                     child: WireColorBox(
                                       width: 22,
                                       height: 22,
@@ -470,7 +470,7 @@ class _EfuPageState extends State<EfuPage> {
                                   ),
 
                                   Expanded(
-                                    flex: 6,
+                                    flex: 7,
                                     child: _buildCell(
                                       context: context,
                                       label: '切 断 線 長',

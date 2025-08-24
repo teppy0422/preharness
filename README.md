@@ -208,9 +208,15 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 036
 
+- Fine-tuning the layout of efu.dart.
+
+#### commit 037
+
 ---
 
 ### now
+
+efu.dart で Y のブロックをハイライト
 
 ### next
 

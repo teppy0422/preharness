@@ -339,7 +339,16 @@ class _FullScreenImageView extends StatelessWidget {
       backgroundColor: Colors.black,
       body: GestureDetector(
         onTap: () => Navigator.of(context).pop(),
-        child: Center(child: Image.asset(imagePath, fit: BoxFit.contain)),
+        child: InteractiveViewer(
+          minScale: 0.5,
+          maxScale: 4.0,
+          child: Center(
+            child: Image.asset(
+              imagePath, 
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
       ),
     );
   }
