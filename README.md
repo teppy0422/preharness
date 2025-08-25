@@ -248,12 +248,14 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 043
 
+- Added "Select All" when tapping an item in measurement.dart.
+- The recommended value has been revised to flash.
+
+#### commit 044
+
 ---
 
 ### now
-
-- measurement.dart で項目をタップした時に全選択を追加。
-- 推奨値は点滅するように修正。
 
 ### next
 

@@ -27,7 +27,10 @@ class DialSelectorPage extends StatefulWidget {
   State<DialSelectorPage> createState() => _DialSelectorPageState();
 }
 
-class _DialSelectorPageState extends State<DialSelectorPage> {
+class _DialSelectorPageState extends State<DialSelectorPage>
+    with TickerProviderStateMixin {
+  late AnimationController _blinkController;
+  late Animation<double> _blinkAnimation;
   // ダイヤル選択肢
   final List<String> topDialOptions = ['0.2/0.3', '0.5', '0.85', '1.25', '2.0'];
   final List<String> bottomDialOptions = ['1', '2', '3', '4'];
@@ -53,12 +56,28 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
   @override
   void initState() {
     super.initState();
-    selectedTopDial = widget.initialTopDialOptions?.first ?? topDialOptions[0];
+    selectedTopDial = widget.initialTopDialOptions?.last ?? topDialOptions.last;
     selectedBottomDial =
-        widget.initialBottomDialOptions?.first ?? bottomDialOptions[0];
+        widget.initialBottomDialOptions?.last ?? bottomDialOptions.last;
     selectedHindDial =
-        widget.initialHindDialOptions?.first ?? hindDialOptions[0];
+        widget.initialHindDialOptions?.last ?? hindDialOptions.last;
     _isInitialState = true;
+
+    // 点滅アニメーション設定
+    _blinkController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _blinkAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut),
+    );
+    _blinkController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _blinkController.dispose();
+    super.dispose();
   }
 
   @override
@@ -184,43 +203,83 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
               buttonColor = widget.valuesAreFromDb
                   ? AppColors.getHighLightColor(context)
                   : AppColors.red;
-              borderColor = AppColors.getHighLightColor(context);
+              borderColor = widget.valuesAreFromDb
+                  ? AppColors.getHighLightColor(context)
+                  : AppColors.red;
               fontColor = AppColors.paperBlack;
             } else if (isRecommended) {
-              buttonColor = Colors.grey[900]!;
+              buttonColor = AppColors.paperBlack;
               borderColor = AppColors.getHighLightColor(context);
               fontColor = AppColors.paperWhite;
             } else {
-              buttonColor = Colors.grey[300]!;
+              buttonColor = AppColors.paperBlack;
               borderColor = Colors.grey[300]!;
-              fontColor = AppColors.paperBlack;
+              fontColor = AppColors.paperWhite;
             }
 
-            return GestureDetector(
-              onTap: () => onTap(val),
-              child: Container(
-                width: customWidth,
-                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
-                decoration: BoxDecoration(
-                  color: buttonColor,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: borderColor,
-                    width: isRecommended ? 3.0 : 3.0,
-                  ),
-                ),
-                child: Text(
-                  val,
-                  textAlign: TextAlign.center, // ← これを追加
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: "Inter",
-                    fontWeight: FontWeight.w900,
-                    color: fontColor,
-                  ),
-                ),
-              ),
-            );
+            return isRecommended
+                ? AnimatedBuilder(
+                    animation: _blinkAnimation,
+                    builder: (context, child) {
+                      final animatedBorderColor = _blinkAnimation.value > 0.5
+                          ? AppColors.getHighLightColor(context)
+                          : Colors.transparent;
+
+                      return GestureDetector(
+                        onTap: () => onTap(val),
+                        child: Container(
+                          width: customWidth,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 3,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: buttonColor,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: animatedBorderColor,
+                              width: 2.0,
+                            ),
+                          ),
+                          child: Text(
+                            val,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontFamily: "Inter",
+                              fontWeight: FontWeight.w900,
+                              color: fontColor,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : GestureDetector(
+                    onTap: () => onTap(val),
+                    child: Container(
+                      width: customWidth,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 3,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: buttonColor,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: borderColor, width: 2.0),
+                      ),
+                      child: Text(
+                        val,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: "Inter",
+                          fontWeight: FontWeight.w900,
+                          color: fontColor,
+                        ),
+                      ),
+                    ),
+                  );
           }).toList(),
         ),
       ],

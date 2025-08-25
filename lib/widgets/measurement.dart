@@ -48,6 +48,7 @@ class _StandardInfoCardState extends State<Measurement> {
     });
     _controllers = List.generate(4, (_) => TextEditingController());
     _statuses = List.generate(4, (_) => ""); // ← 初期は空
+
     // 最初のTextFieldにフォーカスを当てる
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_focusNodes[0]);
@@ -73,6 +74,16 @@ class _StandardInfoCardState extends State<Measurement> {
       return double.tryParse(value) ?? defaultValue;
     }
     return defaultValue;
+  }
+
+  bool _hasRecommendation(String label) {
+    if (label == "後足C/H") {
+      return _statuses.length > 1 && _statuses[1] == "NG"; // 後足C/Hは2番目の項目
+    }
+    if (label == "前足C/H") {
+      return _statuses.isNotEmpty && _statuses[0] == "NG"; // 前足C/Hは1番目の項目
+    }
+    return false;
   }
 
   void _calculateRecommendedHindDial(
@@ -120,11 +131,11 @@ class _StandardInfoCardState extends State<Measurement> {
 
     // topDialの値から増加量をマッピング (ダイヤル設定による計測値への影響)
     final topDialValues = {
-      '0.2/0.3': 0, // topDial=0.2/0.3の場合、計測値が0.2mm増加
-      '0.5': 0.05, // topDial=0.5の場合、計測値が0.5mm増加
-      '0.85': 0.1, // topDial=0.85の場合、計測値が0.85mm増加
-      '1.25': 0.15, // topDial=1.25の場合、計測値が1.25mm増加
-      '2.0': 0.2, // topDial=2.0の場合、計測値が2.0mm増加
+      '0.2/0.3': 0,
+      '0.5': 0.1,
+      '0.85': 0.2,
+      '1.25': 0.33,
+      '2.0': 0.48,
     };
 
     final topDialOptions = ['0.2/0.3', '0.5', '0.85', '1.25', '2.0'];
@@ -153,7 +164,7 @@ class _StandardInfoCardState extends State<Measurement> {
       for (int bottomOption in bottomDialOptions) {
         final bottomChange =
             (bottomOption - currentBottomDial) *
-            0.02; // bottomDialを変更した場合の計測値変化量
+            0.08; // bottomDialを変更した場合の計測値変化量
         final totalChange = topChange + bottomChange; // 両方を変更した場合の総変化量
         final error = (totalChange - neededAdjustment).abs(); // 必要調整量との誤差
 
@@ -335,6 +346,13 @@ class _StandardInfoCardState extends State<Measurement> {
                           showCursor: true,
                           textAlign: TextAlign.right,
                           keyboardType: TextInputType.none,
+                          onTap: () {
+                            // テキストフィールドタップ時に全選択
+                            controller.selection = TextSelection(
+                              baseOffset: 0,
+                              extentOffset: controller.text.length,
+                            );
+                          },
                           style: TextStyle(color: fieldTextColor),
                           decoration: InputDecoration(
                             isDense: true,
@@ -356,6 +374,7 @@ class _StandardInfoCardState extends State<Measurement> {
                                 width: 2.0,
                               ),
                             ),
+                            enabledBorder: OutlineInputBorder(),
                           ),
                           onSubmitted: (_) {
                             final input = double.tryParse(controller.text);
