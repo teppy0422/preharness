@@ -230,25 +230,30 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 039
 
-- measurement.dart で後足計測が NG の場合は推奨値を表示
+- If the rear foot measurement in measurement.dart is NG, display the recommended value.
 
 #### commit 040
 
-- measurement.dart で後足計測が NG の場合は推奨値を表示
+- If the rear foot measurement in measurement.dart is NG, display the recommended value.
 
 #### commit 041
 
-- 計測が OK になった場合、推奨値をハイライト表示をやめる
+### 2025-08-25
+
+- When the measurement.dart is OK, stop highlighting the recommended value.
 
 #### commit 042
 
-- 推奨値は点滅するように修正
+- Modify the design of measurement.dart.
+
+#### commit 043
 
 ---
 
 ### now
 
-- measurement.dart でエラーになった場合の処理を追加
+- measurement.dart で項目をタップした時に全選択を追加。
+- 推奨値は点滅するように修正。
 
 ### next
 

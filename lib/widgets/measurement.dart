@@ -365,15 +365,17 @@ class _StandardInfoCardState extends State<Measurement> {
                               setState(() {
                                 _statuses[index] = "OK";
                               });
-                              
+
                               // OK判定の場合は推奨値をクリア
-                              if (label == "後足C/H" && widget.onHindDialRecommendation != null) {
+                              if (label == "後足C/H" &&
+                                  widget.onHindDialRecommendation != null) {
                                 widget.onHindDialRecommendation!(null);
                               }
-                              if (label == "前足C/H" && widget.onFrontDialRecommendation != null) {
+                              if (label == "前足C/H" &&
+                                  widget.onFrontDialRecommendation != null) {
                                 widget.onFrontDialRecommendation!(null, null);
                               }
-                              
+
                               if (index + 1 < _focusNodes.length) {
                                 FocusScope.of(
                                   context,

@@ -99,6 +99,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                       selectedHindDial,
                     );
                   },
+                  customWidth: 70,
                   labelColor: labelColor,
                   recommendedValue: widget.recommendedTopDial,
                 ),
@@ -122,6 +123,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                       selectedHindDial,
                     );
                   },
+                  customWidth: 90,
                   labelColor: labelColor,
                   recommendedValue: widget.recommendedBottomDial,
                 ),
@@ -145,6 +147,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                       selectedHindDial,
                     );
                   },
+                  customWidth: 30,
                   labelColor: labelColor,
                   recommendedValue: widget.recommendedHindDial,
                 ),
@@ -162,22 +165,14 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
     required String selectedValue,
     required void Function(String) onTap,
     required Color labelColor,
+    required double customWidth,
     String? recommendedValue,
   }) {
     return Column(
       children: [
-        // Text(
-        //   title,
-        //   style: TextStyle(
-        //     fontSize: 14,
-        //     fontFamily: "NotoSansJP",
-        //     fontWeight: FontWeight.w900,
-        //     color: labelColor,
-        //   ),
-        // ),
         const SizedBox(height: 2),
         Wrap(
-          spacing: 12,
+          spacing: 10,
           children: options.map((val) {
             final isSelected = selectedValue == val;
             final isRecommended = recommendedValue == val;
@@ -204,7 +199,8 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
             return GestureDetector(
               onTap: () => onTap(val),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                width: customWidth,
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
                 decoration: BoxDecoration(
                   color: buttonColor,
                   borderRadius: BorderRadius.circular(8),
@@ -215,6 +211,7 @@ class _DialSelectorPageState extends State<DialSelectorPage> {
                 ),
                 child: Text(
                   val,
+                  textAlign: TextAlign.center, // ← これを追加
                   style: TextStyle(
                     fontSize: 14,
                     fontFamily: "Inter",
