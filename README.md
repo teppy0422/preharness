@@ -238,6 +238,12 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 041
 
+- 計測が OK になった場合、推奨値をハイライト表示をやめる
+
+#### commit 042
+
+- 推奨値は点滅するように修正
+
 ---
 
 ### now

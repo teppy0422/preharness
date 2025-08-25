@@ -75,7 +75,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     }
   }
 
-  void _onHindDialRecommendation(String recommendedDial) {
+  void _onHindDialRecommendation(String? recommendedDial) {
     setState(() {
       _recommendedHindDial = recommendedDial;
     });
@@ -89,7 +89,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     });
   }
 
-  void _onFrontDialRecommendation(String recommendedTopDial, String recommendedBottomDial) {
+  void _onFrontDialRecommendation(String? recommendedTopDial, String? recommendedBottomDial) {
     setState(() {
       _recommendedTopDial = recommendedTopDial;
       _recommendedBottomDial = recommendedBottomDial;
