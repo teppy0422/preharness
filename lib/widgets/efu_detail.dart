@@ -491,14 +491,21 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       ),
       child: ClipOval(
         child: Center(
-          child: Row(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildFlipCounter(),
+              Divider(
+                color: AppColors.getHighLightColor(context),
+                thickness: 1,
+                height: 10,
+              ),
               Text(
-                '/$targetCount',
+                '$targetCount',
                 style: TextStyle(
                   fontSize: 28,
+                  height: 0.8,
+                  letterSpacing: 3.0, // ← 文字の間隔を広げる
                   fontWeight: FontWeight.bold,
                   color: AppColors.getHighLightColor(context),
                 ),
@@ -524,6 +531,20 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
     // 現在の数字をベースに、桁ごとに処理
     List<Widget> digits = [];
+
+    // 0の場合は特別処理
+    if (_f13KeyCount == 0) {
+      print('Special handling for zero: count=$_f13KeyCount');
+      digits.add(
+        _buildSingleDigit(
+          currentDigit: '0',
+          previousDigit: '',
+          shouldAnimate: false,
+          digitIndex: 0,
+        ),
+      );
+      return digits;
+    }
 
     for (int i = 0; i < currentStr.length; i++) {
       final currentDigit = currentStr[i];
@@ -573,6 +594,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 28,
+            height: 1,
             fontWeight: FontWeight.bold,
             color: AppColors.getHighLightColor(context),
           ),
@@ -583,7 +605,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     // 変化あり：アニメーション
     return SizedBox(
       width: 20,
-      height: 40,
       child: ClipRect(
         child: SlidingNumber(
           key: ValueKey('$digitIndex-$currentDigit-$previousDigit'),
@@ -592,19 +613,23 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 28,
+              height: 1,
               fontWeight: FontWeight.bold,
               color: AppColors.getHighLightColor(context),
             ),
           ),
-          previousChild: previousDigit.isNotEmpty ? Text(
-            previousDigit,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: AppColors.getHighLightColor(context),
-            ),
-          ) : null,
+          previousChild: previousDigit.isNotEmpty
+              ? Text(
+                  previousDigit,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 28,
+                    height: 1,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.getHighLightColor(context),
+                  ),
+                )
+              : null,
         ),
       ),
     );
@@ -640,14 +665,20 @@ class _SlidingNumberState extends State<SlidingNumber>
       vsync: this,
     );
 
-    _slideInAnim = Tween<double>(begin: 40.0, end: 0.0)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _slideInAnim = Tween<double>(
+      begin: 40.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-    _slideOutAnim = Tween<double>(begin: 0.0, end: -40.0)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _slideOutAnim = Tween<double>(
+      begin: 0.0,
+      end: -40.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-    _opacityAnim = Tween<double>(begin: 1.0, end: 0.0)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _opacityAnim = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     // 数字が切り替わるたびにアニメーションを再生
     WidgetsBinding.instance.addPostFrameCallback((_) {
