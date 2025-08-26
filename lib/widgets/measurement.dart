@@ -297,6 +297,7 @@ class _StandardInfoCardState extends State<Measurement> {
     String status, // ← 追加
   ) {
     final highLightColor = AppColors.getHighLightColor(context); // ← 1回だけ取得
+    final baseColor = AppColors.getLineColor(context); // ← 1回だけ取得
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
@@ -367,14 +368,24 @@ class _StandardInfoCardState extends State<Measurement> {
                               color: hintColor,
                               fontSize: 12,
                             ),
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: baseColor,
+                                width: 1.0,
+                              ),
+                            ),
                             focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                 color: highLightColor,
                                 width: 2.0,
                               ),
                             ),
-                            enabledBorder: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: baseColor,
+                                width: 1.0,
+                              ),
+                            ),
                           ),
                           onSubmitted: (_) {
                             final input = double.tryParse(controller.text);

@@ -253,6 +253,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 044
 
+- Arduino leonardo を利用してカウンターを追加(F1 キーを送る)
+
+#### commit 045
+
 ---
 
 ### now
@@ -277,7 +281,11 @@ flutter run<br/>
 flutter pub get
 </pre>
 - 無線接続の有効化(USB 接続した状態で実行)
+- タブレットのワイヤレスデバッグをオフ → オン
+- USB ケーブル接続して下記
 <pre>adb tcpip 5555</pre>
+- USB ケーブルを抜いて下記
+<pre>flutter run</pre>
 
 ### prompt 4 AI
 

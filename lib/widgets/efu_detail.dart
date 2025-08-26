@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:preharness/widgets/dial_selector_with_db.dart';
 import 'package:preharness/widgets/measurement.dart';
 import 'package:preharness/utils/global.dart';
@@ -27,19 +28,34 @@ class EfuDetailPage extends StatefulWidget {
   State<EfuDetailPage> createState() => _EfuDetailPageState();
 }
 
-class _EfuDetailPageState extends State<EfuDetailPage> {
+class _EfuDetailPageState extends State<EfuDetailPage>
+    with SingleTickerProviderStateMixin {
   Color? _containerColor; // Added
   Color? _containerForeColor; // Added
   String? _recommendedHindDial; // 推奨後足ダイヤル値
   String _currentHindDial = '5'; // 現在の後足ダイヤル値
   String? _recommendedTopDial; // 推奨上ダイヤル値
-  String? _recommendedBottomDial; // 推奨下ダイヤル値  
+  String? _recommendedBottomDial; // 推奨下ダイヤル値
   String _currentTopDial = '0.5'; // 現在の上ダイヤル値
   String _currentBottomDial = '1'; // 現在の下ダイヤル値
+  int _f13KeyCount = 0; // F13キーカウンター
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _glowAnimation;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
+    );
+    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _loadColor(); // Call a method to load the color
   }
 
@@ -75,6 +91,12 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     }
   }
 
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   void _onHindDialRecommendation(String? recommendedDial) {
     setState(() {
       _recommendedHindDial = recommendedDial;
@@ -89,7 +111,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     });
   }
 
-  void _onFrontDialRecommendation(String? recommendedTopDial, String? recommendedBottomDial) {
+  void _onFrontDialRecommendation(
+    String? recommendedTopDial,
+    String? recommendedBottomDial,
+  ) {
     setState(() {
       _recommendedTopDial = recommendedTopDial;
       _recommendedBottomDial = recommendedBottomDial;
@@ -98,276 +123,328 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Column(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Divider(
-                      height: 1,
-                      thickness: .5,
-                      color: Colors.white,
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        print(
+          'Key event: ${event.runtimeType}, logicalKey: ${event.logicalKey}, physicalKey: ${event.physicalKey}',
+        );
+
+        if (event is KeyDownEvent) {
+          // F13、F1、またはInsertキーをチェック（Android対応）
+          if (event.logicalKey == LogicalKeyboardKey.f13 ||
+              event.logicalKey == LogicalKeyboardKey.f1 ||
+              event.logicalKey == LogicalKeyboardKey.insert ||
+              event.physicalKey == PhysicalKeyboardKey.f13) {
+            print('Target key detected: ${event.logicalKey}');
+            setState(() {
+              _f13KeyCount++;
+            });
+            _animationController.forward().then((_) {
+              _animationController.reverse();
+            });
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Card(
+        elevation: 4,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Column(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Divider(
+                        height: 1,
+                        thickness: .5,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Rowで左右に分割
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // 左側: 情報グループ
+                                    Expanded(
+                                      flex: 5,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 5,
+                                                child: _buildLabelValue(
+                                                  '製品品番:',
+                                                  widget
+                                                      .processingConditions['p_number'],
+                                                  valueFont: 28,
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 3,
+                                                child: _buildLabelValue(
+                                                  'ロットNo:',
+                                                  widget
+                                                      .processingConditions['lot_num'],
+                                                  valueFont: 28,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 5),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 5,
+                                                child: _buildLabelValue(
+                                                  '設変:',
+                                                  widget
+                                                      .processingConditions['eng_change'],
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 3,
+                                                child: _buildLabelValue(
+                                                  '構成No:',
+                                                  widget
+                                                      .processingConditions['cfg_no'],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 5),
+                                          Row(
+                                            children: [
+                                              _buildLabelValue(
+                                                '色:',
+                                                widget
+                                                    .processingConditions['wire_color'],
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 5),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 5,
+                                                child: _buildLabelValue(
+                                                  '準完日:',
+                                                  widget
+                                                      .processingConditions['delivery_date'],
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 3,
+                                                child: _buildLabelValue(
+                                                  '数量:',
+                                                  widget
+                                                      .processingConditions['wire_cnt'],
+                                                  valueFont: 30,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 10),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              ElevatedButton.icon(
+                                                onPressed: () {
+                                                  try {
+                                                    widget.onBack();
+                                                  } catch (e) {
+                                                    print(
+                                                      'Error in onBack: $e',
+                                                    );
+                                                    // エラーが発生した場合、Navigatorで直接戻る
+                                                    Navigator.of(context).pop();
+                                                  }
+                                                },
+                                                icon: const Icon(
+                                                  Icons.arrow_back,
+                                                ),
+                                                label: const Text('戻る'),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 0), // 左右の間隔
+
+                                    Expanded(
+                                      flex: 6,
+                                      child: Column(
+                                        children: [
+                                          DialSelectorWithDb(
+                                            processingConditions:
+                                                widget.processingConditions,
+                                            blockInfo: widget.blockInfo,
+                                            recommendedHindDial:
+                                                _recommendedHindDial,
+                                            recommendedTopDial:
+                                                _recommendedTopDial,
+                                            recommendedBottomDial:
+                                                _recommendedBottomDial,
+                                            onDialChanged: _onDialChanged,
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  formatCode(
+                                                    widget
+                                                        .blockInfo['terminals'][0],
+                                                    "-",
+                                                  ),
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppColors.getLineColor(
+                                                          context,
+                                                        ),
+                                                    fontSize: 20,
+                                                  ),
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Text(
+                                                  '${widget.processingConditions['wire_type']} / ${widget.processingConditions['wire_size']}',
+                                                  style: TextStyle(
+                                                    color:
+                                                        AppColors.getLineColor(
+                                                          context,
+                                                        ),
+                                                    fontSize: 20,
+                                                  ),
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  formatCode(
+                                                    widget
+                                                        .blockInfo['terminals'][1],
+                                                    "-",
+                                                  ),
+                                                  style: TextStyle(
+                                                    fontSize: 20,
+                                                    color:
+                                                        AppColors.getLineColor(
+                                                          context,
+                                                        ),
+                                                  ),
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              ),
+                                              Expanded(child: Text("")),
+                                            ],
+                                          ),
+                                          Divider(
+                                            height: 20,
+                                            thickness: 0.5,
+                                            color: AppColors.getLineColor(
+                                              context,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.of(context).push(
+                                                PageRouteBuilder(
+                                                  pageBuilder:
+                                                      (
+                                                        context,
+                                                        animation,
+                                                        secondaryAnimation,
+                                                      ) {
+                                                        return _FullScreenImageView(
+                                                          imagePath:
+                                                              'assets/images/71144020-2.jpg',
+                                                        );
+                                                      },
+                                                  transitionsBuilder:
+                                                      (
+                                                        context,
+                                                        animation,
+                                                        secondaryAnimation,
+                                                        child,
+                                                      ) {
+                                                        return FadeTransition(
+                                                          opacity: animation,
+                                                          child: child,
+                                                        );
+                                                      },
+                                                ),
+                                              );
+                                            },
+                                            child: SizedBox(
+                                              height: 250,
+                                              child: InteractiveViewer(
+                                                minScale: 0.5,
+                                                maxScale: 3.0,
+                                                child: Image.asset(
+                                                  'assets/images/71144020-2.jpg',
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Column(
                             children: [
-                              // Rowで左右に分割
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // 左側: 情報グループ
-                                  Expanded(
-                                    flex: 5,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              flex: 5,
-                                              child: _buildLabelValue(
-                                                '製品品番:',
-                                                widget
-                                                    .processingConditions['p_number'],
-                                                valueFont: 28,
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 3,
-                                              child: _buildLabelValue(
-                                                'ロットNo:',
-                                                widget
-                                                    .processingConditions['lot_num'],
-                                                valueFont: 28,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 5),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              flex: 5,
-                                              child: _buildLabelValue(
-                                                '設変:',
-                                                widget
-                                                    .processingConditions['eng_change'],
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 3,
-                                              child: _buildLabelValue(
-                                                '構成No:',
-                                                widget
-                                                    .processingConditions['cfg_no'],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 5),
-                                        Row(
-                                          children: [
-                                            _buildLabelValue(
-                                              '色:',
-                                              widget
-                                                  .processingConditions['wire_color'],
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 5),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              flex: 5,
-                                              child: _buildLabelValue(
-                                                '準完日:',
-                                                widget
-                                                    .processingConditions['delivery_date'],
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 3,
-                                              child: _buildLabelValue(
-                                                '数量:',
-                                                widget
-                                                    .processingConditions['wire_cnt'],
-                                                valueFont: 30,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            ElevatedButton.icon(
-                                              onPressed: () {
-                                                try {
-                                                  widget.onBack();
-                                                } catch (e) {
-                                                  print('Error in onBack: $e');
-                                                  // エラーが発生した場合、Navigatorで直接戻る
-                                                  Navigator.of(context).pop();
-                                                }
-                                              },
-                                              icon: const Icon(
-                                                Icons.arrow_back,
-                                              ),
-                                              label: const Text('戻る'),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 0), // 左右の間隔
-
-                                  Expanded(
-                                    flex: 6,
-                                    child: Column(
-                                      children: [
-                                        DialSelectorWithDb(
-                                          processingConditions:
-                                              widget.processingConditions,
-                                          blockInfo: widget.blockInfo,
-                                          recommendedHindDial:
-                                              _recommendedHindDial,
-                                          recommendedTopDial: _recommendedTopDial,
-                                          recommendedBottomDial: _recommendedBottomDial,
-                                          onDialChanged: _onDialChanged,
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                formatCode(
-                                                  widget
-                                                      .blockInfo['terminals'][0],
-                                                  "-",
-                                                ),
-                                                style: TextStyle(fontSize: 20),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                '${widget.processingConditions['wire_type']} / ${widget.processingConditions['wire_size']}',
-                                                style: TextStyle(fontSize: 20),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                formatCode(
-                                                  widget
-                                                      .blockInfo['terminals'][1],
-                                                  "-",
-                                                ),
-                                                style: TextStyle(fontSize: 20),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                            Expanded(child: Text("")),
-                                          ],
-                                        ),
-                                        Divider(
-                                          height: 20,
-                                          thickness: 0.5,
-                                          color: AppColors.getLineColor(
-                                            context,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              PageRouteBuilder(
-                                                pageBuilder:
-                                                    (
-                                                      context,
-                                                      animation,
-                                                      secondaryAnimation,
-                                                    ) {
-                                                      return _FullScreenImageView(
-                                                        imagePath:
-                                                            'assets/images/71144020-2.jpg',
-                                                      );
-                                                    },
-                                                transitionsBuilder:
-                                                    (
-                                                      context,
-                                                      animation,
-                                                      secondaryAnimation,
-                                                      child,
-                                                    ) {
-                                                      return FadeTransition(
-                                                        opacity: animation,
-                                                        child: child,
-                                                      );
-                                                    },
-                                              ),
-                                            );
-                                          },
-                                          child: SizedBox(
-                                            height: 250,
-                                            child: InteractiveViewer(
-                                              minScale: 0.5,
-                                              maxScale: 3.0,
-                                              child: Image.asset(
-                                                'assets/images/71144020-2.jpg',
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                              Measurement(
+                                chListData: widget.chListData,
+                                onHindDialRecommendation:
+                                    _onHindDialRecommendation,
+                                onFrontDialRecommendation:
+                                    _onFrontDialRecommendation,
+                                currentHindDial: _currentHindDial,
+                                currentTopDial: _currentTopDial,
+                                currentBottomDial: _currentBottomDial,
                               ),
+                              SizedBox(height: 40),
+                              _buildAnimatedCounter(),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Column(
-                          children: [
-                            Measurement(
-                              chListData: widget.chListData,
-                              onHindDialRecommendation:
-                                  _onHindDialRecommendation,
-                              onFrontDialRecommendation: _onFrontDialRecommendation,
-                              currentHindDial: _currentHindDial,
-                              currentTopDial: _currentTopDial,
-                              currentBottomDial: _currentBottomDial,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    const Divider(height: 10, thickness: 1),
-                  ],
-                ),
-              ],
-            ),
-          ],
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      const Divider(height: 10, thickness: 1),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -399,6 +476,49 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildAnimatedCounter() {
+    final targetCount = widget.processingConditions['wire_cnt'];
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Container(
+            width: 120,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.getHighLightColor(context).withOpacity(0.1),
+              border: Border.all(
+                color: AppColors.getHighLightColor(context).withOpacity(0.3),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.getHighLightColor(
+                    context,
+                  ).withOpacity(_glowAnimation.value * 0.4),
+                  blurRadius: 20 * _glowAnimation.value,
+                  spreadRadius: 5 * _glowAnimation.value,
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                '$_f13KeyCount/$targetCount',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.getHighLightColor(context),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

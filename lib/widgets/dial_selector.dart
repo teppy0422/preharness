@@ -224,7 +224,6 @@ class _DialSelectorPageState extends State<DialSelectorPage>
                       final animatedBorderColor = _blinkAnimation.value > 0.5
                           ? AppColors.getHighLightColor(context)
                           : Colors.transparent;
-
                       return GestureDetector(
                         onTap: () => onTap(val),
                         child: Container(
