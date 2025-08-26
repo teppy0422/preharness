@@ -266,6 +266,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 047
 
+- Fixed bugs in \_buildAnimatedCounter.
+
+#### commit 048
+
 ---
 
 ### now

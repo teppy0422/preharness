@@ -228,10 +228,11 @@ class _Work40PageState extends State<Work40Page>
             top: 70,
             left: 10,
             right: 10,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _isDetailView
+            bottom: 0,
+            child: Column(
+              children: [
+                Expanded(
+                  child: _isDetailView
                       ? EfuDetailPage(
                           processingConditions: _processingConditions!,
                           blockInfo: _selectedBlockInfo!,
@@ -241,8 +242,8 @@ class _Work40PageState extends State<Work40Page>
                           chListError: _chListError,
                         )
                       : _buildEfuPage(),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
