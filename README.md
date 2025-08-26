@@ -253,9 +253,14 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 044
 
-- Arduino leonardo を利用してカウンターを追加(F1 キーを送る)
+- Add a counter using Arduino Leonardo (send F1 key)
 
 #### commit 045
+
+- Add a counter to efu_detail.dart
+- Changed the counter to an elevator-style animation.
+
+#### commit 046
 
 ---
 

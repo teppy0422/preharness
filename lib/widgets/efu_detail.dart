@@ -28,8 +28,7 @@ class EfuDetailPage extends StatefulWidget {
   State<EfuDetailPage> createState() => _EfuDetailPageState();
 }
 
-class _EfuDetailPageState extends State<EfuDetailPage>
-    with SingleTickerProviderStateMixin {
+class _EfuDetailPageState extends State<EfuDetailPage> {
   Color? _containerColor; // Added
   Color? _containerForeColor; // Added
   String? _recommendedHindDial; // 推奨後足ダイヤル値
@@ -39,23 +38,11 @@ class _EfuDetailPageState extends State<EfuDetailPage>
   String _currentTopDial = '0.5'; // 現在の上ダイヤル値
   String _currentBottomDial = '1'; // 現在の下ダイヤル値
   int _f13KeyCount = 0; // F13キーカウンター
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _glowAnimation;
+  int _previousF13Count = -1; // フリップ用の前の値（初回は確実に変化を検出するため-1）
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
-    );
-    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
     _loadColor(); // Call a method to load the color
   }
 
@@ -89,12 +76,6 @@ class _EfuDetailPageState extends State<EfuDetailPage>
         });
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
   }
 
   void _onHindDialRecommendation(String? recommendedDial) {
@@ -137,12 +118,19 @@ class _EfuDetailPageState extends State<EfuDetailPage>
               event.logicalKey == LogicalKeyboardKey.insert ||
               event.physicalKey == PhysicalKeyboardKey.f13) {
             print('Target key detected: ${event.logicalKey}');
+            if (!mounted) return KeyEventResult.ignored;
+
+            print(
+              'Before update: previous=$_previousF13Count, current=$_f13KeyCount',
+            );
             setState(() {
+              _previousF13Count = _f13KeyCount;
               _f13KeyCount++;
             });
-            _animationController.forward().then((_) {
-              _animationController.reverse();
-            });
+            print(
+              'After update: previous=$_previousF13Count, current=$_f13KeyCount',
+            );
+
             return KeyEventResult.handled;
           }
         }
@@ -419,20 +407,28 @@ class _EfuDetailPageState extends State<EfuDetailPage>
                             ),
                           ),
                           const SizedBox(width: 16),
-                          Column(
+                          Stack(
                             children: [
-                              Measurement(
-                                chListData: widget.chListData,
-                                onHindDialRecommendation:
-                                    _onHindDialRecommendation,
-                                onFrontDialRecommendation:
-                                    _onFrontDialRecommendation,
-                                currentHindDial: _currentHindDial,
-                                currentTopDial: _currentTopDial,
-                                currentBottomDial: _currentBottomDial,
+                              Column(
+                                children: [
+                                  Measurement(
+                                    chListData: widget.chListData,
+                                    onHindDialRecommendation:
+                                        _onHindDialRecommendation,
+                                    onFrontDialRecommendation:
+                                        _onFrontDialRecommendation,
+                                    currentHindDial: _currentHindDial,
+                                    currentTopDial: _currentTopDial,
+                                    currentBottomDial: _currentBottomDial,
+                                  ),
+                                  SizedBox(height: 120),
+                                ],
                               ),
-                              SizedBox(height: 40),
-                              _buildAnimatedCounter(),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: _buildAnimatedCounter(),
+                              ),
                             ],
                           ),
                         ],
@@ -481,44 +477,223 @@ class _EfuDetailPageState extends State<EfuDetailPage>
 
   Widget _buildAnimatedCounter() {
     final targetCount = widget.processingConditions['wire_cnt'];
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: Container(
-            width: 120,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.getHighLightColor(context).withOpacity(0.1),
-              border: Border.all(
-                color: AppColors.getHighLightColor(context).withOpacity(0.3),
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.getHighLightColor(
-                    context,
-                  ).withOpacity(_glowAnimation.value * 0.4),
-                  blurRadius: 20 * _glowAnimation.value,
-                  spreadRadius: 5 * _glowAnimation.value,
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                '$_f13KeyCount/$targetCount',
+
+    return Container(
+      width: 120,
+      height: 80,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.getHighLightColor(context).withOpacity(0.1),
+        border: Border.all(
+          color: AppColors.getHighLightColor(context).withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: ClipOval(
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildFlipCounter(),
+              Text(
+                '/$targetCount',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: AppColors.getHighLightColor(context),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFlipCounter() {
+    return Row(mainAxisSize: MainAxisSize.min, children: _buildDigitWidgets());
+  }
+
+  List<Widget> _buildDigitWidgets() {
+    final currentStr = _f13KeyCount.toString();
+    final previousStr = _previousF13Count >= 0
+        ? _previousF13Count.toString()
+        : '';
+
+    print('Building digits: $previousStr -> $currentStr');
+
+    // 現在の数字をベースに、桁ごとに処理
+    List<Widget> digits = [];
+
+    for (int i = 0; i < currentStr.length; i++) {
+      final currentDigit = currentStr[i];
+
+      // 右から左に桁を対応させる
+      final currentFromRight = currentStr.length - 1 - i; // 右から何番目か
+      final previousLen = previousStr.length;
+
+      String previousDigit = '';
+      if (currentFromRight < previousLen) {
+        // 前の数字の右からcurrentFromRight番目の桁
+        final previousIndex = previousLen - 1 - currentFromRight;
+        previousDigit = previousStr[previousIndex];
+      }
+
+      final hasChanged = currentDigit != previousDigit;
+
+      print(
+        'Position $i (right-$currentFromRight): prev="$previousDigit" -> cur="$currentDigit", changed: $hasChanged',
+      );
+
+      digits.add(
+        _buildSingleDigit(
+          currentDigit: currentDigit,
+          previousDigit: previousDigit.isEmpty ? '' : previousDigit,
+          shouldAnimate: hasChanged,
+          digitIndex: i,
+        ),
+      );
+    }
+
+    return digits;
+  }
+
+  Widget _buildSingleDigit({
+    required String currentDigit,
+    required String previousDigit,
+    required bool shouldAnimate,
+    required int digitIndex,
+  }) {
+    if (!shouldAnimate) {
+      // 変化なし：静的表示
+      return SizedBox(
+        width: 20,
+        child: Text(
+          currentDigit,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: AppColors.getHighLightColor(context),
+          ),
+        ),
+      );
+    }
+
+    // 変化あり：アニメーション
+    return SizedBox(
+      width: 20,
+      height: 40,
+      child: ClipRect(
+        child: SlidingNumber(
+          key: ValueKey('$digitIndex-$currentDigit-$previousDigit'),
+          currentChild: Text(
+            currentDigit,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: AppColors.getHighLightColor(context),
             ),
           ),
-        );
-      },
+          previousChild: previousDigit.isNotEmpty ? Text(
+            previousDigit,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: AppColors.getHighLightColor(context),
+            ),
+          ) : null,
+        ),
+      ),
+    );
+  }
+}
+
+class SlidingNumber extends StatefulWidget {
+  final Widget currentChild;
+  final Widget? previousChild;
+
+  const SlidingNumber({
+    super.key,
+    required this.currentChild,
+    this.previousChild,
+  });
+
+  @override
+  State<SlidingNumber> createState() => _SlidingNumberState();
+}
+
+class _SlidingNumberState extends State<SlidingNumber>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _slideInAnim;
+  late Animation<double> _slideOutAnim;
+  late Animation<double> _opacityAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _slideInAnim = Tween<double>(begin: 40.0, end: 0.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    _slideOutAnim = Tween<double>(begin: 0.0, end: -40.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    _opacityAnim = Tween<double>(begin: 1.0, end: 0.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+    // 数字が切り替わるたびにアニメーションを再生
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.previousChild != null) {
+        _controller.forward(from: 0);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      clipBehavior: Clip.hardEdge,
+      children: [
+        // 古い数字を上にスライドアウト
+        if (widget.previousChild != null)
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              return Transform.translate(
+                offset: Offset(0.0, _slideOutAnim.value),
+                child: Opacity(
+                  opacity: _opacityAnim.value,
+                  child: widget.previousChild,
+                ),
+              );
+            },
+          ),
+        // 新しい数字を下からスライドイン
+        AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) {
+            return Transform.translate(
+              offset: Offset(0.0, _slideInAnim.value),
+              child: widget.currentChild,
+            );
+          },
+        ),
+      ],
     );
   }
 }
