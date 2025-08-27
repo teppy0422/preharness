@@ -266,18 +266,26 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 047
 
+### 2025-08-28
+
 - Fixed bugs in \_buildAnimatedCounter.
 
 #### commit 048
 
 - Fixed an issue where the app did not accept the Arduino F1 key immediately after launch.
-- Change design f1counter in efu_detail.dart.
+- Changed design f1counter in efu_detail.dart.
 
 #### commit 049
+
+- Changed the design of efu_detail.dart.
+
+#### commit 050
 
 ---
 
 ### now
+
+- 端子品番シリアルの入力フィールドを用意
 
 ### next
 

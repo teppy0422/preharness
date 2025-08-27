@@ -42,7 +42,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   final List<MapEntry<DateTime, double>> _speedData = []; // 速度データ（時刻、速度）
   DateTime? _lastCountTime; // 最後にカウントした時刻
   double _currentSpeed = 0.0; // 現在の速度（カウント/分）
-  
+
   // フォーカスノードを追加
   late final FocusNode _focusNode;
 
@@ -51,13 +51,13 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     super.initState();
     _focusNode = FocusNode();
     _loadColor(); // Call a method to load the color
-    
+
     // 初期化完了後にフォーカスを確実に設定
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
   }
-  
+
   @override
   void dispose() {
     _focusNode.dispose();
@@ -123,6 +123,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   @override
   Widget build(BuildContext context) {
     Color baseLineColor = AppColors.getLineColor(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Focus(
       focusNode: _focusNode,
@@ -178,7 +179,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
       child: Card(
         color: Colors.transparent,
-        elevation: 4,
+        elevation: 0,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Stack(
@@ -186,7 +187,11 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Divider(height: 1, thickness: .5, color: Colors.white),
+                  Divider(
+                    height: 1,
+                    thickness: .5,
+                    color: AppColors.getLineColor(context),
+                  ),
                   SizedBox(height: 10),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,64 +327,88 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                             _recommendedBottomDial,
                                         onDialChanged: _onDialChanged,
                                       ),
-                                      const SizedBox(height: 10),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              formatCode(
-                                                widget
-                                                    .blockInfo['terminals'][0],
-                                                "-",
+                                      Card(
+                                        elevation: 3,
+                                        color: AppColors.getCardColor(context),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: AppColors.getLineColor(
+                                                context,
                                               ),
-                                              style: TextStyle(
-                                                color: AppColors.getLineColor(
-                                                  context,
-                                                ),
-                                                fontSize: 20,
-                                              ),
-                                              textAlign: TextAlign.left,
+                                              width: .5,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
                                             ),
                                           ),
-                                          Expanded(
-                                            child: Text(
-                                              '${widget.processingConditions['wire_type']} / ${widget.processingConditions['wire_size']}',
-                                              style: TextStyle(
-                                                color: AppColors.getLineColor(
-                                                  context,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        formatCode(
+                                                          widget
+                                                              .blockInfo['terminals'][0],
+                                                          "-",
+                                                        ),
+                                                        style: TextStyle(
+                                                          color:
+                                                              AppColors.getLineColor(
+                                                                context,
+                                                              ),
+                                                          fontSize: 20,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Text(
+                                                        '${widget.processingConditions['wire_type']} / ${widget.processingConditions['wire_size']}',
+                                                        style: TextStyle(
+                                                          color:
+                                                              AppColors.getLineColor(
+                                                                context,
+                                                              ),
+                                                          fontSize: 20,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                fontSize: 20,
-                                              ),
-                                              textAlign: TextAlign.left,
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        formatCode(
+                                                          widget
+                                                              .blockInfo['terminals'][1],
+                                                          "-",
+                                                        ),
+                                                        style: TextStyle(
+                                                          fontSize: 20,
+                                                          color:
+                                                              AppColors.getLineColor(
+                                                                context,
+                                                              ),
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                      ),
+                                                    ),
+                                                    Expanded(child: Text("")),
+                                                  ],
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              formatCode(
-                                                widget
-                                                    .blockInfo['terminals'][1],
-                                                "-",
-                                              ),
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                color: AppColors.getLineColor(
-                                                  context,
-                                                ),
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            ),
-                                          ),
-                                          Expanded(child: Text("")),
-                                        ],
-                                      ),
-                                      Divider(
-                                        height: 20,
-                                        thickness: 0.5,
-                                        color: AppColors.getLineColor(context),
+                                        ),
                                       ),
                                       GestureDetector(
                                         onTap: () {
@@ -411,42 +440,107 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                             ),
                                           );
                                         },
-                                        child: SizedBox(
-                                          height: 295,
-                                          child: LayoutBuilder(
-                                            builder: (context, constraints) {
-                                              // ビューポートサイズを取得
-                                              final viewWidth =
-                                                  constraints.maxWidth;
-                                              final viewHeight =
-                                                  constraints.maxHeight;
-                                              final scale = 2.4;
+                                        child: Card(
+                                          elevation: 3,
+                                          child: SizedBox(
+                                            height: 295,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Stack(
+                                                children: [
+                                                  LayoutBuilder(
+                                                    builder: (context, constraints) {
+                                                      // ビューポートサイズを取得
+                                                      final viewWidth =
+                                                          constraints.maxWidth;
+                                                      final viewHeight =
+                                                          constraints.maxHeight;
+                                                      final scale = 2.4;
 
-                                              // パーセンテージでパン位置を指定
-                                              final panX =
-                                                  -(viewWidth *
-                                                      0.04 *
-                                                      scale); // 右に10%
-                                              final panY =
-                                                  -(viewHeight *
-                                                      0.35 *
-                                                      scale); // 下に80%
+                                                      // パーセンテージでパン位置を指定
+                                                      final panX =
+                                                          -(viewWidth *
+                                                              0.04 *
+                                                              scale); // 右に10%
+                                                      final panY =
+                                                          -(viewHeight *
+                                                              0.35 *
+                                                              scale); // 下に80%
 
-                                              return InteractiveViewer(
-                                                minScale: 0.5,
-                                                maxScale: 3.0,
-                                                transformationController:
-                                                    TransformationController(
-                                                      Matrix4.identity()
-                                                        ..translate(panX, panY)
-                                                        ..scale(scale),
+                                                      final image = Image.asset(
+                                                        'assets/images/71144020-2.jpg',
+                                                        fit: BoxFit.contain,
+                                                      );
+
+                                                      return InteractiveViewer(
+                                                        minScale: 0.5,
+                                                        maxScale: 3.0,
+                                                        transformationController:
+                                                            TransformationController(
+                                                              Matrix4.identity()
+                                                                ..translate(
+                                                                  panX,
+                                                                  panY,
+                                                                )
+                                                                ..scale(scale),
+                                                            ),
+                                                        child: isDark
+                                                            ? ColorFiltered(
+                                                                colorFilter:
+                                                                    const ColorFilter.matrix(
+                                                                      [
+                                                                        -1,
+                                                                        0,
+                                                                        0,
+                                                                        0,
+                                                                        255,
+                                                                        0,
+                                                                        -1,
+                                                                        0,
+                                                                        0,
+                                                                        255,
+                                                                        0,
+                                                                        0,
+                                                                        -1,
+                                                                        0,
+                                                                        255,
+                                                                        0,
+                                                                        0,
+                                                                        0,
+                                                                        1,
+                                                                        0,
+                                                                      ],
+                                                                    ),
+                                                                child: image,
+                                                              )
+                                                            : image,
+                                                      );
+                                                    },
+                                                  ),
+                                                  // ボーダーを上に重ねる
+                                                  Positioned.fill(
+                                                    child: IgnorePointer(
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          border: Border.all(
+                                                            color:
+                                                                AppColors.getLineColor(
+                                                                  context,
+                                                                ),
+                                                            width: 0.5,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                8,
+                                                              ),
+                                                        ),
+                                                      ),
                                                     ),
-                                                child: Image.asset(
-                                                  'assets/images/71144020-2.jpg',
-                                                  fit: BoxFit.contain,
-                                                ),
-                                              );
-                                            },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -479,7 +573,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                       ),
                     ],
                   ),
-                  Divider(height: 20, thickness: 0.5, color: baseLineColor),
+                  Divider(height: 10, thickness: 0.5, color: baseLineColor),
                 ],
               ),
               Positioned(
@@ -546,7 +640,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             color: AppColors.getLineColor(context).withOpacity(0.1),
             border: Border.all(
               color: AppColors.getLineColor(context).withOpacity(0.3),
-              width: 2,
+              width: 1,
             ),
           ),
           child: ClipOval(
@@ -590,8 +684,8 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                         ),
                       ),
                       child: SizedBox(
-                        width: 76,
-                        height: 76,
+                        width: 78,
+                        height: 78,
                         child: Center(
                           // ← これでTextが縦横中央
                           child: Text(
@@ -637,18 +731,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   }
 
   Widget _buildSpeedGraph() {
-    return Container(
-      height: 80,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.black.withOpacity(0.1),
-        border: Border.all(
-          color: AppColors.getHighLightColor(context).withOpacity(0.3),
-          width: 1,
-        ),
-      ),
+    return SizedBox(
+      height: 90,
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(4.0),
         child: Stack(
           children: [
             // グラフを全体に表示
@@ -658,9 +744,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                       'データなし',
                       style: TextStyle(
                         fontSize: 10,
-                        color: AppColors.getHighLightColor(
-                          context,
-                        ).withOpacity(0.6),
+                        color: AppColors.getHighLightColor(context),
                       ),
                     ),
                   )
@@ -675,23 +759,27 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             // 平均値テキストを前面に表示（高さを取らない）
             if (_speedData.isNotEmpty)
               Positioned(
-                top: 4,
-                left: 4,
+                top: 0,
+                left: 0,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 6,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
+                    color: AppColors.getCardColor(context),
                     borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: AppColors.getLineColor(context),
+                      width: 1.0,
+                    ),
                   ),
                   child: Text(
-                    '平均: ${(_speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length).toStringAsFixed(1)} /分',
+                    '${(_speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length).toStringAsFixed(1)} /分',
                     style: TextStyle(
-                      fontSize: 9,
-                      color: AppColors.getHighLightColor(context),
-                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                      color: AppColors.getLineColor(context),
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -937,6 +1025,9 @@ class _FullScreenImageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final image = Image.asset(imagePath, fit: BoxFit.contain);
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -946,7 +1037,21 @@ class _FullScreenImageView extends StatelessWidget {
             child: InteractiveViewer(
               minScale: 0.5,
               maxScale: 4.0,
-              child: Center(child: Image.asset(imagePath, fit: BoxFit.contain)),
+              child: Center(
+                child: isDark
+                    ? ColorFiltered(
+                        colorFilter: const ColorFilter.matrix(
+                          [
+                            -1, 0, 0, 0, 255,
+                            0, -1, 0, 0, 255,
+                            0, 0, -1, 0, 255,
+                            0, 0, 0, 1, 0,
+                          ],
+                        ),
+                        child: image,
+                      )
+                    : image,
+              ),
             ),
           ),
           Positioned(

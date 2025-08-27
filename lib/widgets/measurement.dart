@@ -228,52 +228,49 @@ class _StandardInfoCardState extends State<Measurement> {
             {"label": "後足C/W", "min": 2.150, "max": 2.350},
           ];
 
-    return Center(
-      child: SizedBox(
-        width: 220,
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardColor,
-            border: Border.all(color: Colors.white, width: 0.5),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Card(
-            color: cardColor,
-            elevation: 4,
-            margin: EdgeInsets.zero,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 0),
-                  for (int i = 0; i < rows.length; i++)
-                    _buildRow(
-                      rows[i]["label"] as String,
-                      rows[i]["min"] as double,
-                      rows[i]["max"] as double,
-                      i,
-                      _focusNodes[i],
-                      _controllers[i],
-                      isDark,
-                      fieldBgColor,
-                      fieldTextColor,
-                      labelColor,
-                      hintColor,
-                      _activeIndex == i ? highLightColor : labelColor,
-                      _statuses[i], // ← 追加
-                    ),
-                  Text(
-                    "※単位は全てmm",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: labelColor,
-                    ),
+    return SizedBox(
+      width: 220,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardColor,
+          border: Border.all(color: AppColors.getLineColor(context), width: .5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Card(
+          color: cardColor,
+          elevation: 3,
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 0),
+                for (int i = 0; i < rows.length; i++)
+                  _buildRow(
+                    rows[i]["label"] as String,
+                    rows[i]["min"] as double,
+                    rows[i]["max"] as double,
+                    i,
+                    _focusNodes[i],
+                    _controllers[i],
+                    isDark,
+                    fieldBgColor,
+                    fieldTextColor,
+                    labelColor,
+                    hintColor,
+                    _activeIndex == i ? highLightColor : labelColor,
+                    _statuses[i], // ← 追加
                   ),
-                ],
-              ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    "※単位は全てmm",
+                    style: TextStyle(fontSize: 11, color: labelColor),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -308,42 +305,43 @@ class _StandardInfoCardState extends State<Measurement> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(width: 30, child: Text("")),
-                  SizedBox(
-                    width: 120,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        "${minValue.toStringAsFixed(3)}～${maxValue.toStringAsFixed(3)}",
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: fieldTextColor,
+              Positioned(
+                right: 100,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: 30, child: Text("")),
+                    SizedBox(
+                      width: 109,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          "${minValue.toStringAsFixed(3)}～${maxValue.toStringAsFixed(3)}",
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: fieldTextColor,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-
-              const SizedBox(height: 0),
               Row(
                 children: [
                   Stack(
+                    clipBehavior: Clip.none, // はみ出しを許可
                     children: [
                       SizedBox(
                         width: 150,
                         child: TextField(
                           controller: controller,
                           focusNode: focusNode,
-                          // readOnly: true,
                           showCursor: true,
                           textAlign: TextAlign.right,
                           keyboardType: TextInputType.none,
@@ -354,12 +352,13 @@ class _StandardInfoCardState extends State<Measurement> {
                               extentOffset: controller.text.length,
                             );
                           },
-                          style: TextStyle(color: fieldTextColor),
+                          style: TextStyle(color: fieldTextColor), // styleを元に戻す
                           decoration: InputDecoration(
                             isDense: true,
                             filled: true,
                             fillColor: fieldBgColor,
                             contentPadding: const EdgeInsets.symmetric(
+                              // paddingを元に戻す
                               horizontal: 8,
                               vertical: 8,
                             ),
@@ -450,6 +449,7 @@ class _StandardInfoCardState extends State<Measurement> {
                           },
                         ),
                       ),
+                      // フィールドタイトル
                       SizedBox(
                         width: 50,
                         height: 40,
@@ -471,23 +471,26 @@ class _StandardInfoCardState extends State<Measurement> {
                           ],
                         ),
                       ),
+                      // OK/NG
+                      if (status.isNotEmpty)
+                        Positioned(
+                          right: -28, // 右側に30はみ出す
+                          top: 0,
+                          bottom: 0,
+                          child: Center(
+                            child: Text(
+                              status,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: status == "OK"
+                                    ? AppColors.getHighLightColor(context)
+                                    : Colors.red,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
-                  ),
-                  SizedBox(width: 4),
-                  SizedBox(
-                    width: 20,
-                    child: Text(
-                      status,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: status == "OK"
-                            ? AppColors.neonGreen
-                            : status == "NG"
-                            ? Colors.red
-                            : Colors.transparent,
-                      ),
-                    ),
                   ),
                 ],
               ),

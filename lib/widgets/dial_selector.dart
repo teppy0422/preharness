@@ -86,12 +86,16 @@ class _DialSelectorPageState extends State<DialSelectorPage>
 
     final cardColor = isDark ? AppColors.black : AppColors.paperWhite;
     final labelColor = isDark ? Colors.white70 : Colors.black87;
-    return Center(
+    return Card(
+      elevation: 3,
       child: SizedBox(
         child: Container(
           decoration: BoxDecoration(
             color: cardColor,
-            border: Border.all(color: Colors.white, width: .5),
+            border: Border.all(
+              color: AppColors.getLineColor(context),
+              width: .5,
+            ),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Padding(
@@ -146,7 +150,7 @@ class _DialSelectorPageState extends State<DialSelectorPage>
                   labelColor: labelColor,
                   recommendedValue: widget.recommendedBottomDial,
                 ),
-                const Divider(thickness: 1, color: Colors.grey),
+                Divider(thickness: .5, color: AppColors.getLineColor(context)),
                 _buildDialSection(
                   title: "後足",
                   options: hindDialOptions,
@@ -187,6 +191,8 @@ class _DialSelectorPageState extends State<DialSelectorPage>
     required double customWidth,
     String? recommendedValue,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       children: [
         const SizedBox(height: 2),
@@ -203,27 +209,36 @@ class _DialSelectorPageState extends State<DialSelectorPage>
               buttonColor = widget.valuesAreFromDb
                   ? AppColors.getHighLightColor(context)
                   : AppColors.red;
-              borderColor = widget.valuesAreFromDb
-                  ? AppColors.getHighLightColor(context)
-                  : AppColors.red;
+              borderColor = isDark
+                  ? widget.valuesAreFromDb
+                        ? AppColors.getHighLightColor(context)
+                        : AppColors.red
+                  : AppColors.paperBlack;
               fontColor = AppColors.paperBlack;
             } else if (isRecommended) {
-              buttonColor = AppColors.paperBlack;
-              borderColor = AppColors.getHighLightColor(context);
-              fontColor = AppColors.paperWhite;
+              //ここを変えても何も変わらないよ
+              buttonColor = Colors.transparent;
+              borderColor = AppColors.getLineColor(context);
+              fontColor = AppColors.getLineColor(context);
             } else {
-              buttonColor = AppColors.paperBlack;
-              borderColor = Colors.grey[300]!;
-              fontColor = AppColors.paperWhite;
+              buttonColor = Colors.transparent;
+              borderColor = AppColors.getLineColor(context);
+              fontColor = AppColors.getLineColor(context);
             }
 
-            return isRecommended
+            return isRecommended && !isSelected
                 ? AnimatedBuilder(
                     animation: _blinkAnimation,
                     builder: (context, child) {
-                      final animatedBorderColor = _blinkAnimation.value > 0.5
+                      final animatedBoxColor = _blinkAnimation.value > 0.5
                           ? AppColors.getHighLightColor(context)
                           : Colors.transparent;
+                      final animatedFontColor = !isDark
+                          ? AppColors.paperBlack
+                          : (_blinkAnimation.value > 0.5
+                                ? AppColors.paperBlack
+                                : AppColors.paperWhite);
+
                       return GestureDetector(
                         onTap: () => onTap(val),
                         child: Container(
@@ -233,11 +248,11 @@ class _DialSelectorPageState extends State<DialSelectorPage>
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: buttonColor,
+                            color: animatedBoxColor,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: animatedBorderColor,
-                              width: 2.0,
+                              color: animatedFontColor,
+                              width: 1.0,
                             ),
                           ),
                           child: Text(
@@ -247,7 +262,7 @@ class _DialSelectorPageState extends State<DialSelectorPage>
                               fontSize: 14,
                               fontFamily: "Inter",
                               fontWeight: FontWeight.w900,
-                              color: fontColor,
+                              color: animatedFontColor,
                             ),
                           ),
                         ),
@@ -265,7 +280,7 @@ class _DialSelectorPageState extends State<DialSelectorPage>
                       decoration: BoxDecoration(
                         color: buttonColor,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: borderColor, width: 2.0),
+                        border: Border.all(color: borderColor, width: 1.0),
                       ),
                       child: Text(
                         val,

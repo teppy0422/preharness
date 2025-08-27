@@ -327,18 +327,23 @@ class _EquipmentInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.getLineColor(context), width: .5),
+        border: Border.all(color: AppColors.getLineSubColor(context), width: 1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Padding(
         padding: const EdgeInsets.all(6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(child: Text("号機: 5号機")),
+                Expanded(
+                  child: Text(
+                    "号機: 5号機",
+                    style: TextStyle(color: AppColors.getLineSubColor(context)),
+                  ),
+                ),
                 Expanded(child: Text("機種: CM20")),
                 Expanded(child: Text("管理No: 3456")),
               ],
@@ -468,7 +473,7 @@ class _SearchCardState extends State<_SearchCard> {
             border: Border.all(
               color: widget.focusNode.hasFocus
                   ? AppColors.getHighLightColor(context)
-                  : Colors.grey,
+                  : AppColors.getLineColor(context),
               width: widget.focusNode.hasFocus ? 2.0 : 1.0,
             ),
             borderRadius: BorderRadius.circular(4),
