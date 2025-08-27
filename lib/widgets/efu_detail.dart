@@ -39,11 +39,29 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   String _currentBottomDial = '1'; // 現在の下ダイヤル値
   int _f13KeyCount = 0; // F13キーカウンター
   int _previousF13Count = -1; // フリップ用の前の値（初回は確実に変化を検出するため-1）
+  final List<MapEntry<DateTime, double>> _speedData = []; // 速度データ（時刻、速度）
+  DateTime? _lastCountTime; // 最後にカウントした時刻
+  double _currentSpeed = 0.0; // 現在の速度（カウント/分）
+  
+  // フォーカスノードを追加
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
+    _focusNode = FocusNode();
     _loadColor(); // Call a method to load the color
+    
+    // 初期化完了後にフォーカスを確実に設定
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+  
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _loadColor() async {
@@ -107,6 +125,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     Color baseLineColor = AppColors.getLineColor(context);
 
     return Focus(
+      focusNode: _focusNode,
       autofocus: true,
       onKeyEvent: (node, event) {
         print(
@@ -125,12 +144,30 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             print(
               'Before update: previous=$_previousF13Count, current=$_f13KeyCount',
             );
+
+            final now = DateTime.now();
+            // 速度計算（カウント/分）
+            if (_lastCountTime != null) {
+              final timeDiff = now.difference(_lastCountTime!).inMilliseconds;
+              if (timeDiff > 0) {
+                _currentSpeed = 60000.0 / timeDiff; // 1分間あたりのカウント数
+                // データを追加（最大60秒分保持）
+                _speedData.add(MapEntry(now, _currentSpeed));
+
+                // 60秒より古いデータを削除
+                final cutoff = now.subtract(const Duration(seconds: 60));
+                _speedData.removeWhere((entry) => entry.key.isBefore(cutoff));
+              }
+            }
+
             setState(() {
               _previousF13Count = _f13KeyCount;
               _f13KeyCount++;
+              _lastCountTime = now;
             });
+
             print(
-              'After update: previous=$_previousF13Count, current=$_f13KeyCount',
+              'After update: previous=$_previousF13Count, current=$_f13KeyCount, speed: $_currentSpeed',
             );
 
             return KeyEventResult.handled;
@@ -375,14 +412,41 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                           );
                                         },
                                         child: SizedBox(
-                                          height: 250,
-                                          child: InteractiveViewer(
-                                            minScale: 0.5,
-                                            maxScale: 3.0,
-                                            child: Image.asset(
-                                              'assets/images/71144020-2.jpg',
-                                              fit: BoxFit.contain,
-                                            ),
+                                          height: 295,
+                                          child: LayoutBuilder(
+                                            builder: (context, constraints) {
+                                              // ビューポートサイズを取得
+                                              final viewWidth =
+                                                  constraints.maxWidth;
+                                              final viewHeight =
+                                                  constraints.maxHeight;
+                                              final scale = 2.4;
+
+                                              // パーセンテージでパン位置を指定
+                                              final panX =
+                                                  -(viewWidth *
+                                                      0.04 *
+                                                      scale); // 右に10%
+                                              final panY =
+                                                  -(viewHeight *
+                                                      0.35 *
+                                                      scale); // 下に80%
+
+                                              return InteractiveViewer(
+                                                minScale: 0.5,
+                                                maxScale: 3.0,
+                                                transformationController:
+                                                    TransformationController(
+                                                      Matrix4.identity()
+                                                        ..translate(panX, panY)
+                                                        ..scale(scale),
+                                                    ),
+                                                child: Image.asset(
+                                                  'assets/images/71144020-2.jpg',
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              );
+                                            },
                                           ),
                                         ),
                                       ),
@@ -418,7 +482,18 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                   Divider(height: 20, thickness: 0.5, color: baseLineColor),
                 ],
               ),
-              Positioned(bottom: 10, right: 0, child: _buildAnimatedCounter()),
+              Positioned(
+                bottom: 1,
+                right: 0,
+                left: 0, // 左端の位置を指定してスペースを確保
+                child: Row(
+                  children: [
+                    Expanded(child: _buildSpeedGraph()),
+                    const SizedBox(width: 16),
+                    _buildAnimatedCounter(),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -456,42 +531,172 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   }
 
   Widget _buildAnimatedCounter() {
-    final targetCount = widget.processingConditions['wire_cnt'];
+    final targetCount =
+        int.tryParse(widget.processingConditions['wire_cnt'].toString()) ?? 0;
+    final isCompleted = _f13KeyCount >= targetCount && targetCount > 0;
+    final counterString = "$_f13KeyCount/$targetCount";
+    return Stack(
+      clipBehavior: Clip.none, // ❗ Containerの外にはみ出させたい場合必要
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.getLineColor(context).withOpacity(0.1),
+            border: Border.all(
+              color: AppColors.getLineColor(context).withOpacity(0.3),
+              width: 2,
+            ),
+          ),
+          child: ClipOval(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!isCompleted) ...[
+                    _buildFlipCounter(),
+                    Divider(
+                      color: AppColors.getLineColor(context),
+                      thickness: 0.5,
+                      height: 10,
+                    ),
+                    Text(
+                      '$targetCount',
+                      style: TextStyle(
+                        fontSize: 28,
+                        height: 0.8,
+                        letterSpacing: 3.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.getHighLightColor(context),
+                      ),
+                    ),
+                  ] else ...[
+                    ElevatedButton(
+                      onPressed: () {
+                        // 完了処理をここに実装
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('作業完了しました！')),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.getHighLightColor(
+                          context,
+                        ), // 背景色
+                        elevation: 2, // 影の高さ
+                        padding: EdgeInsets.zero, // SizedBoxでサイズ管理するので余白はゼロ
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8), // 角丸
+                        ),
+                      ),
+                      child: SizedBox(
+                        width: 76,
+                        height: 76,
+                        child: Center(
+                          // ← これでTextが縦横中央
+                          child: Text(
+                            '完了',
+                            style: TextStyle(
+                              color: AppColors.paperBlack,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (isCompleted) ...[
+          Positioned(
+            bottom: -10,
+            right: -20,
+            width: 100,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end, // ✅ 右寄せ
+              children: [
+                Text(
+                  counterString,
+                  style: TextStyle(
+                    color: AppColors.getHighLightColor(context),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 
+  Widget _buildSpeedGraph() {
     return Container(
-      width: 80,
       height: 80,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.getHighLightColor(context).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.black.withOpacity(0.1),
         border: Border.all(
           color: AppColors.getHighLightColor(context).withOpacity(0.3),
-          width: 2,
+          width: 1,
         ),
       ),
-      child: ClipOval(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildFlipCounter(),
-              Divider(
-                color: AppColors.getHighLightColor(context),
-                thickness: 0.5,
-                height: 10,
-              ),
-              Text(
-                '$targetCount',
-                style: TextStyle(
-                  fontSize: 28,
-                  height: 0.8,
-                  letterSpacing: 3.0, // ← 文字の間隔を広げる
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.getHighLightColor(context),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Stack(
+          children: [
+            // グラフを全体に表示
+            _speedData.isEmpty
+                ? Center(
+                    child: Text(
+                      'データなし',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppColors.getHighLightColor(
+                          context,
+                        ).withOpacity(0.6),
+                      ),
+                    ),
+                  )
+                : CustomPaint(
+                    size: Size.infinite,
+                    painter: SpeedGraphPainter(
+                      speedData: _speedData,
+                      color: AppColors.getHighLightColor(context),
+                      lineColor: AppColors.getLineColor(context),
+                    ),
+                  ),
+            // 平均値テキストを前面に表示（高さを取らない）
+            if (_speedData.isNotEmpty)
+              Positioned(
+                top: 4,
+                left: 4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '平均: ${(_speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length).toStringAsFixed(1)} /分',
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: AppColors.getHighLightColor(context),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -761,6 +966,194 @@ class _FullScreenImageView extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class SpeedGraphPainter extends CustomPainter {
+  final List<MapEntry<DateTime, double>> speedData;
+  final Color color;
+  final Color lineColor;
+  SpeedGraphPainter({
+    required this.speedData,
+    required this.color,
+    required this.lineColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (speedData.isEmpty) return;
+
+    // 平均値を計算
+    final averageSpeed =
+        speedData.map((e) => e.value).reduce((a, b) => a + b) /
+        speedData.length;
+
+    // 平均値からの差分の最大値を計算（上下対称にするため）
+    final maxDiff = speedData
+        .map((e) => (e.value - averageSpeed).abs())
+        .reduce((a, b) => a > b ? a : b);
+
+    if (maxDiff == 0) {
+      // 全て同じ値の場合は平均線のみ描画
+      final averageLinePaint = Paint()
+        ..color = lineColor
+        ..strokeWidth = 0.5
+        ..style = PaintingStyle.stroke;
+      canvas.drawLine(
+        Offset(0, size.height / 2),
+        Offset(size.width, size.height / 2),
+        averageLinePaint,
+      );
+      return;
+    }
+
+    // 時間範囲を取得
+    final now = DateTime.now();
+    final startTime = now.subtract(const Duration(seconds: 60));
+
+    // 平均線を描画（中央に水平線）
+    final averageLinePaint = Paint()
+      ..color = lineColor
+      ..strokeWidth = 0.5
+      ..style = PaintingStyle.stroke;
+
+    final centerY = size.height / 2;
+    canvas.drawLine(
+      Offset(0, centerY),
+      Offset(size.width, centerY),
+      averageLinePaint,
+    );
+
+    // 差分グラフのパスを作成
+    final path = Path();
+    final fillPathAbove = Path(); // 平均より上（速い）
+    final fillPathBelow = Path(); // 平均より下（遅い）
+
+    bool hasAbove = false;
+    bool hasBelow = false;
+
+    // すべての点の座標を事前に計算
+    List<Offset> points = [];
+    for (int i = 0; i < speedData.length; i++) {
+      final entry = speedData[i];
+      final timeProgress =
+          entry.key.difference(startTime).inMilliseconds / 60000.0;
+      final speedDiff = entry.value - averageSpeed;
+
+      // 差分を-1.0〜1.0にノーマライズ（平均が0）
+      final normalizedDiff = speedDiff / maxDiff;
+
+      final x = timeProgress * size.width;
+      final y = centerY - (normalizedDiff * size.height * 0.4); // ±40%の範囲で表示
+
+      points.add(Offset(x, y));
+    }
+
+    // スムーズな曲線を作成
+    for (int i = 0; i < points.length; i++) {
+      if (i == 0) {
+        path.moveTo(points[i].dx, points[i].dy);
+      } else {
+        // ベジェ曲線で滑らかに接続
+        final prev = points[i - 1];
+        final current = points[i];
+
+        if (i == 1) {
+          // 最初の線分は直線
+          path.lineTo(current.dx, current.dy);
+        } else {
+          // 制御点を計算してスムーズな曲線を作成
+          final prevPrev = i >= 2 ? points[i - 2] : prev;
+          final next = i < points.length - 1 ? points[i + 1] : current;
+
+          // 制御点を前後の点を使って滑らかに計算
+          final controlPoint1 = Offset(
+            prev.dx + (current.dx - prevPrev.dx) * 0.05,
+            prev.dy + (current.dy - prevPrev.dy) * 0.05,
+          );
+          final controlPoint2 = Offset(
+            current.dx - (next.dx - prev.dx) * 0.05,
+            current.dy - (next.dy - prev.dy) * 0.05,
+          );
+
+          path.cubicTo(
+            controlPoint1.dx,
+            controlPoint1.dy,
+            controlPoint2.dx,
+            controlPoint2.dy,
+            current.dx,
+            current.dy,
+          );
+        }
+      }
+
+      // 塗りつぶし用パスの処理
+      final entry = speedData[i];
+      final speedDiff = entry.value - averageSpeed;
+      final x = points[i].dx;
+      final y = points[i].dy;
+
+      // 平均より上（速い）の塗りつぶし用パス
+      if (speedDiff > 0) {
+        if (!hasAbove) {
+          fillPathAbove.moveTo(x, centerY);
+          fillPathAbove.lineTo(x, y);
+          hasAbove = true;
+        } else {
+          fillPathAbove.lineTo(x, y);
+        }
+      } else if (hasAbove) {
+        fillPathAbove.lineTo(x, centerY);
+        hasAbove = false;
+      }
+
+      // 平均より下（遅い）の塗りつぶし用パス
+      if (speedDiff < 0) {
+        if (!hasBelow) {
+          fillPathBelow.moveTo(x, centerY);
+          fillPathBelow.lineTo(x, y);
+          hasBelow = true;
+        } else {
+          fillPathBelow.lineTo(x, y);
+        }
+      } else if (hasBelow) {
+        fillPathBelow.lineTo(x, centerY);
+        hasBelow = false;
+      }
+    }
+
+    // パスを閉じる
+    if (hasAbove && speedData.isNotEmpty) {
+      final lastEntry = speedData.last;
+      final lastTimeProgress =
+          lastEntry.key.difference(startTime).inMilliseconds / 60000.0;
+      final lastX = lastTimeProgress * size.width;
+      fillPathAbove.lineTo(lastX, centerY);
+      fillPathAbove.close();
+    }
+
+    if (hasBelow && speedData.isNotEmpty) {
+      final lastEntry = speedData.last;
+      final lastTimeProgress =
+          lastEntry.key.difference(startTime).inMilliseconds / 60000.0;
+      final lastX = lastTimeProgress * size.width;
+      fillPathBelow.lineTo(lastX, centerY);
+      fillPathBelow.close();
+    }
+
+    // 線を描画
+    final linePaint = Paint()
+      ..color = color
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+    canvas.drawPath(path, linePaint);
+
+    // 点は描画しない（スムーズな線のみ）
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true; // 常に再描画してリアルタイム更新
   }
 }
 

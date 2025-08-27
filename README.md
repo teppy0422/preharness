@@ -270,6 +270,11 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 048
 
+- Fixed an issue where the app did not accept the Arduino F1 key immediately after launch.
+- Change design f1counter in efu_detail.dart.
+
+#### commit 049
+
 ---
 
 ### now
