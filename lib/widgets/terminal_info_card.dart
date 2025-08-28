@@ -1,0 +1,73 @@
+import 'package:flutter/material.dart';
+import "package:preharness/constants/app_colors.dart";
+import 'package:preharness/utils/global.dart';
+
+class TerminalInfoCard extends StatelessWidget {
+  final String? terminal1;
+  final String? terminal2;
+  final String wireType;
+  final String wireSize;
+
+  const TerminalInfoCard({
+    super.key,
+    this.terminal1,
+    this.terminal2,
+    required this.wireType,
+    required this.wireSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 3,
+      color: AppColors.getCardColor(context),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.getLineColor(context), width: .5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      formatCode(terminal1 ?? "", "-"),
+                      style: TextStyle(
+                        color: AppColors.getLineColor(context),
+                        fontSize: 20,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      '$wireType / $wireSize',
+                      style: TextStyle(
+                        color: AppColors.getLineColor(context),
+                        fontSize: 20,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      formatCode(terminal2 ?? "", "-"),
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: AppColors.getLineColor(context),
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

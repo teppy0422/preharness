@@ -229,7 +229,7 @@ class _StandardInfoCardState extends State<Measurement> {
           ];
 
     return SizedBox(
-      width: 220,
+      width: 180,
       child: Container(
         decoration: BoxDecoration(
           color: cardColor,
@@ -297,7 +297,7 @@ class _StandardInfoCardState extends State<Measurement> {
     final baseColor = AppColors.getLineColor(context); // ← 1回だけ取得
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
+      padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,19 +474,18 @@ class _StandardInfoCardState extends State<Measurement> {
                       // OK/NG
                       if (status.isNotEmpty)
                         Positioned(
-                          right: -28, // 右側に30はみ出す
-                          top: 0,
+                          right: 1, // 右側に30はみ出す
+                          top: -24,
                           bottom: 0,
                           child: Center(
-                            child: Text(
-                              status,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: status == "OK"
-                                    ? AppColors.getHighLightColor(context)
-                                    : Colors.red,
-                              ),
+                            child: Icon(
+                              status == "OK"
+                                  ? Icons.check_circle
+                                  : Icons.cancel, // アイコンを条件で分ける
+                              size: 16,
+                              color: status == "OK"
+                                  ? AppColors.getHighLightColor(context)
+                                  : Colors.red,
                             ),
                           ),
                         ),

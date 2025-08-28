@@ -5,6 +5,9 @@ import 'package:preharness/widgets/measurement.dart';
 import 'package:preharness/utils/global.dart';
 import 'package:preharness/utils/color_utils.dart';
 import 'package:preharness/constants/app_colors.dart';
+import 'package:preharness/widgets/terminal_info_card.dart';
+import 'package:preharness/widgets/interactive_image_viewer.dart';
+import 'package:preharness/widgets/product_info_card.dart';
 
 class EfuDetailPage extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
@@ -192,7 +195,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                     thickness: .5,
                     color: AppColors.getLineColor(context),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 5),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -206,107 +209,12 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                               children: [
                                 // 左側: 情報グループ
                                 Expanded(
-                                  flex: 5,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 5,
-                                            child: _buildLabelValue(
-                                              '製品品番:',
-                                              widget
-                                                  .processingConditions['p_number'],
-                                              valueFont: 28,
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 3,
-                                            child: _buildLabelValue(
-                                              'ロットNo:',
-                                              widget
-                                                  .processingConditions['lot_num'],
-                                              valueFont: 28,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 5),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 5,
-                                            child: _buildLabelValue(
-                                              '設変:',
-                                              widget
-                                                  .processingConditions['eng_change'],
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 3,
-                                            child: _buildLabelValue(
-                                              '構成No:',
-                                              widget
-                                                  .processingConditions['cfg_no'],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 5),
-                                      Row(
-                                        children: [
-                                          _buildLabelValue(
-                                            '色:',
-                                            widget
-                                                .processingConditions['wire_color'],
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 5),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            flex: 5,
-                                            child: _buildLabelValue(
-                                              '準完日:',
-                                              widget
-                                                  .processingConditions['delivery_date'],
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 3,
-                                            child: _buildLabelValue(
-                                              '数量:',
-                                              widget
-                                                  .processingConditions['wire_cnt'],
-                                              valueFont: 30,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 10),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          ElevatedButton.icon(
-                                            onPressed: () {
-                                              try {
-                                                widget.onBack();
-                                              } catch (e) {
-                                                print('Error in onBack: $e');
-                                                // エラーが発生した場合、Navigatorで直接戻る
-                                                Navigator.of(context).pop();
-                                              }
-                                            },
-                                            icon: const Icon(Icons.arrow_back),
-                                            label: const Text('戻る'),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                  flex: 3,
+                                  child: ProductInfoCard(
+                                    processingConditions: widget.processingConditions,
+                                    onBack: widget.onBack,
+                                    containerColor: _containerColor,
+                                    containerForeColor: _containerForeColor,
                                   ),
                                 ),
 
@@ -316,16 +224,23 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                   flex: 6,
                                   child: Column(
                                     children: [
-                                      DialSelectorWithDb(
-                                        processingConditions:
-                                            widget.processingConditions,
-                                        blockInfo: widget.blockInfo,
-                                        recommendedHindDial:
-                                            _recommendedHindDial,
-                                        recommendedTopDial: _recommendedTopDial,
-                                        recommendedBottomDial:
-                                            _recommendedBottomDial,
-                                        onDialChanged: _onDialChanged,
+                                      TerminalInfoCard(
+                                        terminal1:
+                                            widget.blockInfo['terminals']?[0] ??
+                                            "",
+                                        terminal2:
+                                            widget.blockInfo['terminals']?[1] ??
+                                            "",
+                                        wireType:
+                                            widget
+                                                .processingConditions['wire_type']
+                                                ?.toString() ??
+                                            '',
+                                        wireSize:
+                                            widget
+                                                .processingConditions['wire_size']
+                                                ?.toString() ??
+                                            '',
                                       ),
                                       Card(
                                         elevation: 3,
@@ -339,210 +254,71 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                               width: .5,
                                             ),
                                             borderRadius: BorderRadius.circular(
-                                              6,
+                                              8,
                                             ),
                                           ),
                                           child: Padding(
                                             padding: const EdgeInsets.all(8),
-                                            child: Column(
+                                            child: Row(
                                               children: [
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text(
-                                                        formatCode(
-                                                          widget
-                                                              .blockInfo['terminals'][0],
-                                                          "-",
-                                                        ),
-                                                        style: TextStyle(
-                                                          color:
-                                                              AppColors.getLineColor(
-                                                                context,
-                                                              ),
-                                                          fontSize: 20,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Text(
-                                                        '${widget.processingConditions['wire_type']} / ${widget.processingConditions['wire_size']}',
-                                                        style: TextStyle(
-                                                          color:
-                                                              AppColors.getLineColor(
-                                                                context,
-                                                              ),
-                                                          fontSize: 20,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Text(
-                                                        formatCode(
-                                                          widget
-                                                              .blockInfo['terminals'][1],
-                                                          "-",
-                                                        ),
-                                                        style: TextStyle(
-                                                          fontSize: 20,
-                                                          color:
-                                                              AppColors.getLineColor(
-                                                                context,
-                                                              ),
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.left,
-                                                      ),
-                                                    ),
-                                                    Expanded(child: Text("")),
-                                                  ],
-                                                ),
+                                                Text("Applicator"),
+                                                Text("端子"),
+                                                Text("マイクロメーター"),
                                               ],
                                             ),
                                           ),
                                         ),
                                       ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.of(context).push(
-                                            PageRouteBuilder(
-                                              pageBuilder:
-                                                  (
-                                                    context,
-                                                    animation,
-                                                    secondaryAnimation,
-                                                  ) {
-                                                    return _FullScreenImageView(
-                                                      imagePath:
-                                                          'assets/images/71144020-2.jpg',
-                                                    );
-                                                  },
-                                              transitionsBuilder:
-                                                  (
-                                                    context,
-                                                    animation,
-                                                    secondaryAnimation,
-                                                    child,
-                                                  ) {
-                                                    return FadeTransition(
-                                                      opacity: animation,
-                                                      child: child,
-                                                    );
-                                                  },
-                                            ),
-                                          );
-                                        },
-                                        child: Card(
-                                          elevation: 3,
-                                          child: SizedBox(
-                                            height: 295,
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              child: Stack(
-                                                children: [
-                                                  LayoutBuilder(
-                                                    builder: (context, constraints) {
-                                                      // ビューポートサイズを取得
-                                                      final viewWidth =
-                                                          constraints.maxWidth;
-                                                      final viewHeight =
-                                                          constraints.maxHeight;
-                                                      final scale = 2.4;
-
-                                                      // パーセンテージでパン位置を指定
-                                                      final panX =
-                                                          -(viewWidth *
-                                                              0.04 *
-                                                              scale); // 右に10%
-                                                      final panY =
-                                                          -(viewHeight *
-                                                              0.35 *
-                                                              scale); // 下に80%
-
-                                                      final image = Image.asset(
-                                                        'assets/images/71144020-2.jpg',
-                                                        fit: BoxFit.contain,
-                                                      );
-
-                                                      return InteractiveViewer(
-                                                        minScale: 0.5,
-                                                        maxScale: 3.0,
-                                                        transformationController:
-                                                            TransformationController(
-                                                              Matrix4.identity()
-                                                                ..translate(
-                                                                  panX,
-                                                                  panY,
-                                                                )
-                                                                ..scale(scale),
-                                                            ),
-                                                        child: isDark
-                                                            ? ColorFiltered(
-                                                                colorFilter:
-                                                                    const ColorFilter.matrix(
-                                                                      [
-                                                                        -1,
-                                                                        0,
-                                                                        0,
-                                                                        0,
-                                                                        255,
-                                                                        0,
-                                                                        -1,
-                                                                        0,
-                                                                        0,
-                                                                        255,
-                                                                        0,
-                                                                        0,
-                                                                        -1,
-                                                                        0,
-                                                                        255,
-                                                                        0,
-                                                                        0,
-                                                                        0,
-                                                                        1,
-                                                                        0,
-                                                                      ],
-                                                                    ),
-                                                                child: image,
-                                                              )
-                                                            : image,
-                                                      );
-                                                    },
-                                                  ),
-                                                  // ボーダーを上に重ねる
-                                                  Positioned.fill(
-                                                    child: IgnorePointer(
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                          border: Border.all(
-                                                            color:
-                                                                AppColors.getLineColor(
-                                                                  context,
-                                                                ),
-                                                            width: 0.5,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                8,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              children: [
+                                                DialSelectorWithDb(
+                                                  processingConditions: widget
+                                                      .processingConditions,
+                                                  blockInfo: widget.blockInfo,
+                                                  recommendedHindDial:
+                                                      _recommendedHindDial,
+                                                  recommendedTopDial:
+                                                      _recommendedTopDial,
+                                                  recommendedBottomDial:
+                                                      _recommendedBottomDial,
+                                                  onDialChanged: _onDialChanged,
+                                                ),
+                                                InteractiveImageViewer(
+                                                  imagePath:
+                                                      'assets/images/71144020-2.jpg',
+                                                  scale: 2.4,
+                                                  panX: 0.165,
+                                                  panY: 0.35,
+                                                  height: 240,
+                                                  width: 500,
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
+                                          SizedBox(width: 8),
+                                          Column(
+                                            children: [
+                                              SizedBox(height: 4),
+                                              Measurement(
+                                                chListData: widget.chListData,
+                                                onHindDialRecommendation:
+                                                    _onHindDialRecommendation,
+                                                onFrontDialRecommendation:
+                                                    _onFrontDialRecommendation,
+                                                currentHindDial:
+                                                    _currentHindDial,
+                                                currentTopDial: _currentTopDial,
+                                                currentBottomDial:
+                                                    _currentBottomDial,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -552,30 +328,12 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Stack(
-                        children: [
-                          Column(
-                            children: [
-                              Measurement(
-                                chListData: widget.chListData,
-                                onHindDialRecommendation:
-                                    _onHindDialRecommendation,
-                                onFrontDialRecommendation:
-                                    _onFrontDialRecommendation,
-                                currentHindDial: _currentHindDial,
-                                currentTopDial: _currentTopDial,
-                                currentBottomDial: _currentBottomDial,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                   Divider(height: 10, thickness: 0.5, color: baseLineColor),
                 ],
               ),
+
               Positioned(
                 bottom: 1,
                 right: 0,
@@ -1014,62 +772,6 @@ class _SlidingNumberState extends State<SlidingNumber>
           },
         ),
       ],
-    );
-  }
-}
-
-class _FullScreenImageView extends StatelessWidget {
-  final String imagePath;
-
-  const _FullScreenImageView({required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final image = Image.asset(imagePath, fit: BoxFit.contain);
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: InteractiveViewer(
-              minScale: 0.5,
-              maxScale: 4.0,
-              child: Center(
-                child: isDark
-                    ? ColorFiltered(
-                        colorFilter: const ColorFilter.matrix(
-                          [
-                            -1, 0, 0, 0, 255,
-                            0, -1, 0, 0, 255,
-                            0, 0, -1, 0, 255,
-                            0, 0, 0, 1, 0,
-                          ],
-                        ),
-                        child: image,
-                      )
-                    : image,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 10,
-            left: 0,
-            right: 0,
-            child: Text(
-              'タップして戻る / ピンチで拡大縮小',
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
