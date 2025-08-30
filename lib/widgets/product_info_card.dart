@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:preharness/utils/color_utils.dart';
-import 'package:preharness/utils/global.dart';
 import 'package:preharness/constants/app_colors.dart';
+import 'package:preharness/utils/global.dart';
 
-class ProductInfoCard extends StatelessWidget {
+class ProductInfoCard extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
   final VoidCallback onBack;
   final Color? containerColor;
@@ -18,6 +17,30 @@ class ProductInfoCard extends StatelessWidget {
   });
 
   @override
+  State<ProductInfoCard> createState() => _ProductInfoCardState();
+}
+
+class _ProductInfoCardState extends State<ProductInfoCard> {
+  final _micrometerFocusNode = FocusNode();
+  final _micrometerController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _micrometerFocusNode.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _micrometerFocusNode.removeListener(() {});
+    _micrometerFocusNode.dispose();
+    _micrometerController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,7 +51,7 @@ class ProductInfoCard extends StatelessWidget {
               flex: 5,
               child: _buildLabelValue(
                 '製品品番:',
-                processingConditions['p_number'],
+                widget.processingConditions['p_number'],
                 valueFont: 28,
               ),
             ),
@@ -36,7 +59,7 @@ class ProductInfoCard extends StatelessWidget {
               flex: 3,
               child: _buildLabelValue(
                 'ロットNo:',
-                processingConditions['lot_num'],
+                widget.processingConditions['lot_num'],
                 valueFont: 28,
               ),
             ),
@@ -49,19 +72,22 @@ class ProductInfoCard extends StatelessWidget {
               flex: 5,
               child: _buildLabelValue(
                 '設変:',
-                processingConditions['eng_change'],
+                widget.processingConditions['eng_change'],
               ),
             ),
             Expanded(
               flex: 3,
-              child: _buildLabelValue('構成No:', processingConditions['cfg_no']),
+              child: _buildLabelValue(
+                '構成No:',
+                widget.processingConditions['cfg_no'],
+              ),
             ),
           ],
         ),
         SizedBox(height: 5),
         Row(
           children: [
-            _buildLabelValue('色:', processingConditions['wire_color']),
+            _buildLabelValue('色:', widget.processingConditions['wire_color']),
           ],
         ),
         SizedBox(height: 5),
@@ -71,14 +97,14 @@ class ProductInfoCard extends StatelessWidget {
               flex: 5,
               child: _buildLabelValue(
                 '準完日:',
-                processingConditions['delivery_date'],
+                widget.processingConditions['delivery_date'],
               ),
             ),
             Expanded(
               flex: 3,
               child: _buildLabelValue(
                 '数量:',
-                processingConditions['wire_cnt'],
+                widget.processingConditions['wire_cnt'],
                 valueFont: 30,
               ),
             ),
@@ -91,7 +117,7 @@ class ProductInfoCard extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () {
                 try {
-                  onBack();
+                  widget.onBack();
                 } catch (e) {
                   print('Error in onBack: $e');
                   Navigator.of(context).pop();
@@ -107,15 +133,439 @@ class ProductInfoCard extends StatelessWidget {
           thickness: 0.5,
           color: AppColors.getLineColor(context),
         ),
-        Row(
-          children: [
-            Expanded(
-              flex: 5,
-              child: _buildLabelValue('Applicator:', "7116-4727"),
+        GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(_micrometerFocusNode);
+            _micrometerController.selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: _micrometerController.text.length,
+            );
+          },
+          child: Card(
+            color: AppColors.getCardColor(context),
+            elevation: 3,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: AppColors.getLineColor(context), // ボーダー色
+                  width: .5, // ボーダーの太さ
+                ),
+                borderRadius: BorderRadius.circular(8), // Card に合わせて角丸
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // タイトル付き入力フィールド
+                          Visibility(
+                            visible: _micrometerFocusNode.hasFocus,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        focusNode: _micrometerFocusNode,
+                                        controller: _micrometerController,
+                                        showCursor: true,
+                                        textAlign: TextAlign.right,
+                                        keyboardType: TextInputType.none,
+                                        onTap: () {
+                                          // テキストフィールドタップ時に全選択
+                                          _micrometerController
+                                              .selection = TextSelection(
+                                            baseOffset: 0,
+                                            extentOffset: _micrometerController
+                                                .text
+                                                .length,
+                                          );
+                                        },
+                                        style: TextStyle(
+                                          color: AppColors.getLineColor(
+                                            context,
+                                          ),
+                                          fontSize: 14,
+                                        ),
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          filled: true,
+                                          fillColor: AppColors.getCardColor(
+                                            context,
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 8,
+                                              ),
+                                          border: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: AppColors.getLineColor(
+                                                context,
+                                              ),
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color:
+                                                  AppColors.getHighLightColor(
+                                                    context,
+                                                  ),
+                                              width: 2.0,
+                                            ),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: AppColors.getLineColor(
+                                                context,
+                                              ),
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // フィールドタイトルを浮かせて表示
+                                Positioned(
+                                  top: -16,
+                                  left: -12,
+                                  height: 13,
+                                  child: Container(
+                                    color: AppColors.getCardColor(context),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
+                                    child: Text(
+                                      'マイクロメーター',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.getLineColor(context),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                            ),
+                          ),
+                          // ラベル＋値のRow
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildLabelValue(
+                                  '管理No:',
+                                  "HM-22",
+                                  valueFont: 20,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Icon(
+                                Icons.check_circle,
+                                color: AppColors.getHighLightColor(context),
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            Expanded(flex: 3, child: _buildLabelValue('加締形状:', "2")),
-            Expanded(flex: 3, child: _buildLabelValue('シリアルNo:', "17150")),
-          ],
+          ),
+        ),
+        Card(
+          color: AppColors.getCardColor(context),
+          elevation: 3,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: AppColors.getLineColor(context), // ボーダー色
+                width: .5, // ボーダーの太さ
+              ),
+              borderRadius: BorderRadius.circular(8), // Card に合わせて角丸
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // タイトル付き入力フィールド
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  TextField(
+                                    showCursor: true,
+                                    textAlign: TextAlign.right,
+                                    keyboardType: TextInputType.none,
+                                    onTap: () {
+                                      // テキストフィールドタップ時に全選択
+                                    },
+                                    style: TextStyle(
+                                      color: AppColors.getLineColor(context),
+                                      fontSize: 14,
+                                    ),
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      filled: true,
+                                      fillColor: AppColors.getCardColor(
+                                        context,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 8,
+                                          ),
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: AppColors.getLineColor(
+                                            context,
+                                          ),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: AppColors.getHighLightColor(
+                                            context,
+                                          ),
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: AppColors.getLineColor(
+                                            context,
+                                          ),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // フィールドタイトルを浮かせて表示
+                                  Positioned(
+                                    top: -16,
+                                    left: -12,
+                                    height: 13,
+                                    child: Container(
+                                      color: AppColors.getCardColor(context),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
+                                      child: Text(
+                                        'Applicator Serial',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.getLineColor(
+                                            context,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(
+                              Icons.check_circle,
+                              color: AppColors.getHighLightColor(context),
+                              size: 20,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        // ラベル＋値のRow
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 5,
+                              child: _buildLabelValue(
+                                'アプリ品番:',
+                                "7116-4727",
+                                valueFont: 20,
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: _buildLabelValue(
+                                '加締形状:',
+                                "2",
+                                valueFont: 20,
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: _buildLabelValue(
+                                'シリアルNo:',
+                                "17150",
+                                valueFont: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Card(
+          color: AppColors.getCardColor(context),
+          elevation: 3,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: AppColors.getLineColor(context), // ボーダー色
+                width: .5, // ボーダーの太さ
+              ),
+              borderRadius: BorderRadius.circular(8), // Card に合わせて角丸
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // タイトル付き入力フィールド
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    showCursor: true,
+                                    textAlign: TextAlign.right,
+                                    keyboardType: TextInputType.none,
+                                    onTap: () {
+                                      // テキストフィールドタップ時に全選択
+                                    },
+                                    style: TextStyle(
+                                      color: AppColors.getLineColor(context),
+                                      fontSize: 14,
+                                    ),
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      filled: true,
+                                      fillColor: AppColors.getCardColor(
+                                        context,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 8,
+                                          ),
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: AppColors.getLineColor(
+                                            context,
+                                          ),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: AppColors.getHighLightColor(
+                                            context,
+                                          ),
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: AppColors.getLineColor(
+                                            context,
+                                          ),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Icon(
+                                  Icons.check_circle,
+                                  color: AppColors.getHighLightColor(context),
+                                  size: 20,
+                                ),
+                              ],
+                            ),
+                            // フィールドタイトルを浮かせて表示
+                            Positioned(
+                              top: -16,
+                              left: -12,
+                              height: 13,
+                              child: Container(
+                                color: AppColors.getCardColor(context),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                child: Text(
+                                  '端子リール',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.getLineColor(context),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        // ラベル＋値のRow
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildLabelValue(
+                                '端子品番:',
+                                "7116-4727-02",
+                                valueFont: 20,
+                              ),
+                            ),
+                            Expanded(
+                              child: _buildLabelValue(
+                                'ロットNo:',
+                                "P2J5E6",
+                                valueFont: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -140,8 +590,8 @@ class ProductInfoCard extends StatelessWidget {
               WireColorBox(
                 width: 22,
                 height: 22,
-                color: containerColor ?? Colors.transparent,
-                lineColor: containerForeColor ?? Colors.transparent,
+                color: widget.containerColor ?? Colors.transparent,
+                lineColor: widget.containerForeColor ?? Colors.transparent,
               ),
             ],
           ],
