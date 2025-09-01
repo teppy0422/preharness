@@ -3,11 +3,10 @@ import 'package:preharness/services/api_service.dart';
 import 'package:http/http.dart' as http; // Added missing import
 import 'package:shared_preferences/shared_preferences.dart'; // Added
 import 'dart:convert'; // Added
-import 'dart:developer'; // Added for debugPrint
+// Added for debugPrint
 import 'package:hive/hive.dart'; // Added for Hive
 import 'package:preharness/models/color_entry.dart'; // Added for ColorEntry
-import 'package:collection/collection.dart'; // Added for firstWhereOrNull
-import 'package:preharness/utils/color_utils.dart';
+// Added for firstWhereOrNull
 import 'package:preharness/utils/global.dart';
 
 class ApiTestPage extends StatefulWidget {

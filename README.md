@@ -287,7 +287,11 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 051
 
-### 2025-08-30
+### 2025-09-01
+
+#### commit 051
+
+- マイクロメーターの textfield のアクティブになった時にアンダーラインに修正
 
 ---
 
