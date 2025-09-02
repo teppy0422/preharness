@@ -291,7 +291,9 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 051
 
-- マイクロメーターの textfield のアクティブになった時にアンダーラインに修正
+- Added Micrometer Information Widget
+
+#### commit 052
 
 ---
 

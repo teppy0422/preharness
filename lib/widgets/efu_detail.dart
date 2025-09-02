@@ -211,7 +211,8 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                 Expanded(
                                   flex: 3,
                                   child: ProductInfoCard(
-                                    processingConditions: widget.processingConditions,
+                                    processingConditions:
+                                        widget.processingConditions,
                                     onBack: widget.onBack,
                                     containerColor: _containerColor,
                                     containerForeColor: _containerForeColor,
@@ -242,33 +243,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                 ?.toString() ??
                                             '',
                                       ),
-                                      Card(
-                                        elevation: 3,
-                                        color: AppColors.getCardColor(context),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: AppColors.getLineColor(
-                                                context,
-                                              ),
-                                              width: .5,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8),
-                                            child: Row(
-                                              children: [
-                                                Text("Applicator"),
-                                                Text("端子"),
-                                                Text("マイクロメーター"),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+
                                       Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
