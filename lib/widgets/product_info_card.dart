@@ -27,12 +27,16 @@ class ProductInfoCard extends StatefulWidget {
 class _ProductInfoCardState extends State<ProductInfoCard> {
   String _micrometerSerialNumber = ""; // デフォルト値
   String _applicatorName = ""; // Applicatorアプリ品番
+  String _applicatorSerialNumber = ""; //Applicatorシリアル番号
+  String _terminalName = "";
+  String _terminalLotNumber = "";
 
   @override
   void initState() {
     super.initState();
     _loadMicrometerSerialNumber();
-    _loadApplicatorName();
+    _loadApplicator();
+    _loadTerminal();
   }
 
   Future<void> _loadMicrometerSerialNumber() async {
@@ -45,12 +49,42 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
     }
   }
 
-  Future<void> _loadApplicatorName() async {
+  Future<void> _loadApplicator() async {
     final prefs = await SharedPreferences.getInstance();
     final savedName = prefs.getString('applicator_name');
     if (savedName != null) {
       setState(() {
-        _applicatorName = savedName;
+        // 文字数が足りない場合にエラーにならないようガードを入れる
+        if (savedName.length > 10) {
+          _applicatorName = savedName.substring(0, 10); // 0〜9文字目（最初の10文字）
+          _applicatorSerialNumber = savedName.substring(
+            10,
+          ); // 10文字目以降（index=10から最後まで）
+        } else {
+          // 10文字未満の場合のフォールバック処理
+          _applicatorName = savedName;
+          _applicatorSerialNumber = '';
+        }
+      });
+    }
+  }
+
+  Future<void> _loadTerminal() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedName = prefs.getString('terminal_name');
+    if (savedName != null) {
+      setState(() {
+        // 文字数が足りない場合にエラーにならないようガードを入れる
+        if (savedName.length > 10) {
+          _terminalName = savedName.substring(0, 10); // 0〜9文字目（最初の10文字）
+          _terminalLotNumber = savedName.substring(
+            10,
+          ); // 10文字目以降（index=10から最後まで）
+        } else {
+          // 10文字未満の場合のフォールバック処理
+          _terminalName = savedName;
+          _terminalLotNumber = '';
+        }
       });
     }
   }
@@ -148,51 +182,72 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
           color: AppColors.getLineColor(context),
         ),
         Column(
-            children: [
-              CustomInputCard(
-                title: 'マイクロメーター',
-                subItems: [
-                  SubItem(
-                    label: '管理No:',
-                    value: _micrometerSerialNumber,
-                    valueFont: 20,
-                    flex: 5,
-                    prefsKey: 'micrometer_serial_number',
-                    onInputComplete: (value) {
-                      setState(() {
-                        _micrometerSerialNumber = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              CustomInputCard(
-                title: 'Applicator Serial',
-                subItems: [
-                  SubItem(
-                    label: 'アプリ品番:',
-                    value: _applicatorName,
-                    valueFont: 20,
-                    flex: 5,
-                    prefsKey: 'applicator_name',
-                    onInputComplete: (value) {
-                      setState(() {
-                        _applicatorName = value;
-                      });
-                    },
-                  ),
-                  SubItem(label: '加締形状:', value: '-', valueFont: 20, flex: 3),
-                  SubItem(label: 'シリアルNo:', value: '-', valueFont: 20, flex: 3),
-                ],
-              ),
-              CustomInputCard(
-                title: '端子リール',
-                subItems: [
-                  SubItem(label: '端子品番:', value: '-', valueFont: 20, flex: 1),
-                  SubItem(label: 'ロットNo:', value: '', valueFont: 20, flex: 1),
-                ],
-              ),
-            ],
+          children: [
+            CustomInputCard(
+              title: 'マイクロメーター',
+              subItems: [
+                SubItem(
+                  label: '管理No:',
+                  value: _micrometerSerialNumber,
+                  valueFont: 20,
+                  flex: 5,
+                  prefsKey: 'micrometer_serial_number',
+                  onInputComplete: (value) {
+                    setState(() {
+                      _micrometerSerialNumber = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            CustomInputCard(
+              title: 'Applicator Serial',
+              subItems: [
+                SubItem(
+                  label: 'アプリ品番:',
+                  value: _applicatorName,
+                  valueFont: 20,
+                  flex: 5,
+                  prefsKey: 'applicator_name',
+                  onInputComplete: (value) {
+                    setState(() {
+                      _applicatorName = value;
+                    });
+                  },
+                ),
+                SubItem(label: '加締形状:', value: '-', valueFont: 20, flex: 3),
+                SubItem(
+                  label: 'シリアルNo:',
+                  value: _applicatorSerialNumber,
+                  valueFont: 20,
+                  flex: 3,
+                ),
+              ],
+            ),
+            CustomInputCard(
+              title: '端子リール',
+              subItems: [
+                SubItem(
+                  label: '端子品番:',
+                  value: _terminalName,
+                  valueFont: 20,
+                  flex: 5,
+                  prefsKey: 'terminal_name',
+                  onInputComplete: (value) {
+                    setState(() {
+                      _terminalName = value;
+                    });
+                  },
+                ),
+                SubItem(
+                  label: 'ロットNo:',
+                  value: _terminalLotNumber,
+                  valueFont: 20,
+                  flex: 3,
+                ),
+              ],
+            ),
+          ],
         ),
       ],
     );

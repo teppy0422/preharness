@@ -293,11 +293,15 @@ samples, guidance on mobile development, and a full API reference.
 
 - Added Micrometer Information Widget.
 
-#### commit 052
-
 ### 2025-09-03
 
 - Added custom_input_card.dart.
+
+#### commit 052
+
+- 入力値から値をそれぞれに保存する処理の追加。
+
+#### commit 053
 
 ---
 
