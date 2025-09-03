@@ -307,6 +307,12 @@ samples, guidance on mobile development, and a full API reference.
 - mac に preharness-server をクローン
 - settings_page.dart に windows,mac(wifi),mac(iphone)のパスを追加
 
+#### mac と android でデモする場合の手順
+
+1. setting_page.dart の IP とファイルパスを変更
+2. iphone のインターネット共有をオン
+3. mac と android をその Wifi に接続
+
 #### commit 054
 
 ---
