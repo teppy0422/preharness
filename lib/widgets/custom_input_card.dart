@@ -404,9 +404,9 @@ class _CustomInputCardState extends State<CustomInputCard> {
             ),
             // タイトルを浮かせて表示
             Positioned(
-              top: -5,
+              top: -4,
               left: 12,
-              height: 13,
+              height: 18,
               child: Container(
                 color: AppColors.getCardColor(context),
                 padding: const EdgeInsets.symmetric(horizontal: 4),
