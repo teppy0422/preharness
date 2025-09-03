@@ -303,11 +303,17 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 053
 
+- mac に postgreSQL のインストール
+- mac に preharness-server をクローン
+- settings_page.dart に windows,mac(wifi),mac(iphone)のパスを追加
+
+#### commit 054
+
 ---
 
 ### now
 
-- 端子品番シリアルの入力フィールドを用意
+- プレゼン用に外に持ち出せるように Mac に Nas の役割をさせる
 
 ### next
 

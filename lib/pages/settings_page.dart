@@ -79,18 +79,21 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _loadSettings() async {
     final settings = await _service.loadSettings();
+    // windows OS
+    // final mainPath = r'\\192.168.11.11';
+    // final pathPath = r'\\192.168.11.11\g\projects\PreHarnessPro\data';
+    // mac OS(Wifi)
+    final mainPath = r'\\192.168.11.12';
+    final pathPath = r'/Volumes/NO NAME/projects/PreHarnessPro/data';
+    // mac OS(iphoneインターネット共有)
+    // final mainPath = r'\\172.20.10.5';
+    // final pathPath = r'/Volumes/NO NAME/projects/PreHarnessPro/data';
 
-    _mainController.text = withDefault(
-      settings['main_path'],
-      r'\\192.168.11.11',
-    );
-    _pathController.text = withDefault(
-      settings['path_01'],
-      r'\\192.168.11.11\g\projects\PreHarnessPro\data',
-    );
+    _mainController.text = withDefault(settings['main_path'], mainPath);
+    _pathController.text = withDefault(settings['path_01'], pathPath);
     _typeController.text = withDefault(settings['machine_type'], 'CM20');
     _serialController.text = withDefault(settings['machine_serial'], '0000');
-    _workNameController.text = withDefault(settings['work_name'], '手圧着');
+    _workNameController.text = withDefault(settings['work_name'], '圧着');
 
     _selectedAnimation = await _service.loadAnimationType();
     setState(() {});
@@ -247,7 +250,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 16),
                 Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(minWidth: 300, maxWidth: 600),
+                    constraints: const BoxConstraints(
+                      minWidth: 300,
+                      maxWidth: 600,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -260,10 +266,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             isDense: true,
                           ),
                           items: const [
-                            DropdownMenuItem(
-                              value: 'none',
-                              child: Text('なし'),
-                            ),
+                            DropdownMenuItem(value: 'none', child: Text('なし')),
                             DropdownMenuItem(
                               value: 'flip',
                               child: Text('フリップ'),
