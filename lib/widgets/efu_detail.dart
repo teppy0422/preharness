@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:preharness/widgets/dial_selector_with_db.dart';
 import 'package:preharness/widgets/measurement.dart';
-import 'package:preharness/utils/global.dart';
 import 'package:preharness/utils/color_utils.dart';
 import 'package:preharness/constants/app_colors.dart';
 import 'package:preharness/widgets/terminal_info_card.dart';
@@ -325,35 +324,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildLabelValue(
-    String label,
-    String value, {
-    double labelFont = 11,
-    double valueFont = 24,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(label, style: TextStyle(fontSize: labelFont, height: 1.0)),
-        Row(
-          children: [
-            Text(value, style: TextStyle(fontSize: valueFont, height: 1.0)),
-            SizedBox(width: 2),
-            if (label == '色:') ...[
-              WireColorBox(
-                width: 22,
-                height: 22,
-                color: _containerColor ?? Colors.transparent,
-                lineColor: _containerForeColor ?? Colors.transparent,
-              ),
-            ],
-          ],
-        ),
-      ],
     );
   }
 

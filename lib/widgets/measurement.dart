@@ -485,7 +485,7 @@ class _StandardInfoCardState extends State<Measurement> {
                               size: 16,
                               color: status == "OK"
                                   ? AppColors.getHighLightColor(context)
-                                  : Colors.red,
+                                  : AppColors.getErrorColor(context),
                             ),
                           ),
                         ),
