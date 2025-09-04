@@ -325,6 +325,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 056
 
+- efu_detail.dart の呼び出し時に前回の値を呼び出す処理の修正。
+
+#### commit 057
+
 ---
 
 ### now
@@ -358,6 +362,11 @@ flutter pub get
 <pre>flutter run</pre>
 
 ### prompt 4 AI
+
+efu_detail.dart の仕様
+読み込まれたら
+
+---
 
 あなたは、Flutter/Dart の専門家として、以下のプロジェクト概要を
 理解し、今後の開発に関する質問に答えられるように準備してくださ

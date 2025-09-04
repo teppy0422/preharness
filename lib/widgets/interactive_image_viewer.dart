@@ -54,11 +54,19 @@ class InteractiveImageViewer extends StatelessWidget {
                     final calculatedPanX = -(viewWidth * panX * scale);
                     final calculatedPanY = -(viewHeight * panY * scale);
 
-                    final image = Image.asset(
-                      imagePath,
-                      fit: BoxFit.contain,
-                      width: constraints.maxWidth, // ここを追加
-                      height: constraints.maxHeight,
+                    final image = ColorFiltered(
+                      colorFilter: ColorFilter.matrix([
+                        1.0, 0, 0, 0, 0,     // 赤: そのまま (255)
+                        0, 0.996, 0, 0, 0,   // 緑: わずかに減らす (254)
+                        0, 0, 0.98, 0, 0,    // 青: 少し減らす (250)
+                        0, 0, 0, 1, 0,       // アルファ
+                      ]),
+                      child: Image.asset(
+                        imagePath,
+                        fit: BoxFit.contain,
+                        width: constraints.maxWidth,
+                        height: constraints.maxHeight,
+                      ),
                     );
 
                     return InteractiveViewer(
@@ -93,7 +101,12 @@ class InteractiveImageViewer extends StatelessWidget {
                                 1,
                                 0,
                               ]),
-                              child: image,
+                              child: Image.asset(
+                                imagePath,
+                                fit: BoxFit.contain,
+                                width: constraints.maxWidth,
+                                height: constraints.maxHeight,
+                              ),
                             )
                           : image,
                     );

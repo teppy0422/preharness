@@ -248,9 +248,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                 imagePath:
                                                     'assets/images/71144020-2.jpg',
                                                 scale: 2.4,
-                                                panX: 0.165,
+                                                panX: 0.168,
                                                 panY: 0.35,
-                                                height: 240,
+                                                height: 255,
                                                 width: 500,
                                               ),
                                             ],
@@ -271,9 +271,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                               currentBottomDial:
                                                   _currentBottomDial,
                                             ),
+                                            const SizedBox(height: 25),
                                             CustomCard(
                                               width: 180,
-                                              height: 60,
+                                              height: 50,
                                               child: Center(
                                                 child: Text(
                                                   "部材照合OK",
@@ -332,10 +333,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
           height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.getLineColor(context).withOpacity(0.1),
+            color: AppColors.getCardColor(context),
             border: Border.all(
-              color: AppColors.getLineColor(context).withOpacity(0.3),
-              width: 1,
+              color: AppColors.getLineColor(context),
+              width: 0.5,
             ),
           ),
           child: ClipOval(
@@ -495,7 +496,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
         ? _previousF13Count.toString()
         : '';
 
-    print('Building digits: $previousStr -> $currentStr');
+    // print('Building digits: $previousStr -> $currentStr');
 
     // 現在の数字をベースに、桁ごとに処理
     List<Widget> digits = [];

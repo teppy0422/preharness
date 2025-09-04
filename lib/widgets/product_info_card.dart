@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preharness/constants/app_colors.dart';
 import 'package:preharness/utils/global.dart';
+import 'package:preharness/utils/shared_prefs_helper.dart';
 import 'package:preharness/widgets/custom_input_card.dart';
 import 'package:preharness/widgets/ui/pattern_button.dart';
 import 'package:preharness/widgets/ui/custom_card.dart';
@@ -27,68 +28,43 @@ class ProductInfoCard extends StatefulWidget {
 }
 
 class _ProductInfoCardState extends State<ProductInfoCard> {
-  String _micrometerSerialNumber = ""; // デフォルト値
+  String _micrometerSerialNumber = ""; // マイクロメーター
+
   String _applicatorName = ""; // Applicatorアプリ品番
-  String _applicatorSerialNumber = ""; //Applicatorシリアル番号
-  String _terminalName = "";
-  String _terminalLotNumber = "";
+  String _applicatorSerialNumber = ""; // Applicatorシリアル番号
+
+  String _terminalName = ""; // 材料の端子品番
+  String _terminalSerialNumber = ""; // 材料の端子ロットナンバー
+
+  Future<void> _loadStringPref(String key, Function(String) setter) async {
+    await SharedPrefsHelper.loadAndSetStringWithState(key, this, setter);
+  }
 
   @override
   void initState() {
     super.initState();
-    _loadMicrometerSerialNumber();
-    _loadApplicator();
-    _loadTerminal();
+    _loadAllPreferences();
   }
 
-  Future<void> _loadMicrometerSerialNumber() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedNumber = prefs.getString('micrometer_serial_number');
-    if (savedNumber != null) {
-      setState(() {
-        _micrometerSerialNumber = savedNumber;
-      });
-    }
-  }
-
-  Future<void> _loadApplicator() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedName = prefs.getString('applicator_name');
-    if (savedName != null) {
-      setState(() {
-        // 文字数が足りない場合にエラーにならないようガードを入れる
-        if (savedName.length > 10) {
-          _applicatorName = savedName.substring(0, 10); // 0〜9文字目（最初の10文字）
-          _applicatorSerialNumber = savedName.substring(
-            10,
-          ); // 10文字目以降（index=10から最後まで）
-        } else {
-          // 10文字未満の場合のフォールバック処理
-          _applicatorName = savedName;
-          _applicatorSerialNumber = '';
-        }
-      });
-    }
-  }
-
-  Future<void> _loadTerminal() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedName = prefs.getString('terminal_name');
-    if (savedName != null) {
-      setState(() {
-        // 文字数が足りない場合にエラーにならないようガードを入れる
-        if (savedName.length > 10) {
-          _terminalName = savedName.substring(0, 10); // 0〜9文字目（最初の10文字）
-          _terminalLotNumber = savedName.substring(
-            10,
-          ); // 10文字目以降（index=10から最後まで）
-        } else {
-          // 10文字未満の場合のフォールバック処理
-          _terminalName = savedName;
-          _terminalLotNumber = '';
-        }
-      });
-    }
+  Future<void> _loadAllPreferences() async {
+    await _loadStringPref(
+      'micrometer_serial_number', // これが保存名で呼び出し
+      (value) => _micrometerSerialNumber = value, // これが変数にセット
+    );
+    await _loadStringPref(
+      'applicator_name',
+      (value) => _applicatorName = value,
+    );
+    await _loadStringPref(
+      'applicator_serial_number',
+      (value) => _applicatorSerialNumber = value,
+    );
+    await _loadStringPref('terminal_name', (value) => _terminalName = value);
+    await _loadStringPref(
+      'terminal_serial_number',
+      (value) => _terminalSerialNumber = value,
+    );
+    // _loadTerminal();
   }
 
   @override
@@ -116,12 +92,6 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
           ],
         ),
         const SizedBox(height: 12),
-        Divider(
-          height: 1,
-          thickness: 0.5,
-          color: AppColors.getLineColor(context),
-        ),
-        const SizedBox(height: 6),
         Card(
           color: AppColors.getCardColor(context),
           elevation: 4,
@@ -227,6 +197,10 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                   flex: 5,
                   prefsKey: 'micrometer_serial_number',
                   onInputComplete: (value) {
+                    SharedPrefsHelper.loadAndSetString(
+                      'micrometer_serial_number',
+                      (value) => _micrometerSerialNumber = value,
+                    );
                     setState(() {
                       _micrometerSerialNumber = value;
                     });
@@ -239,14 +213,30 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
               subItems: [
                 SubItem(
                   label: 'アプリ品番:',
-                  value: _applicatorName,
+                  value: formatCode(_applicatorName, "-"),
                   valueFont: 20,
                   flex: 5,
                   prefsKey: 'applicator_name',
                   onInputComplete: (value) {
-                    setState(() {
-                      _applicatorName = value;
-                    });
+                    if (value.length > 10) {
+                      final applicatorName = value
+                          .substring(0, 10)
+                          .replaceAll(RegExp(r'\s'), '');
+                      final applicatorSerialNumber = value.substring(10);
+                      SharedPrefsHelper.saveString(
+                        'applicator_name',
+                        applicatorName,
+                      );
+                      setState(() {});
+                      SharedPrefsHelper.saveString(
+                        'applicator_serial_number',
+                        applicatorSerialNumber,
+                      );
+                      setState(() {
+                        _applicatorName = applicatorName;
+                        _applicatorSerialNumber = applicatorSerialNumber;
+                      });
+                    } else {}
                   },
                 ),
                 SubItem(label: '加締形状:', value: '-', valueFont: 20, flex: 3),
@@ -263,19 +253,33 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
               subItems: [
                 SubItem(
                   label: '端子品番:',
-                  value: _terminalName,
+                  value: formatCode(_terminalName, "-"),
                   valueFont: 20,
                   flex: 5,
                   prefsKey: 'terminal_name',
                   onInputComplete: (value) {
-                    setState(() {
-                      _terminalName = value;
-                    });
+                    if (value.length > 10) {
+                      final terminalName = value.substring(0, 10);
+                      final terminalSerialNumber = value.substring(10);
+                      SharedPrefsHelper.saveString(
+                        'terminal_name',
+                        terminalName,
+                      );
+                      setState(() {});
+                      SharedPrefsHelper.saveString(
+                        'terminal_serial_number',
+                        terminalSerialNumber,
+                      );
+                      setState(() {
+                        _terminalName = terminalName;
+                        _terminalSerialNumber = terminalSerialNumber;
+                      });
+                    } else {}
                   },
                 ),
                 SubItem(
                   label: 'ロットNo:',
-                  value: _terminalLotNumber,
+                  value: _terminalSerialNumber,
                   valueFont: 20,
                   flex: 3,
                 ),
