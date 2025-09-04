@@ -71,7 +71,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     try {
       final String colorNum = widget.processingConditions['wire_color'] ?? '';
       if (colorNum.isEmpty) {
-        print('wire_color is empty in efu_detail');
+        // print('wire_color is empty in efu_detail');
         return;
       }
 
@@ -88,7 +88,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
         });
       }
     } catch (e) {
-      print('Error in _loadColor (efu_detail): $e');
+      // print('Error in _loadColor (efu_detail): $e');
       // エラー時はデフォルト色を設定
       if (mounted) {
         setState(() {
@@ -126,29 +126,17 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   @override
   Widget build(BuildContext context) {
     Color baseLineColor = AppColors.getLineColor(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Focus(
       focusNode: _focusNode,
       autofocus: true,
       onKeyEvent: (node, event) {
-        print(
-          'Key event: ${event.runtimeType}, logicalKey: ${event.logicalKey}, physicalKey: ${event.physicalKey}',
-        );
-
         if (event is KeyDownEvent) {
           // F13、F1、またはInsertキーをチェック（Android対応）
           if (event.logicalKey == LogicalKeyboardKey.f13 ||
               event.logicalKey == LogicalKeyboardKey.f1 ||
               event.logicalKey == LogicalKeyboardKey.insert ||
               event.physicalKey == PhysicalKeyboardKey.f13) {
-            print('Target key detected: ${event.logicalKey}');
-            if (!mounted) return KeyEventResult.ignored;
-
-            print(
-              'Before update: previous=$_previousF13Count, current=$_f13KeyCount',
-            );
-
             final now = DateTime.now();
             // 速度計算（カウント/分）
             if (_lastCountTime != null) {
@@ -170,169 +158,162 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               _lastCountTime = now;
             });
 
-            print(
-              'After update: previous=$_previousF13Count, current=$_f13KeyCount, speed: $_currentSpeed',
-            );
-
             return KeyEventResult.handled;
           }
         }
         return KeyEventResult.ignored;
       },
 
-      child: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Divider(
-                    height: 1,
-                    thickness: .5,
-                    color: AppColors.getLineColor(context),
-                  ),
-                  SizedBox(height: 5),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Rowで左右に分割
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // 左側: 情報グループ
-                                Expanded(
-                                  flex: 3,
-                                  child: ProductInfoCard(
-                                    processingConditions:
-                                        widget.processingConditions,
-                                    onBack: widget.onBack,
-                                    containerColor: _containerColor,
-                                    containerForeColor: _containerForeColor,
-                                  ),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Divider(
+                  height: 1,
+                  thickness: .5,
+                  color: AppColors.getLineColor(context),
+                ),
+                SizedBox(height: 5),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Rowで左右に分割
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 左側: 情報グループ
+                              Expanded(
+                                flex: 3,
+                                child: ProductInfoCard(
+                                  processingConditions:
+                                      widget.processingConditions,
+                                  onBack: widget.onBack,
+                                  containerColor: _containerColor,
+                                  containerForeColor: _containerForeColor,
                                 ),
+                              ),
 
-                                const SizedBox(width: 0), // 左右の間隔
+                              const SizedBox(width: 0), // 左右の間隔
 
-                                Expanded(
-                                  flex: 6,
-                                  child: Column(
-                                    children: [
-                                      TerminalInfoCard(
-                                        terminal1:
-                                            widget.blockInfo['terminals']?[0] ??
-                                            "",
-                                        terminal2:
-                                            widget.blockInfo['terminals']?[1] ??
-                                            "",
-                                        wireType:
-                                            widget
-                                                .processingConditions['wire_type']
-                                                ?.toString() ??
-                                            '',
-                                        wireSize:
-                                            widget
-                                                .processingConditions['wire_size']
-                                                ?.toString() ??
-                                            '',
-                                      ),
+                              Expanded(
+                                flex: 6,
+                                child: Column(
+                                  children: [
+                                    TerminalInfoCard(
+                                      terminal1:
+                                          widget.blockInfo['terminals']?[0] ??
+                                          "",
+                                      terminal2:
+                                          widget.blockInfo['terminals']?[1] ??
+                                          "",
+                                      wireType:
+                                          widget
+                                              .processingConditions['wire_type']
+                                              ?.toString() ??
+                                          '',
+                                      wireSize:
+                                          widget
+                                              .processingConditions['wire_size']
+                                              ?.toString() ??
+                                          '',
+                                    ),
 
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              children: [
-                                                DialSelectorWithDb(
-                                                  processingConditions: widget
-                                                      .processingConditions,
-                                                  blockInfo: widget.blockInfo,
-                                                  recommendedHindDial:
-                                                      _recommendedHindDial,
-                                                  recommendedTopDial:
-                                                      _recommendedTopDial,
-                                                  recommendedBottomDial:
-                                                      _recommendedBottomDial,
-                                                  onDialChanged: _onDialChanged,
-                                                ),
-                                                InteractiveImageViewer(
-                                                  imagePath:
-                                                      'assets/images/71144020-2.jpg',
-                                                  scale: 2.4,
-                                                  panX: 0.165,
-                                                  panY: 0.35,
-                                                  height: 240,
-                                                  width: 500,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          SizedBox(width: 8),
-                                          Column(
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
                                             children: [
-                                              SizedBox(height: 4),
-                                              Measurement(
-                                                chListData: widget.chListData,
-                                                onHindDialRecommendation:
-                                                    _onHindDialRecommendation,
-                                                onFrontDialRecommendation:
-                                                    _onFrontDialRecommendation,
-                                                currentHindDial:
-                                                    _currentHindDial,
-                                                currentTopDial: _currentTopDial,
-                                                currentBottomDial:
-                                                    _currentBottomDial,
+                                              DialSelectorWithDb(
+                                                processingConditions:
+                                                    widget.processingConditions,
+                                                blockInfo: widget.blockInfo,
+                                                recommendedHindDial:
+                                                    _recommendedHindDial,
+                                                recommendedTopDial:
+                                                    _recommendedTopDial,
+                                                recommendedBottomDial:
+                                                    _recommendedBottomDial,
+                                                onDialChanged: _onDialChanged,
                                               ),
-                                              CustomCard(
-                                                width: 180,
-                                                height: 60,
-                                                child: Center(
-                                                  child: Text(
-                                                    "部材照合OK",
-                                                    style: TextStyle(
-                                                      fontSize: 20,
-                                                    ),
-                                                  ),
-                                                ),
+                                              InteractiveImageViewer(
+                                                imagePath:
+                                                    'assets/images/71144020-2.jpg',
+                                                scale: 2.4,
+                                                panX: 0.165,
+                                                panY: 0.35,
+                                                height: 240,
+                                                width: 500,
                                               ),
                                             ],
                                           ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Column(
+                                          children: [
+                                            SizedBox(height: 4),
+                                            Measurement(
+                                              chListData: widget.chListData,
+                                              onHindDialRecommendation:
+                                                  _onHindDialRecommendation,
+                                              onFrontDialRecommendation:
+                                                  _onFrontDialRecommendation,
+                                              currentHindDial: _currentHindDial,
+                                              currentTopDial: _currentTopDial,
+                                              currentBottomDial:
+                                                  _currentBottomDial,
+                                            ),
+                                            CustomCard(
+                                              width: 180,
+                                              height: 60,
+                                              child: Center(
+                                                child: Text(
+                                                  "部材照合OK",
+                                                  style: TextStyle(
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  Divider(height: 10, thickness: 0.5, color: baseLineColor),
-                ],
-              ),
-
-              Positioned(
-                bottom: 1,
-                right: 0,
-                left: 0, // 左端の位置を指定してスペースを確保
-                child: Row(
-                  children: [
-                    Expanded(child: _buildSpeedGraph()),
-                    const SizedBox(width: 16),
-                    _buildAnimatedCounter(),
+                    ),
                   ],
                 ),
+                Divider(height: 10, thickness: 0.5, color: baseLineColor),
+              ],
+            ),
+
+            Positioned(
+              bottom: 1,
+              right: 0,
+              left: 0, // 左端の位置を指定してスペースを確保
+              child: Row(
+                children: [
+                  Expanded(child: _buildSpeedGraph()),
+                  const SizedBox(width: 16),
+                  _buildAnimatedCounter(),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
