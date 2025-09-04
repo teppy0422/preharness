@@ -100,7 +100,7 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             PatternButton(
-              label: "←戻る",
+              label: "←戻る ",
               fontSize: 16,
               width: 64,
               height: 36,

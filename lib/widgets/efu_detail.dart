@@ -179,9 +179,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
         return KeyEventResult.ignored;
       },
 
-      child: Card(
-        color: Colors.transparent,
-        elevation: 0,
+      child: Container(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Stack(
@@ -289,6 +287,18 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                 currentTopDial: _currentTopDial,
                                                 currentBottomDial:
                                                     _currentBottomDial,
+                                              ),
+                                              Card(
+                                                color: Colors.transparent,
+                                                elevation: 0,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                    8.0,
+                                                  ),
+                                                  child: Stack(
+                                                    children: [Text("aaa")],
+                                                  ),
+                                                ),
                                               ),
                                             ],
                                           ),

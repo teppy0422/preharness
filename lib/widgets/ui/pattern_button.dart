@@ -19,7 +19,6 @@ class PatternButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = AppColors.getCardColor(context);
     return SizedBox(
       width: width,
       height: height,
@@ -55,22 +54,22 @@ class PatternButton extends StatelessWidget {
                     shadows: <Shadow>[
                       // 4方向へのオフセットで、ぼかし具合を変えずに太い縁取りを作成
                       Shadow(
-                        color: cardColor,
+                        color: AppColors.getCardColor(context),
                         blurRadius: 2.0,
                         offset: Offset(2, 2),
                       ),
                       Shadow(
-                        color: cardColor,
+                        color: AppColors.getCardColor(context),
                         blurRadius: 2.0,
                         offset: Offset(-2, 2),
                       ),
                       Shadow(
-                        color: cardColor,
+                        color: AppColors.getCardColor(context),
                         blurRadius: 2.0,
                         offset: Offset(2, -2),
                       ),
                       Shadow(
-                        color: cardColor,
+                        color: AppColors.getCardColor(context),
                         blurRadius: 2.0,
                         offset: Offset(-2, -2),
                       ),
