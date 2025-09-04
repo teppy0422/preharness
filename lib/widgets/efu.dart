@@ -234,6 +234,7 @@ class _EfuPageState extends State<EfuPage> {
         addParts2,
         widget.mark_color_2,
       ]);
+      final isDark = Theme.of(context).brightness == Brightness.dark;
       return LayoutBuilder(
         builder: (context, constraints) {
           // 高さ固定（例: 400）にしたい場合
@@ -242,376 +243,386 @@ class _EfuPageState extends State<EfuPage> {
           final double aspectRatio = 2.1;
           final double width = height * aspectRatio;
 
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-
           return Center(
             // 中央揃え（任意）
             child: SizedBox(
               height: height,
               width: width,
-              child: Container(
-                color: isDark
-                    ? AppColors.black
-                    : AppColors.paperWhite, // ← ここで分岐
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // グリッド部
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 5,
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 5,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '製造指示書',
-                                      labelFontSize: 20,
-                                      valueHeight: 0,
-                                      showBorder: false,
-                                      value: "",
+              child: Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  // Cardのshapeプロパティに枠線を設定
+                  side: BorderSide(
+                    color: isDark
+                        ? AppColors.getLineColor(context)
+                        : //
+                          Colors.transparent, // ダークモードでは枠線なし
+                    width: 0.2,
+                  ),
+                ),
+                child: Container(
+                  color: AppColors.getCardColor(context),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // グリッド部
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 5,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '製造指示書',
+                                        labelFontSize: 20,
+                                        valueHeight: 0,
+                                        showBorder: false,
+                                        value: "",
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 4,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: 'ロットNo.',
-                                      cellBgColor: getLightColor(context),
-                                      value: widget.lot_num,
-                                      valueFontSize: 24,
-                                      overFlowTop: -10,
-                                      right: BorderSide.none,
-                                      bottom: BorderSide.none,
+                                    Expanded(
+                                      flex: 4,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: 'ロットNo.',
+                                        cellBgColor: getLightColor(context),
+                                        value: widget.lot_num,
+                                        valueFontSize: 24,
+                                        overFlowTop: -10,
+                                        right: BorderSide.none,
+                                        bottom: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '構成No.',
-                                      labelColor: Colors.white,
-                                      labelBgColor: getDarkColor(context),
-                                      value: widget.cfg_no,
-                                      valueFontSize: 20,
-                                      overFlowTop: -6,
-                                      right: BorderSide.none,
-                                      bottom: BorderSide.none,
+                                    Expanded(
+                                      flex: 2,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '構成No.',
+                                        labelColor: Colors.white,
+                                        labelBgColor: getDarkColor(context),
+                                        value: widget.cfg_no,
+                                        valueFontSize: 20,
+                                        overFlowTop: -6,
+                                        right: BorderSide.none,
+                                        bottom: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '追 番',
-                                      labelAlignment: Alignment.center,
-                                      value: "",
-                                      right: BorderSide.none,
-                                      bottom: BorderSide.none,
+                                    Expanded(
+                                      flex: 1,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '追 番',
+                                        labelAlignment: Alignment.center,
+                                        value: "",
+                                        right: BorderSide.none,
+                                        bottom: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  // 日連番
-                                  Expanded(
-                                    flex: 1,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '日 連 番',
-                                      labelAlignment: Alignment.center,
-                                      value: "",
-                                      valueFontSize: 14,
-                                      overFlowTop: 0,
-                                      right: BorderSide.none,
-                                      bottom: BorderSide.none,
+                                    // 日連番
+                                    Expanded(
+                                      flex: 1,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '日 連 番',
+                                        labelAlignment: Alignment.center,
+                                        value: "",
+                                        valueFontSize: 14,
+                                        overFlowTop: 0,
+                                        right: BorderSide.none,
+                                        bottom: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  // 全量
-                                  Expanded(
-                                    flex: 1,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '全 量',
-                                      labelAlignment: Alignment.center,
-                                      value: "",
-                                      bottom: BorderSide.none,
+                                    // 全量
+                                    Expanded(
+                                      flex: 1,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '全 量',
+                                        labelAlignment: Alignment.center,
+                                        value: "",
+                                        bottom: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  // 空きセル
-                                  Expanded(
-                                    flex: 4,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '',
-                                      value: "",
-                                      showBorder: false,
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    // 空きセル
+                                    Expanded(
+                                      flex: 4,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '',
+                                        value: "",
+                                        showBorder: false,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 10,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '製 品 品 番',
-                                      value:
-                                          "${widget.p_number}    ${widget.eng_change}",
-                                      valueFontSize: 16,
-                                      bottom: BorderSide.none,
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 10,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '製 品 品 番',
+                                        value:
+                                            "${widget.p_number}    ${widget.eng_change}",
+                                        valueFontSize: 16,
+                                        bottom: BorderSide.none,
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 8,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: 'ジョイントアッシー',
-                                      labelAlignment: Alignment.center,
-                                      value: '',
-                                      bottom: BorderSide.none,
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 8,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: 'ジョイントアッシー',
+                                        labelAlignment: Alignment.center,
+                                        value: '',
+                                        bottom: BorderSide.none,
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 5,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: 'サブアッシー',
-                                      labelAlignment: Alignment.center,
-                                      value: '',
-                                      bottom: BorderSide.none,
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 5,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: 'サブアッシー',
+                                        labelAlignment: Alignment.center,
+                                        value: '',
+                                        bottom: BorderSide.none,
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 10,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '切断機種号機',
-                                      labelAlignment: Alignment.center,
-                                      value: '',
-                                      bottom: BorderSide.none,
+                                    Expanded(
+                                      flex: 10,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '切断機種号機',
+                                        labelAlignment: Alignment.center,
+                                        value: '',
+                                        bottom: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  // 空きセル
-                                  Expanded(
-                                    flex: 4,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '',
-                                      value: "",
-                                      showBorder: false,
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    // 空きセル
+                                    Expanded(
+                                      flex: 4,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '',
+                                        value: "",
+                                        showBorder: false,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 4,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '品 種',
-                                      labelAlignment: Alignment.center,
-                                      value: widget.wire_type,
-                                      valueFontSize: 18,
-                                      overFlowTop: -2,
-                                      bottom: BorderSide.none,
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 4,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '品 種',
+                                        labelAlignment: Alignment.center,
+                                        value: widget.wire_type,
+                                        valueFontSize: 18,
+                                        overFlowTop: -2,
+                                        bottom: BorderSide.none,
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 4,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: 'サイズ',
-                                      labelAlignment: Alignment.center,
-                                      value: widget.wire_size,
-                                      valueFontSize: 18,
-                                      overFlowTop: -2,
-                                      bottom: BorderSide.none,
-                                      left: BorderSide.none,
-                                      right: BorderSide.none,
-                                      lefthalfborder: true,
+                                    Expanded(
+                                      flex: 4,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: 'サイズ',
+                                        labelAlignment: Alignment.center,
+                                        value: widget.wire_size,
+                                        valueFontSize: 18,
+                                        overFlowTop: -2,
+                                        bottom: BorderSide.none,
+                                        left: BorderSide.none,
+                                        right: BorderSide.none,
+                                        lefthalfborder: true,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 8,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '色',
-                                      labelAlignment: Alignment.center,
-                                      value: widget.wire_color,
-                                      valueFontSize: 30,
-                                      overFlowTop: -12,
-                                      left: BorderSide.none,
-                                      bottom: BorderSide.none,
-                                      lefthalfborder: true,
+                                    Expanded(
+                                      flex: 8,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '色',
+                                        labelAlignment: Alignment.center,
+                                        value: widget.wire_color,
+                                        valueFontSize: 30,
+                                        overFlowTop: -12,
+                                        left: BorderSide.none,
+                                        bottom: BorderSide.none,
+                                        lefthalfborder: true,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 4,
-                                    child: WireColorBox(
-                                      width: 22,
-                                      height: 22,
-                                      color:
-                                          _containerColor ?? Colors.transparent,
-                                      lineColor:
-                                          _containerForeColor ??
-                                          Colors.transparent,
+                                    Expanded(
+                                      flex: 4,
+                                      child: WireColorBox(
+                                        width: 22,
+                                        height: 22,
+                                        color:
+                                            _containerColor ??
+                                            Colors.transparent,
+                                        lineColor:
+                                            _containerForeColor ??
+                                            Colors.transparent,
+                                      ),
                                     ),
-                                  ),
 
-                                  Expanded(
-                                    flex: 7,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '切 断 線 長',
-                                      labelAlignment: Alignment.center,
-                                      value: wireLen,
-                                      valueFontSize: 22,
-                                      overFlowTop: -6,
-                                      bottom: BorderSide.none,
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 7,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '切 断 線 長',
+                                        labelAlignment: Alignment.center,
+                                        value: wireLen,
+                                        valueFontSize: 22,
+                                        overFlowTop: -6,
+                                        bottom: BorderSide.none,
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 6,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '数 量',
-                                      labelAlignment: Alignment.center,
-                                      value: widget.wire_cnt,
-                                      valueFontSize: 24,
-                                      valueAlignment: MainAxisAlignment.end,
-                                      overFlowTop: -10,
-                                      bottom: BorderSide.none,
+                                    Expanded(
+                                      flex: 6,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '数 量',
+                                        labelAlignment: Alignment.center,
+                                        value: widget.wire_cnt,
+                                        valueFontSize: 24,
+                                        valueAlignment: MainAxisAlignment.end,
+                                        overFlowTop: -10,
+                                        bottom: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
 
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    flex: 4,
-                                    child: _buildOneBlock(
-                                      strip: stripLen1,
-                                      directives: blockList1_1,
-                                      terminals: blockList1_2,
-                                      context: context,
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 4,
+                                      child: _buildOneBlock(
+                                        strip: stripLen1,
+                                        directives: blockList1_1,
+                                        terminals: blockList1_2,
+                                        context: context,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 4,
-                                    child: _buildOneBlock(
-                                      strip: stripLen2,
-                                      directives: blockList2_1,
-                                      terminals: blockList2_2,
-                                      context: context,
+                                    Expanded(
+                                      flex: 4,
+                                      child: _buildOneBlock(
+                                        strip: stripLen2,
+                                        directives: blockList2_1,
+                                        terminals: blockList2_2,
+                                        context: context,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(flex: 3, child: _buildQr(context)),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '工程',
-                                      labelFontSize: 12,
-                                      value: '',
-                                      right: BorderSide.none,
+                                    Expanded(flex: 3, child: _buildQr(context)),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '工程',
+                                        labelFontSize: 12,
+                                        value: '',
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 5,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '切断',
-                                      labelFontSize: 12,
-                                      value: widget.cut_code,
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 5,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '切断',
+                                        labelFontSize: 12,
+                                        value: widget.cut_code,
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 5,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '集中',
-                                      labelFontSize: 12,
-                                      value: '',
-                                      cellBgColor: getLightColor(context),
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 5,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '集中',
+                                        labelFontSize: 12,
+                                        value: '',
+                                        cellBgColor: getLightColor(context),
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 5,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '前1',
-                                      labelFontSize: 12,
-                                      value: '',
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 5,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '前1',
+                                        labelFontSize: 12,
+                                        value: '',
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 5,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '前2',
-                                      labelFontSize: 12,
-                                      value: '',
-                                      cellBgColor: getLightColor(context),
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 5,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '前2',
+                                        labelFontSize: 12,
+                                        value: '',
+                                        cellBgColor: getLightColor(context),
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 5,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: 'ジョイント',
-                                      labelFontSize: 12,
-                                      value: "",
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 5,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: 'ジョイント',
+                                        labelFontSize: 12,
+                                        value: "",
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 5,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '準完',
-                                      labelFontSize: 12,
-                                      value:
-                                          "$deliveryParseMonth/$deliveryParseDay",
-                                      cellBgColor: getLightColor(context),
-                                      right: BorderSide.none,
+                                    Expanded(
+                                      flex: 5,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '準完',
+                                        labelFontSize: 12,
+                                        value:
+                                            "$deliveryParseMonth/$deliveryParseDay",
+                                        cellBgColor: getLightColor(context),
+                                        right: BorderSide.none,
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: _buildCell(
-                                      context: context,
-                                      label: '組立',
-                                      labelFontSize: 12,
-                                      value: "N9",
+                                    Expanded(
+                                      flex: 2,
+                                      child: _buildCell(
+                                        context: context,
+                                        label: '組立',
+                                        labelFontSize: 12,
+                                        value: "N9",
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

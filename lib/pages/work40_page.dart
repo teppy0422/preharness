@@ -328,6 +328,7 @@ class _EquipmentInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
+        color: AppColors.getCardColor(context),
         border: Border.all(color: AppColors.getLineSubColor(context), width: 1),
         borderRadius: BorderRadius.circular(4),
       ),
@@ -471,6 +472,7 @@ class _SearchCardState extends State<_SearchCard> {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
+            color: AppColors.getCardColor(context),
             border: Border.all(
               color: widget.focusNode.hasFocus
                   ? AppColors.getHighLightColor(context)

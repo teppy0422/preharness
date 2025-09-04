@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         brightness: Brightness.light,
         fontFamily: 'NotoSansJP',
-        scaffoldBackgroundColor: AppColors.paperWhite,
+        scaffoldBackgroundColor: AppColors.grayWhite,
         textTheme: const TextTheme(
           bodyLarge: TextStyle(fontWeight: FontWeight.w900),
           bodyMedium: TextStyle(fontWeight: FontWeight.w600),

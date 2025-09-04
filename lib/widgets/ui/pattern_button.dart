@@ -19,6 +19,8 @@ class PatternButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return SizedBox(
       width: width,
       height: height,
@@ -43,6 +45,7 @@ class PatternButton extends StatelessWidget {
             child: CustomPaint(
               painter: DiagonalStripesPainter(
                 color: AppColors.getLineColor(context),
+                alpha: isDark ? 60 : 40,
               ),
               child: Center(
                 child: Text(
@@ -88,13 +91,14 @@ class PatternButton extends StatelessWidget {
 /// 斜線パターンを描く CustomPainter
 class DiagonalStripesPainter extends CustomPainter {
   final Color color;
+  final int alpha;
 
-  DiagonalStripesPainter({required this.color});
+  DiagonalStripesPainter({required this.color, required this.alpha});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withAlpha(80)
+      ..color = color.withAlpha(alpha)
       ..strokeWidth = 2;
 
     const double step = 8; // 斜線の間隔

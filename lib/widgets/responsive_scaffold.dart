@@ -9,7 +9,6 @@ class ResponsiveScaffold extends StatefulWidget {
   final String title;
   final String currentPage;
   final Widget child;
-
   const ResponsiveScaffold({
     super.key,
     required this.title,
@@ -89,13 +88,13 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
               ),
             ),
           Positioned(
-            top: 32,
+            top: 28,
             right: 8, // ← UserIconButton より左へ
             child: Row(
               children: const [
                 // Nasステータス
                 NasStatusIcon(),
-                SizedBox(width: 12),
+                SizedBox(width: 8),
                 // ユーザーログインアイコン
                 UserIconButton(),
               ],

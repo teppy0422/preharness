@@ -100,7 +100,7 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             PatternButton(
-              label: "←戻る ",
+              label: "←Back",
               fontSize: 16,
               width: 64,
               height: 36,
@@ -121,71 +121,91 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
           color: AppColors.getLineColor(context),
         ),
         const SizedBox(height: 6),
-
-        Row(
-          children: [
-            Expanded(
-              flex: 5,
-              child: _buildLabelValue(
-                '製品品番:',
-                widget.processingConditions['p_number'],
-                valueFont: 28,
-              ),
+        Card(
+          color: AppColors.getCardColor(context),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: AppColors.getLineColor(context),
+              width: 0.5,
             ),
-            Expanded(
-              flex: 3,
-              child: _buildLabelValue(
-                'ロットNo:',
-                widget.processingConditions['lot_num'],
-                valueFont: 28,
-              ),
+            borderRadius: BorderRadius.circular(8.0), //
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: _buildLabelValue(
+                        '製品品番:',
+                        widget.processingConditions['p_number'],
+                        valueFont: 28,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: _buildLabelValue(
+                        'ロットNo:',
+                        widget.processingConditions['lot_num'],
+                        valueFont: 28,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 5),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: _buildLabelValue(
+                        '設変:',
+                        widget.processingConditions['eng_change'],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: _buildLabelValue(
+                        '構成No:',
+                        widget.processingConditions['cfg_no'],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 5),
+                Row(
+                  children: [
+                    _buildLabelValue(
+                      '色:',
+                      widget.processingConditions['wire_color'],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 5),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: _buildLabelValue(
+                        '準完日:',
+                        widget.processingConditions['delivery_date'],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: _buildLabelValue(
+                        '数量:',
+                        widget.processingConditions['wire_cnt'],
+                        valueFont: 30,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
-        SizedBox(height: 5),
-        Row(
-          children: [
-            Expanded(
-              flex: 5,
-              child: _buildLabelValue(
-                '設変:',
-                widget.processingConditions['eng_change'],
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: _buildLabelValue(
-                '構成No:',
-                widget.processingConditions['cfg_no'],
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 5),
-        Row(
-          children: [
-            _buildLabelValue('色:', widget.processingConditions['wire_color']),
-          ],
-        ),
-        SizedBox(height: 5),
-        Row(
-          children: [
-            Expanded(
-              flex: 5,
-              child: _buildLabelValue(
-                '準完日:',
-                widget.processingConditions['delivery_date'],
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: _buildLabelValue(
-                '数量:',
-                widget.processingConditions['wire_cnt'],
-                valueFont: 30,
-              ),
-            ),
-          ],
+          ),
         ),
         SizedBox(height: 5),
 

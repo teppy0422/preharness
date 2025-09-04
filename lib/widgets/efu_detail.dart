@@ -181,7 +181,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
       child: Container(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(4),
           child: Stack(
             children: [
               Column(

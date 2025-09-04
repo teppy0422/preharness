@@ -25,6 +25,8 @@ class AppColors {
   static const Color paperWhite = Color(0xFFFFFEFA);
   static const Color paperBlack = Color(0xFF1C1C1C);
 
+  static const Color grayWhite = Color(0xFFEAE7E1);
+
   // 枠線などのデフォルト色
   static const Color border = Color(0xFFBDBDBD);
 
@@ -45,11 +47,27 @@ class AppColors {
 
   static Color getLineSubColor(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? Color.fromARGB(255, 178, 177, 174) : paperBlack;
+    return isDark ? const Color.fromARGB(255, 178, 177, 174) : paperBlack;
   }
 
   static Color getCardColor(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? black : valueBackground;
+    return isDark ? black : paperWhite;
+  }
+
+  // Lottie Color Converter
+  static String colorToLottieRgb(Color color) {
+    final r = (color.red / 255).toStringAsFixed(3);
+    final g = (color.green / 255).toStringAsFixed(3);
+    final b = (color.blue / 255).toStringAsFixed(3);
+    return '[$r,$g,$b]';
+  }
+
+  static String colorToLottieRgba(Color color) {
+    final r = (color.red / 255).toStringAsFixed(3);
+    final g = (color.green / 255).toStringAsFixed(3);
+    final b = (color.blue / 255).toStringAsFixed(3);
+    // The original animation uses a fixed alpha of 1, so we'll do the same.
+    return '[$r,$g,$b,1]';
   }
 }
