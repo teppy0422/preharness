@@ -6,6 +6,7 @@ import 'package:preharness/constants/app_colors.dart';
 import 'package:preharness/utils/global.dart';
 import 'package:preharness/widgets/custom_input_card.dart';
 import 'package:preharness/widgets/ui/pattern_button.dart';
+import 'package:preharness/widgets/ui/custom_card.dart';
 
 class ProductInfoCard extends StatefulWidget {
   final Map<String, dynamic> processingConditions;

@@ -7,6 +7,7 @@ import 'package:preharness/constants/app_colors.dart';
 import 'package:preharness/widgets/terminal_info_card.dart';
 import 'package:preharness/widgets/interactive_image_viewer.dart';
 import 'package:preharness/widgets/product_info_card.dart';
+import 'package:preharness/widgets/ui/custom_card.dart';
 
 class EfuDetailPage extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
@@ -288,15 +289,15 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                 currentBottomDial:
                                                     _currentBottomDial,
                                               ),
-                                              Card(
-                                                color: Colors.transparent,
-                                                elevation: 0,
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                    8.0,
-                                                  ),
-                                                  child: Stack(
-                                                    children: [Text("aaa")],
+                                              CustomCard(
+                                                width: 180,
+                                                height: 60,
+                                                child: Center(
+                                                  child: Text(
+                                                    "部材照合OK",
+                                                    style: TextStyle(
+                                                      fontSize: 20,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
@@ -569,7 +570,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
         ),
       );
     }
-
     return digits;
   }
 
