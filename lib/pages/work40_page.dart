@@ -11,6 +11,7 @@ import 'package:preharness/services/settings_service.dart';
 import 'package:preharness/widgets/flip_animation.dart';
 import 'package:preharness/widgets/slide_animation.dart';
 import 'package:preharness/widgets/fade_scale_animation.dart';
+import 'package:preharness/widgets/ui/pattern_button.dart';
 
 class Work40Page extends StatefulWidget {
   const Work40Page({super.key});
@@ -193,7 +194,7 @@ class _Work40PageState extends State<Work40Page>
       child: Stack(
         children: [
           Positioned(
-            top: 20,
+            top: 32,
             left: 10,
             right: 10,
             child: Row(
@@ -215,7 +216,7 @@ class _Work40PageState extends State<Work40Page>
                 Expanded(
                   flex: 3,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 7),
+                    padding: const EdgeInsets.only(),
                     child: _EquipmentInfoCard(),
                   ),
                 ),
@@ -545,23 +546,14 @@ class _SearchCardState extends State<_SearchCard> {
               : _buildRawKeyboardReader(),
         ),
         SizedBox(width: 10),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue, // ボタンの色
-            foregroundColor: Colors.white, // 文字色
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-            textStyle: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), // 角を丸く
-            ),
-            elevation: 1, // 影を付ける
-            minimumSize: const Size(60, 30), // 最低サイズを設定
-          ),
-          onPressed: _handleSearch,
-          child: const Text('検索'),
+        PatternButton(
+          label: "検索",
+          fontSize: 14,
+          width: 64,
+          height: 32,
+          onPressed: () {
+            _handleSearch();
+          },
         ),
       ],
     );

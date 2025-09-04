@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preharness/constants/app_colors.dart';
 import 'package:preharness/utils/global.dart';
 import 'package:preharness/widgets/custom_input_card.dart';
+import 'package:preharness/widgets/ui/pattern_button.dart';
 
 class ProductInfoCard extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
@@ -94,6 +95,33 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 5),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            PatternButton(
+              label: "←戻る",
+              fontSize: 16,
+              width: 64,
+              height: 36,
+              onPressed: () {
+                try {
+                  widget.onBack();
+                } catch (e) {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Divider(
+          height: 1,
+          thickness: 0.5,
+          color: AppColors.getLineColor(context),
+        ),
+        const SizedBox(height: 6),
+
         Row(
           children: [
             Expanded(
@@ -159,25 +187,10 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
             ),
           ],
         ),
-        SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            ElevatedButton.icon(
-              onPressed: () {
-                try {
-                  widget.onBack();
-                } catch (e) {
-                  Navigator.of(context).pop();
-                }
-              },
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('戻る'),
-            ),
-          ],
-        ),
+        SizedBox(height: 5),
+
         Divider(
-          height: 10,
+          height: 16,
           thickness: 0.5,
           color: AppColors.getLineColor(context),
         ),

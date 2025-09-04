@@ -89,7 +89,7 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
               ),
             ),
           Positioned(
-            top: 16,
+            top: 32,
             right: 8, // ← UserIconButton より左へ
             child: Row(
               children: const [

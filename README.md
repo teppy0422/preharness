@@ -315,6 +315,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 054
 
+- Added widget/ui/pattern_button.dart for Button design.
+
+#### commit 055
+
 ---
 
 ### now
