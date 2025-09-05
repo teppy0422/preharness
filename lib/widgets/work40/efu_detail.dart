@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:preharness/widgets/dial_selector_with_db.dart';
-import 'package:preharness/widgets/measurement.dart';
+import 'package:preharness/widgets/work40/dial_selector_with_db.dart';
+import 'package:preharness/widgets/work40/measurement.dart';
 import 'package:preharness/utils/color_utils.dart';
 import 'package:preharness/constants/app_colors.dart';
 import 'package:preharness/widgets/terminal_info_card.dart';
 import 'package:preharness/widgets/interactive_image_viewer.dart';
-import 'package:preharness/widgets/product_info_card.dart';
-import 'package:preharness/widgets/crimp_condition.dart';
+import 'package:preharness/widgets/work40/product_info_card.dart';
+import 'package:preharness/widgets/work40/crimp_condition.dart';
 import 'package:preharness/widgets/ui/custom_card.dart';
 
 class EfuDetailPage extends StatefulWidget {
@@ -543,9 +543,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
       final hasChanged = currentDigit != previousDigit || isNewDigit;
 
-      print(
-        'Position $i (right-$currentFromRight): prev="$previousDigit" -> cur="$currentDigit", changed: $hasChanged, isNew: $isNewDigit',
-      );
+      // print(
+      //   'Position $i (right-$currentFromRight): prev="$previousDigit" -> cur="$currentDigit", changed: $hasChanged, isNew: $isNewDigit',
+      // );
 
       digits.add(
         _buildSingleDigit(

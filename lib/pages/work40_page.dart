@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // RawKeyEventのために追加
 import 'package:preharness/services/api_service.dart';
-import 'package:preharness/widgets/efu.dart';
-import 'package:preharness/widgets/efu_detail.dart'; // 詳細ページをインポート
+import 'package:preharness/widgets/work40/efu.dart';
+import 'package:preharness/widgets/work40/efu_detail.dart'; // 詳細ページをインポート
 import 'package:preharness/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
 import 'package:preharness/utils/global.dart';

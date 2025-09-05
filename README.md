@@ -331,6 +331,7 @@ samples, guidance on mobile development, and a full API reference.
 
 - product_info_card.dart から加工条件を crimp_condition.dart として widget にまとめる。
 - sidebar の色を修正
+- work40_page.dart の widget を widget/work40 にまとめる
 
 #### commit 058
 
@@ -339,14 +340,15 @@ samples, guidance on mobile development, and a full API reference.
 ### now
 
 - efu_detail.dart を読み込んだ時にアプリと端子リールが異なる場合の処理を追加
+
+### next
+
 - アンマッチの場合に textfield にフォーカス
 - measurement.dart の OK/NG の処理を追加
 - 全て正しい場合に照合 OK の処理
 - 照合 OK ならカウントアップが進む
 - 生産完了で DB に履歴保存
 - Arduino でプレス制御
-
-### next
 
 - インデックス検索
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:preharness/services/local_db_service.dart';
-import 'package:preharness/widgets/dial_selector.dart';
+import 'package:preharness/widgets/work40/dial_selector.dart';
 import 'package:drift/drift.dart' as drift;
 
 class DialSelectorWithDb extends StatefulWidget {
