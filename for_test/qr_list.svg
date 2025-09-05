@@ -24,9 +24,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.76418644"
-     inkscape:cx="283.90895"
-     inkscape:cy="285.34761"
+     inkscape:zoom="1.3121822"
+     inkscape:cx="216.81893"
+     inkscape:cy="222.20907"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -102,5 +102,62 @@ nfznTcPsAAAAAElFTkSuQmCC
          x="48.41695"
          y="37.486691"
          style="stroke-width:0.0738974">712562540867890</tspan></text>
+    <image
+       width="28.608097"
+       height="28.608097"
+       preserveAspectRatio="none"
+       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKIAAACiAQMAAAD4PIRYAAAABlBMVEX///8AAABVwtN+AAAACXBI
+WXMAAA7EAAAOxAGVKw4bAAAAyElEQVRIie2WUQ7EIAhESTyAR/LqHKkHIHEHMOvW/R/6UZI2+ugH
+GaaoyBsPijERl+DVfDVLKJ52iXXFO7d8ioKcem7Mq5BCIy2nK1dEs0Oe+O8bi4ZTRxZ3+JdFV5x7
+Kh3mSM118XUJhS7YWMjUtneoNMaWYmpY9+FVQSVHRkyNnz5RKaSBR7Wt+krorU9IV9D1x6I+NGl/
+xaUS54elTPfpSaN5knna21NNw6+VtPv9ZvuXS+V7n+h6nKY0upwaNYVMfPrGQ+IDyaSSztWBU18A
+AAAASUVORK5CYII=
+"
+       id="image915"
+       x="9.5627966"
+       y="52.919258" />
+    <text
+       xml:space="preserve"
+       style="font-weight:900;font-size:3.95674px;line-height:1.25;font-family:'M PLUS 1';-inkscape-font-specification:'M PLUS 1, Heavy';stroke-width:0.0927358"
+       x="10.291082"
+       y="5.9200888"
+       id="text921"><tspan
+         sodipodi:role="line"
+         id="tspan919"
+         x="10.291082"
+         y="5.9200888"
+         style="stroke-width:0.0927358">applicator_serial</tspan><tspan
+         sodipodi:role="line"
+         x="10.291082"
+         y="10.866014"
+         style="stroke-width:0.0927358"
+         id="tspan923" /></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:900;font-size:3.95674px;line-height:1.25;font-family:'M PLUS 1';-inkscape-font-specification:'M PLUS 1, Heavy';stroke-width:0.0927358"
+       x="10.291082"
+       y="51.086578"
+       id="text929"><tspan
+         sodipodi:role="line"
+         x="10.291082"
+         y="51.086578"
+         style="stroke-width:0.0927358"
+         id="tspan931">terminal</tspan><tspan
+         sodipodi:role="line"
+         x="10.291082"
+         y="56.032505"
+         style="stroke-width:0.0927358"
+         id="tspan927" /></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:900;font-size:3.14013px;line-height:1.25;font-family:'M PLUS 1';-inkscape-font-specification:'M PLUS 1, Heavy';stroke-width:0.0735965"
+       x="10.309048"
+       y="84.52803"
+       id="text937"><tspan
+         sodipodi:role="line"
+         id="tspan935"
+         x="10.309048"
+         y="84.52803"
+         style="stroke-width:0.0735965">7114454508QQ8808</tspan></text>
   </g>
 </svg>

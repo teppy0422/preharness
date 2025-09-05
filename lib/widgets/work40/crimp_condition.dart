@@ -24,8 +24,10 @@ class _CrimpConditionState extends State<CrimpCondition> {
   final FocusNode _terminalFocusNode = FocusNode();
 
   // CustomInputCard用のGlobalKey
-  final GlobalKey<CustomInputCardState> _applicatorCardKey = GlobalKey<CustomInputCardState>();
-  final GlobalKey<CustomInputCardState> _terminalCardKey = GlobalKey<CustomInputCardState>();
+  final GlobalKey<CustomInputCardState> _applicatorCardKey =
+      GlobalKey<CustomInputCardState>();
+  final GlobalKey<CustomInputCardState> _terminalCardKey =
+      GlobalKey<CustomInputCardState>();
 
   Future<void> _loadStringPref(String key, Function(String) setter) async {
     final value = await SharedPrefsHelper.getString(key);
@@ -100,12 +102,15 @@ class _CrimpConditionState extends State<CrimpCondition> {
       // Terminalの検証（terminal1と比較）
       if (_terminalName.isEmpty) {
         _terminalValidation = ValidationState.error;
-      } else if (currentTerminal1 != null &&
-          _terminalName == currentTerminal1) {
+      } else if (currentTerminal0 != null &&
+          _terminalName == currentTerminal0) {
         _terminalValidation = ValidationState.valid;
-      } else if (currentTerminal1 != null &&
-          _terminalName != currentTerminal1) {
+      } else if (currentTerminal0 != null &&
+          _terminalName != currentTerminal0) {
         _terminalValidation = ValidationState.error;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _terminalCardKey.currentState?.triggerTap();
+        });
       } else {
         _terminalValidation = ValidationState.none;
       }
@@ -198,7 +203,6 @@ class _CrimpConditionState extends State<CrimpCondition> {
                 if (value.length > 10) {
                   final terminalName = value.substring(0, 10);
                   final terminalSerialNumber = value.substring(10);
-
                   await SharedPrefsHelper.saveString(
                     'terminal_name',
                     terminalName,
@@ -207,7 +211,6 @@ class _CrimpConditionState extends State<CrimpCondition> {
                     'terminal_serial_number',
                     terminalSerialNumber,
                   );
-
                   setState(() {
                     _terminalName = terminalName;
                     _terminalSerialNumber = terminalSerialNumber;
