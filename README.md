@@ -330,6 +330,7 @@ samples, guidance on mobile development, and a full API reference.
 #### commit 057
 
 - product_info_card.dart から加工条件を crimp_condition.dart として widget にまとめる。
+- sidebar の色を修正
 
 #### commit 058
 

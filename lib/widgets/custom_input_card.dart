@@ -122,13 +122,6 @@ class _CustomInputCardState extends State<CustomInputCard> {
     });
   }
 
-  void _handleQRInput(String key, SubItem subItem) {
-    setState(() {
-      _controllers[key]!.text = _inputTexts[key]!;
-    });
-    _startSelectionTimer(key, subItem);
-  }
-
   void _handleKeyboardInput(KeyEvent event) {
     // アクティブなフォーカスノードとSubItemを検索
     String? activeKey;

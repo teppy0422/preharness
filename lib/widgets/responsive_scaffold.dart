@@ -1,5 +1,6 @@
 // lib/widgets/responsive_scaffold.dart
 import 'package:flutter/material.dart';
+import "package:preharness/constants/app_colors.dart";
 import 'package:preharness/main.dart'; // themeNotifier 参照用
 import 'package:flutter/services.dart';
 import "package:preharness/widgets/user_icon_button.dart";
@@ -71,7 +72,7 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
               ),
             ),
 
-          // 折りたたみ時以外はSidebar内に閉じるボタンを表示するなども可能
+          // 折りたたみ時以外はSidebar内に閉じるボタンを表示
           if (!isSidebarCollapsed)
             Positioned(
               top: 18,
@@ -191,8 +192,8 @@ class _SidebarState extends State<Sidebar> {
       ),
       const NavigationRailDestination(
         padding: EdgeInsets.symmetric(vertical: 4),
-        icon: Icon(Icons.build_outlined),
-        selectedIcon: Icon(Icons.build),
+        icon: Icon(Icons.compress_outlined),
+        selectedIcon: Icon(Icons.compress),
         label: Text(
           '圧着',
           style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
@@ -266,10 +267,16 @@ class _SidebarState extends State<Sidebar> {
         widget.onItemSelected(key);
       },
       labelType: NavigationRailLabelType.selected,
+      backgroundColor: AppColors.getCardColor(context),
       groupAlignment: -1.0,
+      indicatorColor: AppColors.getLineColor(context).withAlpha(180),
+      indicatorShape: const CircleBorder(),
+
+      selectedLabelTextStyle: TextStyle(color: AppColors.getLineColor(context)),
+      selectedIconTheme: IconThemeData(color: AppColors.getCardColor(context)),
       leading: Column(
         children: const [
-          SizedBox(height: 20),
+          SizedBox(height: 40),
           Text(
             'Menu',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -281,7 +288,7 @@ class _SidebarState extends State<Sidebar> {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 20.0),
+            padding: const EdgeInsets.only(bottom: 0),
             child: ValueListenableBuilder<ThemeMode>(
               valueListenable: themeNotifier,
               builder: (context, mode, _) {
@@ -310,21 +317,42 @@ class _SidebarState extends State<Sidebar> {
                             states,
                           ) {
                             if (states.contains(WidgetState.selected)) {
-                              // Dark mode (selected)
-                              return const Icon(Icons.dark_mode);
+                              return Icon(
+                                Icons.dark_mode,
+                                color: AppColors.getLineColor(
+                                  context,
+                                ).withAlpha(255),
+                              );
                             }
-                            // Light mode (unselected)
-                            return const Icon(Icons.light_mode);
+                            return Icon(
+                              Icons.light_mode,
+                              color: AppColors.getHighLightColor(
+                                context,
+                              ).withAlpha(255),
+                            );
+                          }),
+                          trackColor: WidgetStateProperty.resolveWith<Color>((
+                            states,
+                          ) {
+                            if (states.contains(WidgetState.selected)) {
+                              return Colors.grey.shade700; // ダークモード時の背景
+                            }
+                            return AppColors.getHighLightColor(
+                              context,
+                            ).withAlpha(80); // ライトモード時の背景
+                          }),
+                          // 親指部分（丸）
+                          thumbColor: WidgetStateProperty.resolveWith<Color>((
+                            states,
+                          ) {
+                            if (states.contains(WidgetState.selected)) {
+                              return AppColors.getCardColor(context); // ダークモード時
+                            }
+                            return AppColors.getLineColor(
+                              context,
+                            ).withAlpha(220); // ライトモード時
                           }),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      isDark ? 'ダーク' : 'ライト',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],

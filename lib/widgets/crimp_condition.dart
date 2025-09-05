@@ -18,7 +18,10 @@ class _CrimpConditionState extends State<CrimpCondition> {
   String _terminalSerialNumber = "";
 
   Future<void> _loadStringPref(String key, Function(String) setter) async {
-    await SharedPrefsHelper.loadAndSetStringWithState(key, this, setter);
+    final value = await SharedPrefsHelper.getString(key);
+    if (value != null) {
+      setState(() => setter(value));
+    }
   }
 
   @override
