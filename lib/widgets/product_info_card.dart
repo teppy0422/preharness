@@ -1,9 +1,6 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:preharness/constants/app_colors.dart';
 import 'package:preharness/utils/global.dart';
-import 'package:preharness/utils/shared_prefs_helper.dart';
-import 'package:preharness/widgets/custom_input_card.dart';
 import 'package:preharness/widgets/ui/pattern_button.dart';
 
 class ProductInfoCard extends StatefulWidget {
@@ -25,43 +22,9 @@ class ProductInfoCard extends StatefulWidget {
 }
 
 class _ProductInfoCardState extends State<ProductInfoCard> {
-  String _micrometerSerialNumber = ""; // マイクロメーター
-
-  String _applicatorName = ""; // Applicatorアプリ品番
-  String _applicatorSerialNumber = ""; // Applicatorシリアル番号
-
-  String _terminalName = ""; // 材料の端子品番
-  String _terminalSerialNumber = ""; // 材料の端子ロットナンバー
-
-  Future<void> _loadStringPref(String key, Function(String) setter) async {
-    await SharedPrefsHelper.loadAndSetStringWithState(key, this, setter);
-  }
-
   @override
   void initState() {
     super.initState();
-    _loadAllPreferences();
-  }
-
-  Future<void> _loadAllPreferences() async {
-    await _loadStringPref(
-      'micrometer_serial_number', // これが保存名で呼び出し
-      (value) => _micrometerSerialNumber = value, // これが変数にセット
-    );
-    await _loadStringPref(
-      'applicator_name',
-      (value) => _applicatorName = value,
-    );
-    await _loadStringPref(
-      'applicator_serial_number',
-      (value) => _applicatorSerialNumber = value,
-    );
-    await _loadStringPref('terminal_name', (value) => _terminalName = value);
-    await _loadStringPref(
-      'terminal_serial_number',
-      (value) => _terminalSerialNumber = value,
-    );
-    // _loadTerminal();
   }
 
   @override
