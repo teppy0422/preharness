@@ -7,6 +7,7 @@ import 'package:preharness/constants/app_colors.dart';
 import 'package:preharness/widgets/terminal_info_card.dart';
 import 'package:preharness/widgets/interactive_image_viewer.dart';
 import 'package:preharness/widgets/product_info_card.dart';
+import 'package:preharness/widgets/crimp_condition.dart';
 import 'package:preharness/widgets/ui/custom_card.dart';
 
 class EfuDetailPage extends StatefulWidget {
@@ -191,16 +192,20 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                               // 左側: 情報グループ
                               Expanded(
                                 flex: 3,
-                                child: ProductInfoCard(
-                                  processingConditions:
-                                      widget.processingConditions,
-                                  onBack: widget.onBack,
-                                  containerColor: _containerColor,
-                                  containerForeColor: _containerForeColor,
+                                child: Column(
+                                  children: [
+                                    ProductInfoCard(
+                                      processingConditions:
+                                          widget.processingConditions,
+                                      onBack: widget.onBack,
+                                      containerColor: _containerColor,
+                                      containerForeColor: _containerForeColor,
+                                    ),
+                                    const CrimpCondition(),
+                                    const SizedBox(width: 0), // 左右の間隔
+                                  ],
                                 ),
                               ),
-
-                              const SizedBox(width: 0), // 左右の間隔
 
                               Expanded(
                                 flex: 6,

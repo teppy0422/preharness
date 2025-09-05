@@ -232,7 +232,7 @@ class _CustomInputCardState extends State<CustomInputCard> {
         ],
         // 入力可能なSubItemがある場合はアイコンを表示
         if (widget.subItems.any((item) => item.prefsKey != null)) ...[
-          SizedBox(width: 8),
+          SizedBox(width: 3),
           Icon(
             _savedValues.values.any((value) => value.isNotEmpty)
                 ? Icons.check_circle

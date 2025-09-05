@@ -329,11 +329,14 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 057
 
+- product_info_card.dart から加工条件を crimp_condition.dart として widget にまとめる。
+
+#### commit 058
+
 ---
 
 ### now
 
-- product_info_card.dart を整理する
 - efu_detail.dart を読み込んだ時にアプリと端子リールが異なる場合の処理を追加
 - アンマッチの場合に textfield にフォーカス
 - measurement.dart の OK/NG の処理を追加
