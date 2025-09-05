@@ -58,10 +58,10 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
           // 折りたたみ時に画面左上に表示するメニューアイコン
           if (isSidebarCollapsed)
             Positioned(
-              top: 18,
+              bottom: 18,
               left: 8,
               child: IconButton(
-                icon: const Icon(Icons.menu),
+                icon: const Icon(Icons.keyboard_double_arrow_right),
                 tooltip: 'メニューを開く',
                 onPressed: () {
                   setState(() {
@@ -75,17 +75,20 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
           // 折りたたみ時以外はSidebar内に閉じるボタンを表示
           if (!isSidebarCollapsed)
             Positioned(
-              top: 18,
+              bottom: 18,
               left: 2,
-              child: IconButton(
-                icon: const Icon(Icons.chevron_left),
-                tooltip: 'メニューを閉じる',
-                onPressed: () {
-                  setState(() {
-                    isSidebarCollapsed = true;
-                    updateSystemUI(true);
-                  });
-                },
+              child: Transform.rotate(
+                angle: 3.1416,
+                child: IconButton(
+                  icon: const Icon(Icons.keyboard_double_arrow_right),
+                  tooltip: 'メニューを閉じる',
+                  onPressed: () {
+                    setState(() {
+                      isSidebarCollapsed = true;
+                      updateSystemUI(true);
+                    });
+                  },
+                ),
               ),
             ),
           Positioned(
@@ -276,11 +279,12 @@ class _SidebarState extends State<Sidebar> {
       selectedIconTheme: IconThemeData(color: AppColors.getCardColor(context)),
       leading: Column(
         children: const [
-          SizedBox(height: 40),
+          SizedBox(height: 4),
           Text(
             'Menu',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
+          SizedBox(height: 5),
         ],
       ),
       destinations: destinations,
@@ -355,6 +359,7 @@ class _SidebarState extends State<Sidebar> {
                         ),
                       ),
                     ),
+                    SizedBox(height: 36),
                   ],
                 );
               },
