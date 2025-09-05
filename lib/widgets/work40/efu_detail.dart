@@ -8,6 +8,7 @@ import 'package:preharness/widgets/terminal_info_card.dart';
 import 'package:preharness/widgets/interactive_image_viewer.dart';
 import 'package:preharness/widgets/work40/product_info_card.dart';
 import 'package:preharness/widgets/work40/crimp_condition.dart';
+import 'package:preharness/utils/shared_prefs_helper.dart';
 import 'package:preharness/widgets/ui/custom_card.dart';
 
 class EfuDetailPage extends StatefulWidget {
@@ -55,11 +56,46 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     super.initState();
     _focusNode = FocusNode();
     _loadColor(); // Call a method to load the color
+    _saveCurrentDataToPrefs(); // 現在のデータをSharedPrefsに保存
 
     // 初期化完了後にフォーカスを確実に設定
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
+  }
+
+  Future<void> _saveCurrentDataToPrefs() async {
+    // processingConditions を efu_ プレフィックスで保存
+    for (final entry in widget.processingConditions.entries) {
+      await SharedPrefsHelper.saveString(
+        'efu_${entry.key}',
+        entry.value?.toString() ?? '',
+      );
+    }
+
+    // blockInfo を block_ プレフィックスで保存
+    for (final entry in widget.blockInfo.entries) {
+      if (entry.value is List) {
+        // リストの場合は各要素を個別に保存
+        final list = entry.value as List;
+        for (int i = 0; i < list.length; i++) {
+          await SharedPrefsHelper.saveString(
+            'block_${entry.key}_$i',
+            list[i]?.toString() ?? '',
+          );
+        }
+        // リストの長さも保存
+        await SharedPrefsHelper.saveString(
+          'block_${entry.key}_length',
+          list.length.toString(),
+        );
+      } else {
+        await SharedPrefsHelper.saveString(
+          'block_${entry.key}',
+          entry.value?.toString() ?? '',
+        );
+      }
+    }
   }
 
   @override

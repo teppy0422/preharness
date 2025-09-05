@@ -22,21 +22,29 @@ class SubItem {
   });
 }
 
+enum ValidationState { none, valid, error }
+
 class CustomInputCard extends StatefulWidget {
   final String title; // カード上部に浮いて表示されるタイトル（例: 'マイクロメーター'）
   final List<SubItem> subItems; // カード内に表示するラベル+値のリスト（各SubItemで入力機能を制御）
+  final ValidationState? externalValidation; // 外部からの検証状態
+  final bool autoFocus; // 自動フォーカス
+  final FocusNode? externalFocusNode; // 外部フォーカスノード
 
   const CustomInputCard({
     super.key,
     required this.title,
     required this.subItems,
+    this.externalValidation,
+    this.autoFocus = false,
+    this.externalFocusNode,
   });
 
   @override
-  State<CustomInputCard> createState() => _CustomInputCardState();
+  State<CustomInputCard> createState() => CustomInputCardState();
 }
 
-class _CustomInputCardState extends State<CustomInputCard> {
+class CustomInputCardState extends State<CustomInputCard> {
   final Map<String, FocusNode> _focusNodes = {};
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, String> _inputTexts = {};
@@ -53,7 +61,7 @@ class _CustomInputCardState extends State<CustomInputCard> {
     for (var subItem in widget.subItems) {
       if (subItem.prefsKey != null) {
         final key = subItem.prefsKey!;
-        _focusNodes[key] = FocusNode();
+        _focusNodes[key] = widget.externalFocusNode ?? FocusNode();
         _controllers[key] = TextEditingController();
         _inputTexts[key] = '';
         _showTextFields[key] = false;
@@ -68,6 +76,93 @@ class _CustomInputCardState extends State<CustomInputCard> {
           });
         });
       }
+    }
+
+    // 自動フォーカス処理
+    if (widget.autoFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        triggerExternalFocus();
+      });
+    }
+  }
+
+  void _triggerFocus() {
+    final inputSubItem = widget.subItems.firstWhere(
+      (item) => item.prefsKey != null,
+      orElse: () => widget.subItems.first,
+    );
+    if (inputSubItem.prefsKey != null) {
+      final key = inputSubItem.prefsKey!;
+      setState(() {
+        _showTextFields[key] = true;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).requestFocus(_focusNodes[key]!);
+        if (_controllers[key]!.text.isNotEmpty) {
+          _controllers[key]!.selection = TextSelection(
+            baseOffset: 0,
+            extentOffset: _controllers[key]!.text.length,
+          );
+        }
+      });
+    }
+  }
+
+  // 外部からタップ処理をトリガー
+  void triggerTap() {
+    // 入力可能なSubItemがあるかチェック
+    final hasAnyInput = widget.subItems.any((item) => item.prefsKey != null);
+    
+    if (hasAnyInput) {
+      // 入力可能なSubItemの最初のprefsKeyでフィールドを表示
+      final inputSubItem = widget.subItems.firstWhere(
+        (item) => item.prefsKey != null,
+      );
+      final key = inputSubItem.prefsKey!;
+      setState(() {
+        _showTextFields[key] = true;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).requestFocus(_focusNodes[key]!);
+        if (_controllers[key]!.text.isNotEmpty) {
+          _controllers[key]!.selection = TextSelection(
+            baseOffset: 0,
+            extentOffset: _controllers[key]!.text.length,
+          );
+        }
+      });
+    }
+  }
+
+  // 外部からのフォーカス制御用メソッド
+  void triggerExternalFocus() {
+    if (widget.externalFocusNode != null) {
+      // 外部フォーカスノードが指定されている場合、そのキーを探す
+      String? targetKey;
+      for (var subItem in widget.subItems) {
+        if (subItem.prefsKey != null && _focusNodes[subItem.prefsKey!] == widget.externalFocusNode) {
+          targetKey = subItem.prefsKey!;
+          break;
+        }
+      }
+      
+      if (targetKey != null) {
+        setState(() {
+          _showTextFields[targetKey!] = true;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context).requestFocus(_focusNodes[targetKey]!);
+          if (_controllers[targetKey]!.text.isNotEmpty) {
+            _controllers[targetKey]!.selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: _controllers[targetKey]!.text.length,
+            );
+          }
+        });
+      }
+    } else {
+      // 通常のautoFocus処理
+      _triggerFocus();
     }
   }
 
@@ -213,6 +308,40 @@ class _CustomInputCardState extends State<CustomInputCard> {
     );
   }
 
+  IconData _getValidationIcon() {
+    if (widget.externalValidation != null) {
+      switch (widget.externalValidation!) {
+        case ValidationState.valid:
+          return Icons.check_circle;
+        case ValidationState.error:
+          return Icons.cancel;
+        case ValidationState.none:
+          return Icons.help_outline;
+      }
+    }
+    // デフォルトの内部バリデーション
+    return _savedValues.values.any((value) => value.isNotEmpty)
+        ? Icons.check_circle
+        : Icons.cancel;
+  }
+
+  Color _getValidationColor() {
+    if (widget.externalValidation != null) {
+      switch (widget.externalValidation!) {
+        case ValidationState.valid:
+          return AppColors.getLineSubColor(context);
+        case ValidationState.error:
+          return AppColors.getErrorColor(context);
+        case ValidationState.none:
+          return AppColors.getLineColor(context);
+      }
+    }
+    // デフォルトの内部バリデーション
+    return _savedValues.values.any((value) => value.isNotEmpty)
+        ? AppColors.getLineSubColor(context)
+        : AppColors.getErrorColor(context);
+  }
+
   Widget _buildSubItemsRow() {
     return Row(
       children: [
@@ -227,12 +356,8 @@ class _CustomInputCardState extends State<CustomInputCard> {
         if (widget.subItems.any((item) => item.prefsKey != null)) ...[
           SizedBox(width: 3),
           Icon(
-            _savedValues.values.any((value) => value.isNotEmpty)
-                ? Icons.check_circle
-                : Icons.cancel,
-            color: _savedValues.values.any((value) => value.isNotEmpty)
-                ? AppColors.getLineSubColor(context)
-                : AppColors.getErrorColor(context),
+            _getValidationIcon(),
+            color: _getValidationColor(),
             size: 20,
           ),
         ],

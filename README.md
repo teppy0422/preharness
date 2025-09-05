@@ -329,17 +329,23 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 057
 
+### 2025-09-05
+
 - product_info_card.dart から加工条件を crimp_condition.dart として widget にまとめる。
 - sidebar の色を修正
 - work40_page.dart の widget を widget/work40 にまとめる
 
 #### commit 058
 
+- efu_detail.dart を読み込んだ時にアプリが異なる場合の処理を追加
+
+#### commit 059
+
 ---
 
 ### now
 
-- efu_detail.dart を読み込んだ時にアプリと端子リールが異なる場合の処理を追加
+- efu_detail.dart を読み込んだ時に端子が異なる場合の処理を追加
 
 ### next
 

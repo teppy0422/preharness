@@ -17,6 +17,16 @@ class _CrimpConditionState extends State<CrimpCondition> {
   String _terminalName = "";
   String _terminalSerialNumber = "";
 
+  ValidationState _applicatorValidation = ValidationState.none;
+  ValidationState _terminalValidation = ValidationState.none;
+
+  final FocusNode _applicatorFocusNode = FocusNode();
+  final FocusNode _terminalFocusNode = FocusNode();
+
+  // CustomInputCard用のGlobalKey
+  final GlobalKey<CustomInputCardState> _applicatorCardKey = GlobalKey<CustomInputCardState>();
+  final GlobalKey<CustomInputCardState> _terminalCardKey = GlobalKey<CustomInputCardState>();
+
   Future<void> _loadStringPref(String key, Function(String) setter) async {
     final value = await SharedPrefsHelper.getString(key);
     if (value != null) {
@@ -28,6 +38,13 @@ class _CrimpConditionState extends State<CrimpCondition> {
   void initState() {
     super.initState();
     _loadAllPreferences();
+  }
+
+  @override
+  void dispose() {
+    _applicatorFocusNode.dispose();
+    _terminalFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAllPreferences() async {
@@ -48,6 +65,51 @@ class _CrimpConditionState extends State<CrimpCondition> {
       'terminal_serial_number',
       (value) => _terminalSerialNumber = value,
     );
+
+    // 初回バリデーション
+    await _performValidation();
+  }
+
+  Future<void> _performValidation() async {
+    // SharedPrefsから現在の端子値を取得
+    final currentTerminal0 = await SharedPrefsHelper.getString(
+      'block_terminals_0',
+    );
+    final currentTerminal1 = await SharedPrefsHelper.getString(
+      'block_terminals_1',
+    );
+
+    setState(() {
+      // Applicatorの検証（terminal0と比較）
+      if (_applicatorName.isEmpty) {
+        _applicatorValidation = ValidationState.error;
+      } else if (currentTerminal0 != null &&
+          _applicatorName.substring(0, 8) == currentTerminal0.substring(0, 8)) {
+        _applicatorValidation = ValidationState.valid;
+      } else if (currentTerminal0 != null &&
+          _applicatorName != currentTerminal0) {
+        _applicatorValidation = ValidationState.error;
+        // 値が異なる場合はタップ処理をトリガー
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _applicatorCardKey.currentState?.triggerTap();
+        });
+      } else {
+        _applicatorValidation = ValidationState.none;
+      }
+
+      // Terminalの検証（terminal1と比較）
+      if (_terminalName.isEmpty) {
+        _terminalValidation = ValidationState.error;
+      } else if (currentTerminal1 != null &&
+          _terminalName == currentTerminal1) {
+        _terminalValidation = ValidationState.valid;
+      } else if (currentTerminal1 != null &&
+          _terminalName != currentTerminal1) {
+        _terminalValidation = ValidationState.error;
+      } else {
+        _terminalValidation = ValidationState.none;
+      }
+    });
   }
 
   @override
@@ -76,7 +138,9 @@ class _CrimpConditionState extends State<CrimpCondition> {
           ],
         ),
         CustomInputCard(
+          key: _applicatorCardKey,
           title: 'Applicator Serial',
+          externalValidation: _applicatorValidation,
           subItems: [
             SubItem(
               label: 'アプリ品番:',
@@ -104,6 +168,9 @@ class _CrimpConditionState extends State<CrimpCondition> {
                     _applicatorName = applicatorName;
                     _applicatorSerialNumber = applicatorSerialNumber;
                   });
+
+                  // 保存後に再検証
+                  await _performValidation();
                 }
               },
             ),
@@ -117,7 +184,9 @@ class _CrimpConditionState extends State<CrimpCondition> {
           ],
         ),
         CustomInputCard(
+          key: _terminalCardKey,
           title: '端子リール',
+          externalValidation: _terminalValidation,
           subItems: [
             SubItem(
               label: '端子品番:',
@@ -143,6 +212,9 @@ class _CrimpConditionState extends State<CrimpCondition> {
                     _terminalName = terminalName;
                     _terminalSerialNumber = terminalSerialNumber;
                   });
+
+                  // 保存後に再検証
+                  await _performValidation();
                 }
               },
             ),
