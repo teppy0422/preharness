@@ -72,7 +72,6 @@ class _CrimpConditionState extends State<CrimpCondition> {
       'terminal_serial_number',
       (value) => _terminalSerialNumber = value,
     );
-
     // 初回バリデーション
     await _performValidation();
   }
@@ -100,6 +99,10 @@ class _CrimpConditionState extends State<CrimpCondition> {
 
       // Applicatorの検証（terminal0と比較）
       if (_applicatorName.isEmpty) {
+        // 空の場合はタップ処理をトリガー
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _applicatorCardKey.currentState?.triggerTap();
+        });
         _applicatorValidation = ValidationState.error;
       } else if (currentTerminal0 != null &&
           _applicatorName.substring(0, 8) == currentTerminal0.substring(0, 8)) {
@@ -107,16 +110,15 @@ class _CrimpConditionState extends State<CrimpCondition> {
       } else if (currentTerminal0 != null &&
           _applicatorName != currentTerminal0) {
         _applicatorValidation = ValidationState.error;
-        // 値が異なる場合はタップ処理をトリガー
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _applicatorCardKey.currentState?.triggerTap();
-        });
       } else {
-        _applicatorValidation = ValidationState.none;
+        _applicatorValidation = ValidationState.error;
       }
 
       // Terminalの検証（terminal1と比較）
       if (_terminalName.isEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _terminalCardKey.currentState?.triggerTap();
+        });
         _terminalValidation = ValidationState.error;
       } else if (currentTerminal0 != null &&
           _terminalName == currentTerminal0) {
@@ -128,7 +130,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
           _terminalCardKey.currentState?.triggerTap();
         });
       } else {
-        _terminalValidation = ValidationState.none;
+        _terminalValidation = ValidationState.error;
       }
     });
   }
@@ -180,7 +182,6 @@ class _CrimpConditionState extends State<CrimpCondition> {
                       .substring(0, 10)
                       .replaceAll(RegExp(r'\s'), '');
                   final applicatorSerialNumber = value.substring(10);
-
                   await SharedPrefsHelper.saveString(
                     'applicator_name',
                     applicatorName,
