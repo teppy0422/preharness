@@ -12,11 +12,14 @@ class CrimpCondition extends StatefulWidget {
 
 class _CrimpConditionState extends State<CrimpCondition> {
   String _micrometerSerialNumber = "";
+
   String _applicatorName = "";
   String _applicatorSerialNumber = "";
+
   String _terminalName = "";
   String _terminalSerialNumber = "";
 
+  ValidationState _micrometerValidation = ValidationState.none;
   ValidationState _applicatorValidation = ValidationState.none;
   ValidationState _terminalValidation = ValidationState.none;
 
@@ -24,6 +27,8 @@ class _CrimpConditionState extends State<CrimpCondition> {
   final FocusNode _terminalFocusNode = FocusNode();
 
   // CustomInputCard用のGlobalKey
+  final GlobalKey<CustomInputCardState> _micromertorKey =
+      GlobalKey<CustomInputCardState>();
   final GlobalKey<CustomInputCardState> _applicatorCardKey =
       GlobalKey<CustomInputCardState>();
   final GlobalKey<CustomInputCardState> _terminalCardKey =
@@ -82,6 +87,17 @@ class _CrimpConditionState extends State<CrimpCondition> {
     );
 
     setState(() {
+      // Micrometerの検証（nullじゃなければOK）
+      if (_micrometerSerialNumber.isNotEmpty) {
+        _micrometerValidation = ValidationState.valid;
+      } else {
+        _micrometerValidation = ValidationState.error;
+        // 空の場合はタップ処理をトリガー
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _micromertorKey.currentState?.triggerTap();
+        });
+      }
+
       // Applicatorの検証（terminal0と比較）
       if (_applicatorName.isEmpty) {
         _applicatorValidation = ValidationState.error;
@@ -122,7 +138,9 @@ class _CrimpConditionState extends State<CrimpCondition> {
     return Column(
       children: [
         CustomInputCard(
+          key: _micromertorKey,
           title: 'マイクロメーター',
+          externalValidation: _micrometerValidation,
           subItems: [
             SubItem(
               label: '管理No:',
@@ -138,6 +156,9 @@ class _CrimpConditionState extends State<CrimpCondition> {
                 setState(() {
                   _micrometerSerialNumber = value;
                 });
+
+                // 保存後に再検証
+                await _performValidation();
               },
             ),
           ],
