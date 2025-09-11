@@ -47,6 +47,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   final List<MapEntry<DateTime, double>> _speedData = []; // 速度データ（時刻、速度）
   DateTime? _lastCountTime; // 最後にカウントした時刻
   double _currentSpeed = 0.0; // 現在の速度（カウント/分）
+  bool _showComparisonFormula = true; // 比較式表示フラグ（デフォルトで比較式を表示）
 
   // フォーカスノードを追加
   late final FocusNode _focusNode;
@@ -56,15 +57,17 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     super.initState();
     _focusNode = FocusNode();
     _loadColor(); // Call a method to load the color
-    _saveCurrentDataToPrefs(); // 現在のデータをSharedPrefsに保存
 
-    // 初期化完了後にフォーカスを確実に設定
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // 初期化完了後に実行
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _saveCurrentDataToPrefs(); // データ保存を確実に完了
       _focusNode.requestFocus();
     });
   }
 
   Future<void> _saveCurrentDataToPrefs() async {
+    print('🔥 efu_detail: _saveCurrentDataToPrefs 開始');
+
     // processingConditions を efu_ プレフィックスで保存
     for (final entry in widget.processingConditions.entries) {
       await SharedPrefsHelper.saveString(
@@ -79,10 +82,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
         // リストの場合は各要素を個別に保存
         final list = entry.value as List;
         for (int i = 0; i < list.length; i++) {
-          await SharedPrefsHelper.saveString(
-            'block_${entry.key}_$i',
-            list[i]?.toString() ?? '',
-          );
+          final key = 'block_${entry.key}_$i';
+          final value = list[i]?.toString() ?? '';
+          await SharedPrefsHelper.saveString(key, value);
+          print('🔥 efu_detail: 保存 $key = $value');
         }
         // リストの長さも保存
         await SharedPrefsHelper.saveString(
@@ -96,6 +99,8 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
         );
       }
     }
+
+    print('🔥 efu_detail: _saveCurrentDataToPrefs 完了');
   }
 
   @override
@@ -344,7 +349,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             ),
 
             Positioned(
-              bottom: 1,
+              bottom: -40,
               right: 0,
               left: 0, // 左端の位置を指定してスペースを確保
               child: Row(
@@ -467,15 +472,163 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     );
   }
 
+  Future<Map<String, dynamic>> _getComparisonData() async {
+    // crimp_condition.dartのバリデーション処理と同じデータを取得
+    final micrometerSerialNumber =
+        await SharedPrefsHelper.getString('micrometer_serial_number') ?? '';
+    final applicatorName =
+        await SharedPrefsHelper.getString('applicator_name') ?? '';
+    final terminalName =
+        await SharedPrefsHelper.getString('terminal_name') ?? '';
+    final currentTerminal0 =
+        await SharedPrefsHelper.getString('block_terminals_0') ?? '';
+
+    return {
+      'micrometerSerialNumber': micrometerSerialNumber,
+      'applicatorName': applicatorName,
+      'terminalName': terminalName,
+      'currentTerminal0': currentTerminal0,
+    };
+  }
+
+  Widget _buildComparisonFormula() {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _getComparisonData(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final data = snapshot.data!;
+        final micrometerSerialNumber = data['micrometerSerialNumber'] as String;
+        final applicatorName = data['applicatorName'] as String;
+        final terminalName = data['terminalName'] as String;
+        final currentTerminal0 = data['currentTerminal0'] as String;
+
+        // デバッグ出力
+        print('🔍 比較式チェック:');
+        print('  micrometerSerialNumber: "$micrometerSerialNumber"');
+        print('  applicatorName (raw): "$applicatorName"');
+        print('  terminalName: "$terminalName"');
+        print('  currentTerminal0: "$currentTerminal0"');
+        
+        // crimp_condition.dartと同じ処理：applicatorNameは10文字に制限されている
+        print('  applicatorName.length: ${applicatorName.length}');
+        
+        // バリデーション結果（crimp_condition.dartと完全に同じロジック）
+        final micrometerValid = micrometerSerialNumber.isNotEmpty;
+        // crimp_condition.dartは currentTerminal0 != null をチェック（isNotEmptyではない）
+        final applicatorValid = currentTerminal0.isNotEmpty &&
+            applicatorName.isNotEmpty &&
+            applicatorName.length >= 8 &&
+            currentTerminal0.length >= 8 &&
+            applicatorName.substring(0, 8) == currentTerminal0.substring(0, 8);
+        final terminalValid = currentTerminal0.isNotEmpty &&
+            terminalName.isNotEmpty &&
+            terminalName == currentTerminal0;
+            
+        print('  applicatorValid: $applicatorValid');
+        print('  applicatorName.substring(0, 8): "${applicatorName.length >= 8 ? applicatorName.substring(0, 8) : "長さ不足"}"');
+        print('  currentTerminal0.substring(0, 8): "${currentTerminal0.length >= 8 ? currentTerminal0.substring(0, 8) : "長さ不足"}"');
+
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.getCardColor(context),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: AppColors.getLineColor(context),
+              width: 1.0,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '比較式チェック',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.getLineColor(context),
+                ),
+              ),
+              const SizedBox(height: 4),
+              _buildComparisonRow(
+                '✓ マイクロメーター:',
+                micrometerSerialNumber.isEmpty ? '未入力' : micrometerSerialNumber,
+                micrometerValid,
+              ),
+              _buildComparisonRow(
+                '✓ Applicator(前8文字):',
+                '(${currentTerminal0.isEmpty ? "未設定" : "設定済"}&&${applicatorName.isEmpty ? "未入力" : "入力済"}&&${applicatorName.length >= 8 ? "長さ>=8" : "長さ<8"}&&${currentTerminal0.length >= 8 ? "T0長さ>=8" : "T0長さ<8"}) → ${applicatorName.isEmpty || applicatorName.length < 8 ? "入力不足" : applicatorName.substring(0, 8)} == ${currentTerminal0.isEmpty || currentTerminal0.length < 8 ? "T0不足" : currentTerminal0.substring(0, 8)}',
+                applicatorValid,
+              ),
+              _buildComparisonRow(
+                '✓ Terminal(完全一致):',
+                '${terminalName.isEmpty ? "未入力" : terminalName} == ${currentTerminal0.isEmpty ? "未設定" : currentTerminal0}',
+                terminalValid,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildComparisonRow(String label, String comparison, bool isValid) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            isValid ? Icons.check_circle : Icons.cancel,
+            color: isValid
+                ? AppColors.getLineSubColor(context)
+                : AppColors.getErrorColor(context),
+            size: 12,
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.getLineColor(context),
+                  ),
+                ),
+                Text(
+                  comparison,
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: isValid
+                        ? AppColors.getLineSubColor(context)
+                        : AppColors.getErrorColor(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSpeedGraph() {
     return SizedBox(
-      height: 90,
+      height: 210,
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: Stack(
           children: [
-            // グラフを全体に表示
-            _speedData.isEmpty
+            // グラフまたは比較式を表示
+            _showComparisonFormula
+                ? _buildComparisonFormula()
+                : _speedData.isEmpty
                 ? Center(
                     child: Text(
                       'データなし',
@@ -493,8 +646,8 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                       lineColor: AppColors.getLineColor(context),
                     ),
                   ),
-            // 平均値テキストを前面に表示（高さを取らない）
-            if (_speedData.isNotEmpty)
+            // 平均値テキストを前面に表示（高さを取らない）（比較式表示時は非表示）
+            if (_speedData.isNotEmpty && !_showComparisonFormula)
               Positioned(
                 top: 0,
                 left: 0,
@@ -521,6 +674,53 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                   ),
                 ),
               ),
+            // 切り替えスイッチを右上に表示
+            Positioned(
+              top: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _showComparisonFormula = !_showComparisonFormula;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.getCardColor(context),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: AppColors.getLineColor(context),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _showComparisonFormula
+                            ? Icons.show_chart
+                            : Icons.search,
+                        size: 12,
+                        color: AppColors.getLineColor(context),
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        _showComparisonFormula ? 'グラフ' : '式',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppColors.getLineColor(context),
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

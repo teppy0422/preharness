@@ -26,7 +26,6 @@ class _NasStatusIconState extends State<NasStatusIcon> {
   void initState() {
     super.initState();
     _checkNasConnection();
-    _loadLottieFiles();
   }
 
   @override
