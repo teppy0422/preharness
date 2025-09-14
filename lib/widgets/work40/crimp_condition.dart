@@ -91,9 +91,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
       _sharedPrefsListener!,
     );
 
-    print(
-      '🟢 crimp_condition: リスナー登録完了（block_save_completed）',
-    );
+    print('🟢 crimp_condition: リスナー登録完了（block_save_completed）');
   }
 
   Future<void> _loadAllPreferences() async {
@@ -158,14 +156,6 @@ class _CrimpConditionState extends State<CrimpCondition> {
     _applicatorName = applicatorName;
     _terminalName = terminalName;
 
-    // デバッグ出力
-    print('🔍 crimp_condition バリデーション:');
-    print('  micrometerSerialNumber: "$micrometerSerialNumber"');
-    print('  applicatorName: "$applicatorName"');
-    print('  terminalName: "$terminalName"');
-    print('  blockTerminal0: "$blockTerminal0"');
-    print('  キャッシュの状態: ${SharedPrefsHelper.notifier.cache}');
-
     GlobalKey<CustomInputCardState>? firstErrorKey;
 
     setState(() {
@@ -199,31 +189,10 @@ class _CrimpConditionState extends State<CrimpCondition> {
           terminalName.substring(0, 8) == blockTerminal0.substring(0, 8)) {
         // ✅ 先頭8文字一致 → valid（Applicatorと同じ比較ロジック）
         _terminalValidation = ValidationState.valid;
-        print('  terminalValidation: VALID');
-        print(
-          '  terminalName.substring(0, 8): "${terminalName.substring(0, 8)}"',
-        );
-        print(
-          '  blockTerminal0.substring(0, 8): "${blockTerminal0.substring(0, 8)}"',
-        );
       } else {
         // ❌ エラー
         _terminalValidation = ValidationState.error;
         firstErrorKey ??= _terminalCardKey; // まだエラーがなければ設定
-        print('  terminalValidation: ERROR');
-        print('  条件チェック: blockTerminal0 != null = ${blockTerminal0 != null}');
-        print('  条件チェック: terminalName.isNotEmpty = ${terminalName.isNotEmpty}');
-        print(
-          '  条件チェック: terminalName.length >= 8 = ${terminalName.length >= 8}',
-        );
-        print(
-          '  条件チェック: blockTerminal0.length >= 8 = ${blockTerminal0?.length ?? 0 >= 8}',
-        );
-        if (terminalName.length >= 8 && (blockTerminal0?.length ?? 0) >= 8) {
-          print(
-            '  文字比較: "${terminalName.substring(0, 8)}" == "${blockTerminal0!.substring(0, 8)}" = ${terminalName.substring(0, 8) == blockTerminal0.substring(0, 8)}',
-          );
-        }
       }
     });
 
@@ -237,7 +206,6 @@ class _CrimpConditionState extends State<CrimpCondition> {
         }
       });
     }
-
     _isValidating = false;
   }
 
@@ -266,6 +234,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
                   _hasTriggeredAutoTap = false; // 入力完了時にリセット
                 });
                 // 通知機能により自動的にバリデーション実行される
+                _performValidation();
               },
             ),
           ],
@@ -301,6 +270,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
                     _hasTriggeredAutoTap = false; // 入力完了時にリセット
                   });
                   // 通知機能により自動的にバリデーション実行される
+                  _performValidation();
                 }
               },
             ),
@@ -342,6 +312,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
                     _hasTriggeredAutoTap = false; // 入力完了時にリセット
                   });
                   // 通知機能により自動的にバリデーション実行される
+                  _performValidation();
                 }
               },
             ),
