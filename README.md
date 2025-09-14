@@ -342,7 +342,11 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 059
 
-### 2025-09-11
+### 2025-09-14
+
+- crimp_condition.dart の blockTerminal0 の取得を正しく修正
+
+#### commit 060
 
 ---
 

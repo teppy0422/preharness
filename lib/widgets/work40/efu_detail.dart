@@ -67,39 +67,24 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   Future<void> _saveCurrentDataToPrefs() async {
     print('🔥 efu_detail: _saveCurrentDataToPrefs 開始');
+    print('🔥 efu_detail: widget.blockInfo全体: ${widget.blockInfo}');
+    print('🔥 efu_detail: terminals配列: ${widget.blockInfo['terminals']}');
+    print(
+      '🔥 efu_detail: terminals[0] = "${widget.blockInfo['terminals']?[0]}"',
+    );
 
-    // processingConditions を efu_ プレフィックスで保存
-    for (final entry in widget.processingConditions.entries) {
-      await SharedPrefsHelper.saveString(
-        'efu_${entry.key}',
-        entry.value?.toString() ?? '',
-      );
-    }
+    // processingConditions を efu_ プレフィックスで通知機能付き保存
+    await SharedPrefsHelper.saveMapWithNotify(
+      'efu',
+      widget.processingConditions,
+    );
 
-    // blockInfo を block_ プレフィックスで保存
-    for (final entry in widget.blockInfo.entries) {
-      if (entry.value is List) {
-        // リストの場合は各要素を個別に保存
-        final list = entry.value as List;
-        for (int i = 0; i < list.length; i++) {
-          final key = 'block_${entry.key}_$i';
-          final value = list[i]?.toString() ?? '';
-          await SharedPrefsHelper.saveString(key, value);
-          print('🔥 efu_detail: 保存 $key = $value');
-        }
-        // リストの長さも保存
-        await SharedPrefsHelper.saveString(
-          'block_${entry.key}_length',
-          list.length.toString(),
-        );
-      } else {
-        await SharedPrefsHelper.saveString(
-          'block_${entry.key}',
-          entry.value?.toString() ?? '',
-        );
-      }
-    }
+    // blockInfo を block_ プレフィックスで通知機能付き保存
+    await SharedPrefsHelper.saveMapWithNotify('block', widget.blockInfo);
 
+    print(
+      '🔥 efu_detail: block_terminals_0 保存後キャッシュ確認: "${SharedPrefsHelper.getCachedString('block_terminals_0')}"',
+    );
     print('🔥 efu_detail: _saveCurrentDataToPrefs 完了');
   }
 
@@ -472,66 +457,47 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     );
   }
 
-  Future<Map<String, dynamic>> _getComparisonData() async {
-    // crimp_condition.dartのバリデーション処理と同じデータを取得
-    final micrometerSerialNumber =
-        await SharedPrefsHelper.getString('micrometer_serial_number') ?? '';
-    final applicatorName =
-        await SharedPrefsHelper.getString('applicator_name') ?? '';
-    final terminalName =
-        await SharedPrefsHelper.getString('terminal_name') ?? '';
-    final currentTerminal0 =
-        await SharedPrefsHelper.getString('block_terminals_0') ?? '';
-
+  Future<Map<String, String?>> _getComparisonDataWithCache() async {
+    // SharedPrefs優先、block_terminals_0のみキャッシュも確認（通知機能付きで保存されるため）
     return {
-      'micrometerSerialNumber': micrometerSerialNumber,
-      'applicatorName': applicatorName,
-      'terminalName': terminalName,
-      'currentTerminal0': currentTerminal0,
+      'micrometer': await SharedPrefsHelper.getString('micrometer_serial_number') ?? '',
+      'applicator': await SharedPrefsHelper.getString('applicator_name') ?? '',
+      'terminal': await SharedPrefsHelper.getString('terminal_name') ?? '',
+      'blockTerminal0': SharedPrefsHelper.getCachedString('block_terminals_0') ??
+          await SharedPrefsHelper.getString('block_terminals_0'),
     };
   }
 
   Widget _buildComparisonFormula() {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _getComparisonData(),
+    return FutureBuilder<Map<String, String?>>(
+      future: _getComparisonDataWithCache(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-
+        
         final data = snapshot.data!;
-        final micrometerSerialNumber = data['micrometerSerialNumber'] as String;
-        final applicatorName = data['applicatorName'] as String;
-        final terminalName = data['terminalName'] as String;
-        final currentTerminal0 = data['currentTerminal0'] as String;
+        final micrometerSerialNumber = data['micrometer'] ?? '';
+        final applicatorName = data['applicator'] ?? '';
+        final terminalName = data['terminal'] ?? '';
+        final blockTerminal0 = data['blockTerminal0'] ?? '';
 
-        // デバッグ出力
-        print('🔍 比較式チェック:');
-        print('  micrometerSerialNumber: "$micrometerSerialNumber"');
-        print('  applicatorName (raw): "$applicatorName"');
-        print('  terminalName: "$terminalName"');
-        print('  currentTerminal0: "$currentTerminal0"');
-        
-        // crimp_condition.dartと同じ処理：applicatorNameは10文字に制限されている
-        print('  applicatorName.length: ${applicatorName.length}');
-        
-        // バリデーション結果（crimp_condition.dartと完全に同じロジック）
-        final micrometerValid = micrometerSerialNumber.isNotEmpty;
-        // crimp_condition.dartは currentTerminal0 != null をチェック（isNotEmptyではない）
-        final applicatorValid = currentTerminal0.isNotEmpty &&
-            applicatorName.isNotEmpty &&
-            applicatorName.length >= 8 &&
-            currentTerminal0.length >= 8 &&
-            applicatorName.substring(0, 8) == currentTerminal0.substring(0, 8);
-        final terminalValid = currentTerminal0.isNotEmpty &&
-            terminalName.isNotEmpty &&
-            terminalName == currentTerminal0;
-            
-        print('  applicatorValid: $applicatorValid');
-        print('  applicatorName.substring(0, 8): "${applicatorName.length >= 8 ? applicatorName.substring(0, 8) : "長さ不足"}"');
-        print('  currentTerminal0.substring(0, 8): "${currentTerminal0.length >= 8 ? currentTerminal0.substring(0, 8) : "長さ不足"}"');
+    // バリデーション結果（crimp_condition.dartと完全に同じロジック）
+    final micrometerValid = micrometerSerialNumber.isNotEmpty;
+    final applicatorValid =
+        blockTerminal0.isNotEmpty &&
+        applicatorName.isNotEmpty &&
+        applicatorName.length >= 8 &&
+        blockTerminal0.length >= 8 &&
+        applicatorName.substring(0, 8) == blockTerminal0.substring(0, 8);
+    final terminalValid =
+        blockTerminal0.isNotEmpty &&
+        terminalName.isNotEmpty &&
+        terminalName.length >= 8 &&
+        blockTerminal0.length >= 8 &&
+        terminalName.substring(0, 8) == blockTerminal0.substring(0, 8);
 
-        return Container(
+    return Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: AppColors.getCardColor(context),
@@ -561,12 +527,12 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               ),
               _buildComparisonRow(
                 '✓ Applicator(前8文字):',
-                '(${currentTerminal0.isEmpty ? "未設定" : "設定済"}&&${applicatorName.isEmpty ? "未入力" : "入力済"}&&${applicatorName.length >= 8 ? "長さ>=8" : "長さ<8"}&&${currentTerminal0.length >= 8 ? "T0長さ>=8" : "T0長さ<8"}) → ${applicatorName.isEmpty || applicatorName.length < 8 ? "入力不足" : applicatorName.substring(0, 8)} == ${currentTerminal0.isEmpty || currentTerminal0.length < 8 ? "T0不足" : currentTerminal0.substring(0, 8)}',
+                '(${blockTerminal0.isEmpty ? "未設定" : "設定済"}&&${applicatorName.isEmpty ? "未入力" : "入力済"}&&${applicatorName.length >= 8 ? "長さ>=8" : "長さ<8"}&&${blockTerminal0.length >= 8 ? "T0長さ>=8" : "T0長さ<8"}) → ${applicatorName.isEmpty || applicatorName.length < 8 ? "入力不足" : applicatorName.substring(0, 8)} == ${blockTerminal0.isEmpty || blockTerminal0.length < 8 ? "T0不足" : blockTerminal0.substring(0, 8)}',
                 applicatorValid,
               ),
               _buildComparisonRow(
-                '✓ Terminal(完全一致):',
-                '${terminalName.isEmpty ? "未入力" : terminalName} == ${currentTerminal0.isEmpty ? "未設定" : currentTerminal0}',
+                '✓ Terminal(前8文字):',
+                '(${blockTerminal0.isEmpty ? "未設定" : "設定済"}&&${terminalName.isEmpty ? "未入力" : "入力済"}&&${terminalName.length >= 8 ? "長さ>=8" : "長さ<8"}&&${blockTerminal0.length >= 8 ? "T0長さ>=8" : "T0長さ<8"}) → ${terminalName.isEmpty || terminalName.length < 8 ? "入力不足" : terminalName.substring(0, 8)} == ${blockTerminal0.isEmpty || blockTerminal0.length < 8 ? "T0不足" : blockTerminal0.substring(0, 8)}',
                 terminalValid,
               ),
             ],
@@ -622,7 +588,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     return SizedBox(
       height: 210,
       child: Padding(
-        padding: const EdgeInsets.all(4.0),
+        padding: const EdgeInsets.all(0),
         child: Stack(
           children: [
             // グラフまたは比較式を表示
@@ -711,7 +677,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                       Text(
                         _showComparisonFormula ? 'グラフ' : '式',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 13,
                           color: AppColors.getLineColor(context),
                           fontWeight: FontWeight.w900,
                         ),

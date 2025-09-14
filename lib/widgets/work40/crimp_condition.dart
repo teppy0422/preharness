@@ -26,11 +26,14 @@ class _CrimpConditionState extends State<CrimpCondition> {
 
   final FocusNode _applicatorFocusNode = FocusNode();
   final FocusNode _terminalFocusNode = FocusNode();
-  
-  bool _hasInitialized = false;
+
+  final bool _hasInitialized = false;
   bool _isValidating = false;
   bool _hasTriggeredAutoTap = false;
   DateTime? _lastAutoTapTime;
+
+  // SharedPrefs変更監視用
+  VoidCallback? _sharedPrefsListener;
 
   // CustomInputCard用のGlobalKey
   final GlobalKey<CustomInputCardState> _micromertorKey =
@@ -51,20 +54,59 @@ class _CrimpConditionState extends State<CrimpCondition> {
   void initState() {
     super.initState();
     _loadAllPreferences();
+    _setupSharedPrefsListener();
   }
 
   @override
   void dispose() {
     _applicatorFocusNode.dispose();
     _terminalFocusNode.dispose();
+    // SharedPrefs監視を解除
+    if (_sharedPrefsListener != null) {
+      SharedPrefsHelper.notifier.removeKeyListener(
+        'block_terminals_0',
+        _sharedPrefsListener!,
+      );
+      SharedPrefsHelper.notifier.removeKeyListener(
+        'block_save_completed',
+        _sharedPrefsListener!,
+      );
+    }
     super.dispose();
+  }
+
+  void _setupSharedPrefsListener() {
+    print('🟢 crimp_condition: _setupSharedPrefsListener 開始');
+    _sharedPrefsListener = () {
+      if (mounted) {
+        print('🟢 crimp_condition: 関連データ変更検知！バリデーション実行');
+        // 関連するキーの変更時にバリデーションを実行
+        _performValidation();
+      }
+    };
+
+    // block_terminals_0の変更を監視
+    SharedPrefsHelper.notifier.addKeyListener(
+      'block_terminals_0',
+      _sharedPrefsListener!,
+    );
+
+    // block保存完了も監視（確実にefu_detailのデータ保存完了を検知）
+    SharedPrefsHelper.notifier.addKeyListener(
+      'block_save_completed',
+      _sharedPrefsListener!,
+    );
+
+    print(
+      '🟢 crimp_condition: リスナー登録完了（block_terminals_0 + block_save_completed）',
+    );
   }
 
   Future<void> _loadAllPreferences() async {
     // 画面遷移から戻ってきた時のためにフラグをリセット
     _hasTriggeredAutoTap = false;
     _lastAutoTapTime = null;
-    
+
     await _loadStringPref(
       'micrometer_serial_number',
       (value) => _micrometerSerialNumber = value,
@@ -82,55 +124,40 @@ class _CrimpConditionState extends State<CrimpCondition> {
       'terminal_serial_number',
       (value) => _terminalSerialNumber = value,
     );
-    
-    // efu_detailのデータ保存完了を確実に待つ
-    // 複数回チェックして、データが安定するまで待つ
-    await _waitForDataStability();
-    
+
+    // efu_detail.dartのデータ保存完了を待ってからバリデーション実行
     if (mounted) {
-      _performValidation();
-    }
-  }
-  
-  Future<void> _waitForDataStability() async {
-    String? previousTerminal0;
-    int stableCount = 0;
-    
-    // 最大3秒間、データの安定性をチェック
-    for (int i = 0; i < 30; i++) {
-      final currentTerminal0 = await SharedPrefsHelper.getString('block_terminals_0');
-      
-      if (currentTerminal0 == previousTerminal0) {
-        stableCount++;
-        // 3回連続で同じ値なら安定とみなす
-        if (stableCount >= 3) {
-          break;
+      // 少し遅延してからバリデーション（efu_detail.dartの保存完了を待つ）
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          print('🟢 crimp_condition: 遅延バリデーション実行');
+          _performValidation();
         }
-      } else {
-        stableCount = 0;
-      }
-      
-      previousTerminal0 = currentTerminal0;
-      await Future.delayed(Duration(milliseconds: 100));
+      });
     }
   }
 
   Future<void> _performValidation() async {
     if (_isValidating) return;
-    
-    // 自動タップ直後（1秒以内）はバリデーション処理をスキップ
-    if (_lastAutoTapTime != null && 
-        DateTime.now().difference(_lastAutoTapTime!).inMilliseconds < 1000) {
-      return;
-    }
-    
+
     _isValidating = true;
-    
-    // バリデーション前に最新データをSharedPrefsから再読み込み
-    final micrometerSerialNumber = await SharedPrefsHelper.getString('micrometer_serial_number') ?? '';
-    final applicatorName = await SharedPrefsHelper.getString('applicator_name') ?? '';
-    final terminalName = await SharedPrefsHelper.getString('terminal_name') ?? '';
-    final currentTerminal0 = await SharedPrefsHelper.getString('block_terminals_0');
+
+    // キャッシュから即座にデータを取得、なければSharedPrefsから読み込み
+    final micrometerSerialNumber =
+        SharedPrefsHelper.getCachedString('micrometer_serial_number') ??
+        await SharedPrefsHelper.getString('micrometer_serial_number') ??
+        '';
+    final applicatorName =
+        SharedPrefsHelper.getCachedString('applicator_name') ??
+        await SharedPrefsHelper.getString('applicator_name') ??
+        '';
+    final terminalName =
+        SharedPrefsHelper.getCachedString('terminal_name') ??
+        await SharedPrefsHelper.getString('terminal_name') ??
+        '';
+    final blockTerminal0 =
+        SharedPrefsHelper.getCachedString('block_terminals_0') ??
+        await SharedPrefsHelper.getString('block_terminals_0');
 
     // メンバ変数も更新（表示用）
     _micrometerSerialNumber = micrometerSerialNumber;
@@ -142,7 +169,8 @@ class _CrimpConditionState extends State<CrimpCondition> {
     print('  micrometerSerialNumber: "$micrometerSerialNumber"');
     print('  applicatorName: "$applicatorName"');
     print('  terminalName: "$terminalName"');
-    print('  currentTerminal0: "$currentTerminal0"');
+    print('  blockTerminal0: "$blockTerminal0"');
+    print('  キャッシュの状態: ${SharedPrefsHelper.notifier.cache}');
 
     GlobalKey<CustomInputCardState>? firstErrorKey;
 
@@ -156,40 +184,52 @@ class _CrimpConditionState extends State<CrimpCondition> {
       }
 
       // Applicatorの検証（terminal0と比較）
-      if (currentTerminal0 != null &&
+      if (blockTerminal0 != null &&
           applicatorName.isNotEmpty &&
           applicatorName.length >= 8 &&
-          currentTerminal0.length >= 8 &&
-          applicatorName.substring(0, 8) == currentTerminal0.substring(0, 8)) {
+          blockTerminal0.length >= 8 &&
+          applicatorName.substring(0, 8) == blockTerminal0.substring(0, 8)) {
         // ✅ 先頭8文字一致 → valid
         _applicatorValidation = ValidationState.valid;
-        print('  applicatorValidation: VALID');
-        print('  applicatorName.substring(0, 8): "${applicatorName.substring(0, 8)}"');
-        print('  currentTerminal0.substring(0, 8): "${currentTerminal0.substring(0, 8)}"');
       } else {
         // ❌ エラー
         _applicatorValidation = ValidationState.error;
         firstErrorKey ??= _applicatorCardKey; // まだエラーがなければ設定
-        print('  applicatorValidation: ERROR');
-        print('  条件チェック: currentTerminal0 != null = ${currentTerminal0 != null}');
-        print('  条件チェック: applicatorName.isNotEmpty = ${applicatorName.isNotEmpty}');
-        print('  条件チェック: applicatorName.length >= 8 = ${applicatorName.length >= 8}');
-        print('  条件チェック: currentTerminal0.length >= 8 = ${currentTerminal0?.length ?? 0 >= 8}');
-        if (applicatorName.length >= 8 && (currentTerminal0?.length ?? 0) >= 8) {
-          print('  文字比較: "${applicatorName.substring(0, 8)}" == "${currentTerminal0!.substring(0, 8)}" = ${applicatorName.substring(0, 8) == currentTerminal0.substring(0, 8)}');
-        }
       }
 
       // Terminalの検証（terminal0と比較）
-      if (currentTerminal0 != null &&
+      if (blockTerminal0 != null &&
           terminalName.isNotEmpty &&
-          terminalName == currentTerminal0) {
-        // ✅ 完全一致 → valid
+          terminalName.length >= 8 &&
+          blockTerminal0.length >= 8 &&
+          terminalName.substring(0, 8) == blockTerminal0.substring(0, 8)) {
+        // ✅ 先頭8文字一致 → valid（Applicatorと同じ比較ロジック）
         _terminalValidation = ValidationState.valid;
+        print('  terminalValidation: VALID');
+        print(
+          '  terminalName.substring(0, 8): "${terminalName.substring(0, 8)}"',
+        );
+        print(
+          '  blockTerminal0.substring(0, 8): "${blockTerminal0.substring(0, 8)}"',
+        );
       } else {
         // ❌ エラー
         _terminalValidation = ValidationState.error;
         firstErrorKey ??= _terminalCardKey; // まだエラーがなければ設定
+        print('  terminalValidation: ERROR');
+        print('  条件チェック: blockTerminal0 != null = ${blockTerminal0 != null}');
+        print('  条件チェック: terminalName.isNotEmpty = ${terminalName.isNotEmpty}');
+        print(
+          '  条件チェック: terminalName.length >= 8 = ${terminalName.length >= 8}',
+        );
+        print(
+          '  条件チェック: blockTerminal0.length >= 8 = ${blockTerminal0?.length ?? 0 >= 8}',
+        );
+        if (terminalName.length >= 8 && (blockTerminal0?.length ?? 0) >= 8) {
+          print(
+            '  文字比較: "${terminalName.substring(0, 8)}" == "${blockTerminal0!.substring(0, 8)}" = ${terminalName.substring(0, 8) == blockTerminal0.substring(0, 8)}',
+          );
+        }
       }
     });
 
@@ -203,7 +243,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
         }
       });
     }
-    
+
     _isValidating = false;
   }
 
@@ -223,7 +263,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
               flex: 5,
               prefsKey: 'micrometer_serial_number',
               onInputComplete: (value) async {
-                await SharedPrefsHelper.saveString(
+                await SharedPrefsHelper.saveStringWithNotify(
                   'micrometer_serial_number',
                   value,
                 );
@@ -231,13 +271,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
                   _micrometerSerialNumber = value;
                   _hasTriggeredAutoTap = false; // 入力完了時にリセット
                 });
-
-                // 入力完了後は少し遅延してから再検証
-                Future.delayed(Duration(milliseconds: 200), () {
-                  if (mounted) {
-                    _performValidation();
-                  }
-                });
+                // 通知機能により自動的にバリデーション実行される
               },
             ),
           ],
@@ -259,27 +293,20 @@ class _CrimpConditionState extends State<CrimpCondition> {
                       .substring(0, 10)
                       .replaceAll(RegExp(r'\s'), '');
                   final applicatorSerialNumber = value.substring(10);
-                  await SharedPrefsHelper.saveString(
+                  await SharedPrefsHelper.saveStringWithNotify(
                     'applicator_name',
                     applicatorName,
                   );
-                  await SharedPrefsHelper.saveString(
+                  await SharedPrefsHelper.saveStringWithNotify(
                     'applicator_serial_number',
                     applicatorSerialNumber,
                   );
-
                   setState(() {
                     _applicatorName = applicatorName;
                     _applicatorSerialNumber = applicatorSerialNumber;
                     _hasTriggeredAutoTap = false; // 入力完了時にリセット
                   });
-
-                  // 入力完了後は少し遅延してから再検証
-                  Future.delayed(Duration(milliseconds: 200), () {
-                    if (mounted) {
-                      _performValidation();
-                    }
-                  });
+                  // 通知機能により自動的にバリデーション実行される
                 }
               },
             ),
@@ -307,11 +334,11 @@ class _CrimpConditionState extends State<CrimpCondition> {
                 if (value.length > 10) {
                   final terminalName = value.substring(0, 10);
                   final terminalSerialNumber = value.substring(10);
-                  await SharedPrefsHelper.saveString(
+                  await SharedPrefsHelper.saveStringWithNotify(
                     'terminal_name',
                     terminalName,
                   );
-                  await SharedPrefsHelper.saveString(
+                  await SharedPrefsHelper.saveStringWithNotify(
                     'terminal_serial_number',
                     terminalSerialNumber,
                   );
@@ -320,13 +347,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
                     _terminalSerialNumber = terminalSerialNumber;
                     _hasTriggeredAutoTap = false; // 入力完了時にリセット
                   });
-
-                  // 入力完了後は少し遅延してから再検証
-                  Future.delayed(Duration(milliseconds: 200), () {
-                    if (mounted) {
-                      _performValidation();
-                    }
-                  });
+                  // 通知機能により自動的にバリデーション実行される
                 }
               },
             ),

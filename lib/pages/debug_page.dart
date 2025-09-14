@@ -30,6 +30,13 @@ class DebugPage extends StatelessWidget {
               },
               child: const Text('APIテスト'),
             ),
+            const SizedBox(height: 16.0), // Add some spacing
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.sharedPrefsViewer);
+              },
+              child: const Text('SharedPreferences一覧'),
+            ),
           ],
         ),
       ),
