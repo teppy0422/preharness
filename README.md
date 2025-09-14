@@ -348,6 +348,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 060
 
+- efu_detail.dart の比較式を正しく修正
+
+#### commit 061
+
 ---
 
 ### now

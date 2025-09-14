@@ -52,11 +52,21 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   // フォーカスノードを追加
   late final FocusNode _focusNode;
 
+  // ★★★ リアクティブな状態管理のための変更点 ★★★
+  Map<String, String?>? _comparisonData; // 比較データを保持する状態変数
+  VoidCallback? _prefsListener; // リスナーを保持するための変数
+  // ★★★ ここまで ★★★
+
   @override
   void initState() {
     super.initState();
     _focusNode = FocusNode();
     _loadColor(); // Call a method to load the color
+
+    // ★★★ リアクティブな状態管理のための変更点 ★★★
+    _updateComparisonData(); // 初期データをロード
+    _setupPrefsListener(); // SharedPrefsの変更をリッスン
+    // ★★★ ここまで ★★★
 
     // 初期化完了後に実行
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -85,14 +95,77 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     print(
       '🔥 efu_detail: block_terminals_0 保存後キャッシュ確認: "${SharedPrefsHelper.getCachedString('block_terminals_0')}"',
     );
+
+    // 保存完了を通知
+    await SharedPrefsHelper.saveStringWithNotify(
+      'block_save_completed',
+      DateTime.now().toIso8601String(),
+    );
+    print('🔥 efu_detail: block_save_completed を通知');
+
     print('🔥 efu_detail: _saveCurrentDataToPrefs 完了');
   }
 
   @override
   void dispose() {
     _focusNode.dispose();
+    // ★★★ リアクティブな状態管理のための変更点 ★★★
+    // リスナーをクリーンアップ
+    if (_prefsListener != null) {
+      SharedPrefsHelper.notifier.removeKeyListener(
+        'micrometer_serial_number',
+        _prefsListener!,
+      );
+      SharedPrefsHelper.notifier.removeKeyListener(
+        'applicator_name',
+        _prefsListener!,
+      );
+      SharedPrefsHelper.notifier.removeKeyListener(
+        'terminal_name',
+        _prefsListener!,
+      );
+      SharedPrefsHelper.notifier.removeKeyListener(
+        'block_save_completed',
+        _prefsListener!,
+      );
+    }
+    // ★★★ ここまで ★★★
     super.dispose();
   }
+
+  // ★★★ リアクティブな状態管理のための変更点 ★★★
+  // データ取得とUI更新を行うメソッド
+  Future<void> _updateComparisonData() async {
+    final data = await _getComparisonDataWithCache();
+    if (mounted) {
+      setState(() {
+        _comparisonData = data;
+      });
+    }
+  }
+
+  // 変更通知リスナーを設定するメソッド
+  void _setupPrefsListener() {
+    _prefsListener = () {
+      // 変更があったらデータを再取得してUIを更新
+      _updateComparisonData();
+    };
+    // 関連するキーの変更を監視
+    SharedPrefsHelper.notifier.addKeyListener(
+      'micrometer_serial_number',
+      _prefsListener!,
+    );
+    SharedPrefsHelper.notifier.addKeyListener(
+      'applicator_name',
+      _prefsListener!,
+    );
+    SharedPrefsHelper.notifier.addKeyListener('terminal_name', _prefsListener!);
+    SharedPrefsHelper.notifier.addKeyListener(
+      'block_save_completed',
+      _prefsListener!,
+    );
+  }
+  // ★★★ ここまで ★★★
 
   Future<void> _loadColor() async {
     try {
@@ -458,29 +531,38 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   }
 
   Future<Map<String, String?>> _getComparisonDataWithCache() async {
-    // SharedPrefs優先、block_terminals_0のみキャッシュも確認（通知機能付きで保存されるため）
+    // すべての関連データでキャッシュを優先的に使用する
     return {
-      'micrometer': await SharedPrefsHelper.getString('micrometer_serial_number') ?? '',
-      'applicator': await SharedPrefsHelper.getString('applicator_name') ?? '',
-      'terminal': await SharedPrefsHelper.getString('terminal_name') ?? '',
-      'blockTerminal0': SharedPrefsHelper.getCachedString('block_terminals_0') ??
+      'micrometer':
+          SharedPrefsHelper.getCachedString('micrometer_serial_number') ??
+          await SharedPrefsHelper.getString('micrometer_serial_number') ??
+          '',
+      'applicator':
+          SharedPrefsHelper.getCachedString('applicator_name') ??
+          await SharedPrefsHelper.getString('applicator_name') ??
+          '',
+      'terminal':
+          SharedPrefsHelper.getCachedString('terminal_name') ??
+          await SharedPrefsHelper.getString('terminal_name') ??
+          '',
+      'blockTerminal0':
+          SharedPrefsHelper.getCachedString('block_terminals_0') ??
           await SharedPrefsHelper.getString('block_terminals_0'),
     };
   }
 
   Widget _buildComparisonFormula() {
-    return FutureBuilder<Map<String, String?>>(
-      future: _getComparisonDataWithCache(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        final data = snapshot.data!;
-        final micrometerSerialNumber = data['micrometer'] ?? '';
-        final applicatorName = data['applicator'] ?? '';
-        final terminalName = data['terminal'] ?? '';
-        final blockTerminal0 = data['blockTerminal0'] ?? '';
+    // ★★★ リアクティブな状態管理のための変更点 ★★★
+    // FutureBuilderをやめて、状態(_comparisonData)を直接使用する
+    if (_comparisonData == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final data = _comparisonData!;
+    final micrometerSerialNumber = data['micrometer'] ?? '';
+    final applicatorName = data['applicator'] ?? '';
+    final terminalName = data['terminal'] ?? '';
+    final blockTerminal0 = data['blockTerminal0'] ?? '';
 
     // バリデーション結果（crimp_condition.dartと完全に同じロジック）
     final micrometerValid = micrometerSerialNumber.isNotEmpty;
@@ -498,47 +580,42 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
         terminalName.substring(0, 8) == blockTerminal0.substring(0, 8);
 
     return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.getCardColor(context),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: AppColors.getCardColor(context),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: AppColors.getLineColor(context), width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '比較式チェック',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
               color: AppColors.getLineColor(context),
-              width: 1.0,
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '比較式チェック',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.getLineColor(context),
-                ),
-              ),
-              const SizedBox(height: 4),
-              _buildComparisonRow(
-                '✓ マイクロメーター:',
-                micrometerSerialNumber.isEmpty ? '未入力' : micrometerSerialNumber,
-                micrometerValid,
-              ),
-              _buildComparisonRow(
-                '✓ Applicator(前8文字):',
-                '(${blockTerminal0.isEmpty ? "未設定" : "設定済"}&&${applicatorName.isEmpty ? "未入力" : "入力済"}&&${applicatorName.length >= 8 ? "長さ>=8" : "長さ<8"}&&${blockTerminal0.length >= 8 ? "T0長さ>=8" : "T0長さ<8"}) → ${applicatorName.isEmpty || applicatorName.length < 8 ? "入力不足" : applicatorName.substring(0, 8)} == ${blockTerminal0.isEmpty || blockTerminal0.length < 8 ? "T0不足" : blockTerminal0.substring(0, 8)}',
-                applicatorValid,
-              ),
-              _buildComparisonRow(
-                '✓ Terminal(前8文字):',
-                '(${blockTerminal0.isEmpty ? "未設定" : "設定済"}&&${terminalName.isEmpty ? "未入力" : "入力済"}&&${terminalName.length >= 8 ? "長さ>=8" : "長さ<8"}&&${blockTerminal0.length >= 8 ? "T0長さ>=8" : "T0長さ<8"}) → ${terminalName.isEmpty || terminalName.length < 8 ? "入力不足" : terminalName.substring(0, 8)} == ${blockTerminal0.isEmpty || blockTerminal0.length < 8 ? "T0不足" : blockTerminal0.substring(0, 8)}',
-                terminalValid,
-              ),
-            ],
+          const SizedBox(height: 4),
+          _buildComparisonRow(
+            '✓ マイクロメーター:',
+            micrometerSerialNumber.isEmpty ? '未入力' : micrometerSerialNumber,
+            micrometerValid,
           ),
-        );
-      },
+          _buildComparisonRow(
+            '✓ Applicator(前8文字):',
+            '(${blockTerminal0.isEmpty ? "未設定" : "設定済"}&&${applicatorName.isEmpty ? "未入力" : "入力済"}&&${applicatorName.length >= 8 ? "長さ>=8" : "長さ<8"}&&${blockTerminal0.length >= 8 ? "T0長さ>=8" : "T0長さ<8"}) → ${applicatorName.isEmpty || applicatorName.length < 8 ? "入力不足" : applicatorName.substring(0, 8)} == ${blockTerminal0.isEmpty || blockTerminal0.length < 8 ? "T0不足" : blockTerminal0.substring(0, 8)}',
+            applicatorValid,
+          ),
+          _buildComparisonRow(
+            '✓ Terminal(前8文字):',
+            '(${blockTerminal0.isEmpty ? "未設定" : "設定済"}&&${terminalName.isEmpty ? "未入力" : "入力済"}&&${terminalName.length >= 8 ? "長さ>=8" : "長さ<8"}&&${blockTerminal0.length >= 8 ? "T0長さ>=8" : "T0長さ<8"}) → ${terminalName.isEmpty || terminalName.length < 8 ? "入力不足" : terminalName.substring(0, 8)} == ${blockTerminal0.isEmpty || blockTerminal0.length < 8 ? "T0不足" : blockTerminal0.substring(0, 8)}',
+            terminalValid,
+          ),
+        ],
+      ),
     );
   }
 
@@ -563,14 +640,14 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: AppColors.getLineColor(context),
                   ),
                 ),
                 Text(
                   comparison,
                   style: TextStyle(
-                    fontSize: 9,
+                    fontSize: 11,
                     color: isValid
                         ? AppColors.getLineSubColor(context)
                         : AppColors.getErrorColor(context),

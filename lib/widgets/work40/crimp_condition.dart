@@ -85,20 +85,14 @@ class _CrimpConditionState extends State<CrimpCondition> {
       }
     };
 
-    // block_terminals_0の変更を監視
-    SharedPrefsHelper.notifier.addKeyListener(
-      'block_terminals_0',
-      _sharedPrefsListener!,
-    );
-
-    // block保存完了も監視（確実にefu_detailのデータ保存完了を検知）
+    // block保存完了のみを監視（efu_detailのデータ保存完了を検知）
     SharedPrefsHelper.notifier.addKeyListener(
       'block_save_completed',
       _sharedPrefsListener!,
     );
 
     print(
-      '🟢 crimp_condition: リスナー登録完了（block_terminals_0 + block_save_completed）',
+      '🟢 crimp_condition: リスナー登録完了（block_save_completed）',
     );
   }
 
