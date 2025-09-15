@@ -11,6 +11,8 @@ class Measurement extends StatefulWidget {
   final String? currentHindDial;
   final String? currentTopDial;
   final String? currentBottomDial;
+  final Function(bool)? onValidationComplete;
+  final FocusNode? focusNode;
 
   const Measurement({
     super.key,
@@ -20,6 +22,8 @@ class Measurement extends StatefulWidget {
     this.currentHindDial,
     this.currentTopDial,
     this.currentBottomDial,
+    this.onValidationComplete,
+    this.focusNode,
   });
 
   @override
@@ -30,6 +34,7 @@ class _StandardInfoCardState extends State<Measurement> {
   late List<FocusNode> _focusNodes;
   late List<TextEditingController> _controllers;
   List<String> _statuses = []; // OK / NG 表示用
+  bool _allMeasurementsValid = false;
   @override
   void initState() {
     super.initState();
@@ -49,10 +54,38 @@ class _StandardInfoCardState extends State<Measurement> {
     _controllers = List.generate(4, (_) => TextEditingController());
     _statuses = List.generate(4, (_) => ""); // ← 初期は空
 
-    // 最初のTextFieldにフォーカスを当てる
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).requestFocus(_focusNodes[0]);
-    });
+    // 外部フォーカスノードのリスナー設定
+    if (widget.focusNode != null) {
+      widget.focusNode!.addListener(() {
+        if (widget.focusNode!.hasFocus && mounted) {
+          debugPrint('📏 測定セクションにフォーカス受信');
+          // 外部フォーカスが当たったら最初のTextFieldにフォーカス
+          Future.delayed(const Duration(milliseconds: 200), () {
+            if (mounted) {
+              FocusScope.of(context).requestFocus(_focusNodes[0]);
+              debugPrint('📏 最初のTextField にフォーカス移動');
+            }
+          });
+        }
+      });
+    }
+  }
+
+  void _checkAllMeasurements() {
+    // 4つの測定値すべてがOKかどうかをチェック
+    final allOK = _statuses.length == 4 && 
+        _statuses.every((status) => status == "OK");
+    
+    if (allOK != _allMeasurementsValid) {
+      _allMeasurementsValid = allOK;
+      
+      // 親に通知
+      if (widget.onValidationComplete != null) {
+        widget.onValidationComplete!(allOK);
+      }
+      
+      debugPrint('📏 測定結果: ${allOK ? "全てOK" : "未完了またはNG"}');
+    }
   }
 
   @override
@@ -393,6 +426,7 @@ class _StandardInfoCardState extends State<Measurement> {
                                 input <= maxValue) {
                               setState(() {
                                 _statuses[index] = "OK";
+                                _checkAllMeasurements();
                               });
 
                               // OK判定の場合は推奨値をクリア
@@ -415,6 +449,7 @@ class _StandardInfoCardState extends State<Measurement> {
                             } else {
                               setState(() {
                                 _statuses[index] = "NG";
+                                _checkAllMeasurements();
                               });
 
                               // 後足C/Hの場合は推奨ダイヤル値を計算

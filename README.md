@@ -352,6 +352,12 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 061
 
+- efu_detail.dart に crimp_condition.dart が OK なら measurement.dart にフォーカスを移す処理の追加
+
+#### commit 062
+
+- 照合 OK ならカウント開始を追加
+
 ---
 
 ### now

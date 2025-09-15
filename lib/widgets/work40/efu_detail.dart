@@ -9,7 +9,7 @@ import 'package:preharness/widgets/interactive_image_viewer.dart';
 import 'package:preharness/widgets/work40/product_info_card.dart';
 import 'package:preharness/widgets/work40/crimp_condition.dart';
 import 'package:preharness/utils/shared_prefs_helper.dart';
-import 'package:preharness/widgets/ui/custom_card.dart';
+import 'package:preharness/models/workflow_state.dart';
 
 class EfuDetailPage extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
@@ -56,6 +56,12 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   Map<String, String?>? _comparisonData; // 比較データを保持する状態変数
   VoidCallback? _prefsListener; // リスナーを保持するための変数
   // ★★★ ここまで ★★★
+
+  // ワークフロー状態管理
+  final WorkflowState _workflowState = WorkflowState();
+  
+  // フォーカス管理用
+  final FocusNode _measurementFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -109,6 +115,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   @override
   void dispose() {
     _focusNode.dispose();
+    _measurementFocusNode.dispose();
     // ★★★ リアクティブな状態管理のための変更点 ★★★
     // リスナーをクリーンアップ
     if (_prefsListener != null) {
@@ -166,6 +173,114 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     );
   }
   // ★★★ ここまで ★★★
+
+  // ワークフロー制御メソッド
+  void _onCrimpConditionValidationChanged(bool isValid) {
+    debugPrint('🔧 部材照合バリデーション変更: $isValid');
+    setState(() {
+      _workflowState.crimpConditionComplete = isValid;
+    });
+    
+    if (isValid) {
+      debugPrint('🔧 部材照合完了 → 測定にフォーカス移動');
+      // 部材照合完了 → 測定にフォーカス移動
+      _moveToMeasurement();
+    }
+  }
+  
+  void _onMeasurementValidationChanged(bool isValid) {
+    setState(() {
+      _workflowState.measurementComplete = isValid;
+    });
+    
+    if (isValid && _workflowState.canStartProduction) {
+      // 全工程完了 → 生産開始準備
+      _prepareForProduction();
+    }
+  }
+  
+  void _moveToMeasurement() {
+    // 測定セクションにフォーカス移動
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        // FocusScope経由でフォーカス移動
+        FocusScope.of(context).requestFocus(_measurementFocusNode);
+        debugPrint('🎯 フォーカス移動: 測定セクション');
+      }
+    });
+  }
+  
+  void _prepareForProduction() {
+    // 生産開始準備
+    _showProductionReadyDialog();
+  }
+  
+  void _startProduction() {
+    setState(() {
+      _workflowState.productionStarted = true;
+    });
+    debugPrint('🚀 生産開始！');
+    // 生産カウント開始
+    _focusNode.requestFocus(); // F13キー入力にフォーカス戻す
+  }
+  
+  
+  void _showProductionReadyDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('🎉 準備完了'),
+        content: const Text('全ての確認が完了しました。\n生産を開始しますか？'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _startProduction();
+            },
+            child: const Text('生産開始', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ステータスカードの表示制御
+  String _getStatusCardText() {
+    if (_workflowState.productionStarted) {
+      return "生産中";
+    } else if (_workflowState.canStartProduction) {
+      return "生産準備OK";
+    } else if (_workflowState.crimpConditionComplete) {
+      return "測定確認中";
+    } else {
+      return "部材照合中";
+    }
+  }
+  
+  Color _getStatusCardColor() {
+    if (_workflowState.productionStarted) {
+      return Colors.green.shade100;
+    } else if (_workflowState.canStartProduction) {
+      return Colors.blue.shade100;
+    } else if (_workflowState.crimpConditionComplete) {
+      return Colors.orange.shade100;
+    } else {
+      return Colors.grey.shade100;
+    }
+  }
+  
+  Color _getStatusTextColor() {
+    if (_workflowState.productionStarted) {
+      return Colors.green.shade800;
+    } else if (_workflowState.canStartProduction) {
+      return Colors.blue.shade800;
+    } else if (_workflowState.crimpConditionComplete) {
+      return Colors.orange.shade800;
+    } else {
+      return Colors.grey.shade600;
+    }
+  }
 
   Future<void> _loadColor() async {
     try {
@@ -300,7 +415,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                       containerColor: _containerColor,
                                       containerForeColor: _containerForeColor,
                                     ),
-                                    const CrimpCondition(),
+                                    CrimpCondition(
+                                      onValidationComplete: _onCrimpConditionValidationChanged,
+                                    ),
                                     const SizedBox(width: 0), // 左右の間隔
                                   ],
                                 ),
@@ -374,16 +491,27 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                               currentTopDial: _currentTopDial,
                                               currentBottomDial:
                                                   _currentBottomDial,
+                                              onValidationComplete: _onMeasurementValidationChanged,
+                                              focusNode: _measurementFocusNode,
                                             ),
                                             const SizedBox(height: 25),
-                                            CustomCard(
+                                            SizedBox(
                                               width: 180,
                                               height: 50,
-                                              child: Center(
-                                                child: Text(
-                                                  "部材照合OK",
-                                                  style: TextStyle(
-                                                    fontSize: 20,
+                                              child: Card(
+                                                color: _getStatusCardColor(),
+                                                elevation: 4,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8.0),
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    _getStatusCardText(),
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: _getStatusTextColor(),
+                                                    ),
                                                   ),
                                                 ),
                                               ),

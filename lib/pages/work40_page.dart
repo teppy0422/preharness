@@ -30,7 +30,7 @@ class _Work40PageState extends State<Work40Page>
   String? _chListError;
   final FocusNode _searchFocusNode = FocusNode();
   final TextEditingController _searchController = TextEditingController(
-    text: 'N712/ 5M39200151780700186821616BP80D011N712/94.54.5325184039',
+    text: 'N712/ 5M3920002178070018682143V1010A011N712/94.54.5325184039',
   );
 
   late final AnimationController _animationController;
