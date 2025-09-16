@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:preharness/constants/app_colors.dart";
+import 'package:preharness/utils/shared_prefs_helper.dart';
 
 int? _activeIndex;
 
@@ -35,9 +36,12 @@ class _StandardInfoCardState extends State<Measurement> {
   late List<TextEditingController> _controllers;
   List<String> _statuses = []; // OK / NG 表示用
   bool _allMeasurementsValid = false;
+  late final VoidCallback _focusListener;
+
   @override
   void initState() {
     super.initState();
+    debugPrint('📏 [measurement] initState開始');
 
     // TextFieldの数に合わせてFocusNodeとControllerを作成
     _focusNodes = List.generate(4, (i) {
@@ -56,18 +60,24 @@ class _StandardInfoCardState extends State<Measurement> {
 
     // 外部フォーカスノードのリスナー設定
     if (widget.focusNode != null) {
-      widget.focusNode!.addListener(() {
+      debugPrint('📏 [measurement] 外部フォーカスノード受信: ${widget.focusNode.hashCode}');
+      _focusListener = () {
+        debugPrint('📏 [measurement] フォーカスリスナー呼び出し: hasFocus=${widget.focusNode!.hasFocus}, mounted=$mounted');
         if (widget.focusNode!.hasFocus && mounted) {
           debugPrint('📏 測定セクションにフォーカス受信');
           // 外部フォーカスが当たったら最初のTextFieldにフォーカス
-          Future.delayed(const Duration(milliseconds: 200), () {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               FocusScope.of(context).requestFocus(_focusNodes[0]);
               debugPrint('📏 最初のTextField にフォーカス移動');
             }
           });
         }
-      });
+      };
+      widget.focusNode!.addListener(_focusListener);
+      debugPrint('📏 [measurement] フォーカスリスナー登録完了');
+    } else {
+      debugPrint('📏 [measurement] 外部フォーカスノードがnull');
     }
   }
 
@@ -88,8 +98,35 @@ class _StandardInfoCardState extends State<Measurement> {
     }
   }
 
+  // 測定値をSharedPreferencesに保存
+  Future<void> _saveMeasurementValue(String label, double value) async {
+    String key;
+    switch (label) {
+      case "前足C/H":
+        key = "measured_front_ch";
+        break;
+      case "後足C/H":
+        key = "measured_back_ch";
+        break;
+      case "前足C/W":
+        key = "measured_front_cw";
+        break;
+      case "後足C/W":
+        key = "measured_back_cw";
+        break;
+      default:
+        return; // 不明なラベルの場合は保存しない
+    }
+    
+    await SharedPrefsHelper.saveStringWithNotify(key, value.toString());
+    debugPrint('💾 測定値保存: $key = $value');
+  }
+
   @override
   void dispose() {
+    if (widget.focusNode != null) {
+      widget.focusNode!.removeListener(_focusListener);
+    }
     for (var node in _focusNodes) {
       node.dispose();
     }
@@ -419,15 +456,22 @@ class _StandardInfoCardState extends State<Measurement> {
                               ),
                             ),
                           ),
-                          onSubmitted: (_) {
+                          onSubmitted: (_) async {
+                            debugPrint('📏 [measurement] onSubmitted: label=$label, text=${controller.text}');
                             final input = double.tryParse(controller.text);
+                            debugPrint('📏 [measurement] parsed value: $input, range: $minValue-$maxValue');
+                            
                             if (input != null &&
                                 input >= minValue &&
                                 input <= maxValue) {
+                              debugPrint('📏 [measurement] OK判定: $label = $input');
                               setState(() {
                                 _statuses[index] = "OK";
                                 _checkAllMeasurements();
                               });
+
+                              // 測定値をSharedPreferencesに保存
+                              await _saveMeasurementValue(label, input);
 
                               // OK判定の場合は推奨値をクリア
                               if (label == "後足C/H" &&

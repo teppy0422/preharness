@@ -34,7 +34,6 @@ class _CrimpConditionState extends State<CrimpCondition> {
 
   final bool _hasInitialized = false;
   bool _isValidating = false;
-  bool _hasTriggeredAutoTap = false;
   DateTime? _lastAutoTapTime;
 
   // SharedPrefs変更監視用
@@ -100,8 +99,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
   }
 
   Future<void> _loadAllPreferences() async {
-    // 画面遷移から戻ってきた時のためにフラグをリセット
-    _hasTriggeredAutoTap = false;
+    // 画面遷移から戻ってきた時のためにタイマーをリセット
     _lastAutoTapTime = null;
 
     await _loadStringPref(
@@ -213,6 +211,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
         'allValid=$allValid');
     
     if (widget.onValidationComplete != null) {
+      debugPrint('🔧 親に通知: allValid=$allValid');
       widget.onValidationComplete!(allValid);
     }
 
@@ -232,8 +231,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
         });
       }
     } else {
-      // エラーがない場合はフラグをリセット
-      _hasTriggeredAutoTap = false;
+      // エラーがない場合はタイマーをリセット
       _lastAutoTapTime = null;
     }
     _isValidating = false;
@@ -261,7 +259,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
                 );
                 setState(() {
                   _micrometerSerialNumber = value;
-                  _hasTriggeredAutoTap = false; // 入力完了時にリセット
+                  _lastAutoTapTime = null; // 入力完了時にリセット
                 });
                 // 通知機能により自動的にバリデーション実行される
                 _performValidation();
@@ -297,7 +295,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
                   setState(() {
                     _applicatorName = applicatorName;
                     _applicatorSerialNumber = applicatorSerialNumber;
-                    _hasTriggeredAutoTap = false; // 入力完了時にリセット
+                    _lastAutoTapTime = null; // 入力完了時にリセット
                   });
                   // 通知機能により自動的にバリデーション実行される
                   _performValidation();
@@ -339,7 +337,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
                   setState(() {
                     _terminalName = terminalName;
                     _terminalSerialNumber = terminalSerialNumber;
-                    _hasTriggeredAutoTap = false; // 入力完了時にリセット
+                    _lastAutoTapTime = null; // 入力完了時にリセット
                   });
                   // 通知機能により自動的にバリデーション実行される
                   _performValidation();

@@ -356,6 +356,12 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 062
 
+- SharedPreferences に measurement.dart の値を measured として保存
+
+#### commit 063
+
+- efu_detail.dart に入った時に SharedPreferences.measured と条件が異なる場合は空にする
+
 - 照合 OK ならカウント開始を追加
 
 ---
@@ -392,8 +398,10 @@ flutter pub get
 - タブレットのワイヤレスデバッグをオフ → オン
 - USB ケーブル接続して下記
 <pre>adb tcpip 5555</pre>
-- USB ケーブルを抜いて下記
+- USB ケーブルを抜いて下記実行後に選択
 <pre>flutter run</pre>
+- 描画エラーログをフィルターカット
+<pre>flutter logs | grep -v "BLASTBufferQueue"</pre>
 
 ### prompt 4 AI
 

@@ -59,15 +59,19 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   // ワークフロー状態管理
   final WorkflowState _workflowState = WorkflowState();
-  
+
   // フォーカス管理用
-  final FocusNode _measurementFocusNode = FocusNode();
+  late FocusNode _measurementFocusNode;
 
   @override
   void initState() {
     super.initState();
     _focusNode = FocusNode();
+    _measurementFocusNode = FocusNode(); // FocusNodeをここで初期化
     _loadColor(); // Call a method to load the color
+
+    // WorkflowStateを初期化（画面再表示時のリセット）
+    _workflowState.reset();
 
     // ★★★ リアクティブな状態管理のための変更点 ★★★
     _updateComparisonData(); // 初期データをロード
@@ -176,15 +180,24 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   // ワークフロー制御メソッド
   void _onCrimpConditionValidationChanged(bool isValid) {
-    debugPrint('🔧 部材照合バリデーション変更: $isValid');
-    setState(() {
-      _workflowState.crimpConditionComplete = isValid;
-    });
+    debugPrint('🔧 部材照合バリデーション変更: $isValid (previous: ${_workflowState.crimpConditionComplete})');
     
-    if (isValid) {
+    // 状態を更新
+    if (_workflowState.crimpConditionComplete != isValid) {
+      setState(() {
+        _workflowState.crimpConditionComplete = isValid;
+      });
+      debugPrint('🔧 ワークフロー状態更新: crimpConditionComplete = $isValid');
+    }
+    
+    // isValidがtrueで、測定がまだ完了していない場合はフォーカス移動
+    if (isValid && !_workflowState.measurementComplete) {
       debugPrint('🔧 部材照合完了 → 測定にフォーカス移動');
-      // 部材照合完了 → 測定にフォーカス移動
       _moveToMeasurement();
+    } else if (!isValid) {
+      debugPrint('🔧 部材照合未完了のため、フォーカス移動なし');
+    } else {
+      debugPrint('🔧 測定完了済みのため、フォーカス移動スキップ');
     }
   }
   
@@ -201,11 +214,23 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   
   void _moveToMeasurement() {
     // 測定セクションにフォーカス移動
-    Future.delayed(const Duration(milliseconds: 500), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        // FocusScope経由でフォーカス移動
+        debugPrint(
+            '[efu_detail] 測定セクションへのフォーカスを要求します。');
+        debugPrint(
+            '[efu_detail] requestFocus 前: _measurementFocusNode.hasFocus = ${_measurementFocusNode.hasFocus}');
+        
+        // FocusScopeを使用してより確実にフォーカス移動
         FocusScope.of(context).requestFocus(_measurementFocusNode);
-        debugPrint('🎯 フォーカス移動: 測定セクション');
+        
+        // requestFocusが非同期に処理される場合を考慮し、少し待ってから状態を再確認
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            debugPrint(
+                '[efu_detail] requestFocus 後: _measurementFocusNode.hasFocus = ${_measurementFocusNode.hasFocus}');
+          }
+        });
       }
     });
   }
@@ -481,18 +506,23 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                         Column(
                                           children: [
                                             SizedBox(height: 4),
-                                            Measurement(
-                                              chListData: widget.chListData,
-                                              onHindDialRecommendation:
-                                                  _onHindDialRecommendation,
-                                              onFrontDialRecommendation:
-                                                  _onFrontDialRecommendation,
-                                              currentHindDial: _currentHindDial,
-                                              currentTopDial: _currentTopDial,
-                                              currentBottomDial:
-                                                  _currentBottomDial,
-                                              onValidationComplete: _onMeasurementValidationChanged,
-                                              focusNode: _measurementFocusNode,
+                                            Builder(
+                                              builder: (context) {
+                                                debugPrint('📏 [efu_detail] Measurementウィジェット作成: focusNode=${_measurementFocusNode.hashCode}');
+                                                return Measurement(
+                                                  chListData: widget.chListData,
+                                                  onHindDialRecommendation:
+                                                      _onHindDialRecommendation,
+                                                  onFrontDialRecommendation:
+                                                      _onFrontDialRecommendation,
+                                                  currentHindDial: _currentHindDial,
+                                                  currentTopDial: _currentTopDial,
+                                                  currentBottomDial:
+                                                      _currentBottomDial,
+                                                  onValidationComplete: _onMeasurementValidationChanged,
+                                                  focusNode: _measurementFocusNode,
+                                                );
+                                              },
                                             ),
                                             const SizedBox(height: 25),
                                             SizedBox(

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preharness/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
 import 'package:preharness/utils/shared_prefs_helper.dart';
+import 'package:preharness/constants/app_colors.dart';
 
 class SharedPrefsViewerPage extends StatefulWidget {
   const SharedPrefsViewerPage({super.key});
@@ -24,13 +25,13 @@ class _SharedPrefsViewerPageState extends State<SharedPrefsViewerPage> {
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys().toList()..sort();
-    
+
     final Map<String, dynamic> prefsMap = {};
     for (String key in keys) {
       final value = prefs.get(key);
       prefsMap[key] = value;
     }
-    
+
     setState(() {
       _preferences = prefsMap;
       _isLoading = false;
@@ -41,11 +42,11 @@ class _SharedPrefsViewerPageState extends State<SharedPrefsViewerPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
     await _loadPreferences();
-    
+
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('削除しました: $key')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('削除しました: $key')));
     }
   }
 
@@ -73,79 +74,88 @@ class _SharedPrefsViewerPageState extends State<SharedPrefsViewerPage> {
       child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _preferences.isEmpty
-              ? const Center(
-                  child: Text(
-                    '保存されているPreferencesがありません',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                )
-              : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
+          ? const Center(
+              child: Text(
+                '保存されているPreferencesがありません',
+                style: TextStyle(fontSize: 16),
+              ),
+            )
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '保存済み項目: ${_preferences.length}件',
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              ElevatedButton(
-                                onPressed: _loadPreferences,
-                                child: const Text('再読み込み'),
-                              ),
-                            ],
+                          Text(
+                            '保存済み項目: ${_preferences.length}件',
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: Colors.blue.shade200),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('キャッシュ内容:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                Text('Cache: ${SharedPrefsHelper.notifier.cache}', style: const TextStyle(fontSize: 12)),
-                              ],
-                            ),
+                          ElevatedButton(
+                            onPressed: _loadPreferences,
+                            child: const Text('再読み込み'),
                           ),
                         ],
                       ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _preferences.length,
-                        itemBuilder: (context, index) {
-                          final key = _preferences.keys.elementAt(index);
-                          final value = _preferences[key];
-                          
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 4.0,
-                            ),
-                            child: ListTile(
-                              title: Text(
-                                key,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text(_getValueTypeAndValue(value)),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _showDeleteDialog(key),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          // ここで背景色を設定
+                          color: AppColors.getCardColor(context),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: AppColors.getLineSubColor(context),
+                            width: .5,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Cache: ${SharedPrefsHelper.notifier.cache}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.getLineColor(context),
                               ),
                             ),
-                          );
-                        },
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _preferences.length,
+                    itemBuilder: (context, index) {
+                      final key = _preferences.keys.elementAt(index);
+                      final value = _preferences[key];
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 4.0,
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            key,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(_getValueTypeAndValue(value)),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _showDeleteDialog(key),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
