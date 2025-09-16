@@ -320,14 +320,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     debugPrint('🎊 生産準備完了 - zoomアニメーション実行');
   }
 
-  void _startProduction() {
-    setState(() {
-      _workflowState.productionStarted = true;
-    });
-    debugPrint('🚀 生産開始！');
-    // 生産カウント開始
-    _focusNode.requestFocus(); // F13キー入力にフォーカス戻す
-  }
 
   // ステータスカードの表示制御
   String _getStatusCardText() {
@@ -435,6 +427,13 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               event.logicalKey == LogicalKeyboardKey.f1 ||
               event.logicalKey == LogicalKeyboardKey.insert ||
               event.physicalKey == PhysicalKeyboardKey.f13) {
+            
+            // 生産準備OKの時のみカウント有効
+            if (!_workflowState.canStartProduction) {
+              debugPrint('⚠️ 生産準備未完了のため、カウント無効');
+              return KeyEventResult.handled;
+            }
+            
             final now = DateTime.now();
             // 速度計算（カウント/分）
             if (_lastCountTime != null) {
@@ -454,8 +453,14 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               _previousF13Count = _f13KeyCount;
               _f13KeyCount++;
               _lastCountTime = now;
+              // 生産開始フラグも設定
+              if (!_workflowState.productionStarted) {
+                _workflowState.productionStarted = true;
+                debugPrint('🚀 生産開始！初回カウント');
+              }
             });
 
+            debugPrint('✅ カウント実行: $_f13KeyCount');
             return KeyEventResult.handled;
           }
         }

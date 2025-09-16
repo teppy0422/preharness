@@ -363,7 +363,9 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 063
 
-- 照合 OK ならカウント開始を追加
+- 全て照合 OK ならカウント開始を追加
+
+#### commit 064
 
 ---
 
