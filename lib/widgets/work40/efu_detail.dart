@@ -62,6 +62,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   // フォーカス管理用
   late FocusNode _measurementFocusNode;
+  
+  // 測定値の初期値管理
+  Map<String, String>? _initialMeasurements;
 
   @override
   void initState() {
@@ -81,6 +84,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     // 初期化完了後に実行
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _saveCurrentDataToPrefs(); // データ保存を確実に完了
+      await _checkMeasurementInitialValues(); // 測定値の初期値をチェック
       _focusNode.requestFocus();
     });
   }
@@ -177,6 +181,59 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     );
   }
   // ★★★ ここまで ★★★
+
+  // 測定値の初期値チェック
+  Future<void> _checkMeasurementInitialValues() async {
+    try {
+      // 現在のblock_terminals値を取得
+      final currentBlockTerminal0 = await SharedPrefsHelper.getString('block_terminals_0');
+      final currentBlockTerminal1 = await SharedPrefsHelper.getString('block_terminals_1');
+      
+      // 保存済みのblock_terminals値を取得
+      final measuredBlockTerminal0 = await SharedPrefsHelper.getString('measured_block_terminals_0');
+      final measuredBlockTerminal1 = await SharedPrefsHelper.getString('measured_block_terminals_1');
+      
+      debugPrint('🔍 block_terminals比較: 現在0=$currentBlockTerminal0, 保存済み0=$measuredBlockTerminal0');
+      debugPrint('🔍 block_terminals比較: 現在1=$currentBlockTerminal1, 保存済み1=$measuredBlockTerminal1');
+      
+      // 両方が一致する場合のみ測定値を取得
+      if (currentBlockTerminal0 == measuredBlockTerminal0 && 
+          currentBlockTerminal1 == measuredBlockTerminal1 &&
+          currentBlockTerminal0 != null && currentBlockTerminal1 != null) {
+        
+        debugPrint('✅ block_terminals一致 → 測定値を取得');
+        
+        // 保存済みの測定値を取得
+        final measuredFrontCh = await SharedPrefsHelper.getString('measured_front_ch');
+        final measuredBackCh = await SharedPrefsHelper.getString('measured_back_ch');
+        final measuredFrontCw = await SharedPrefsHelper.getString('measured_front_cw');
+        final measuredBackCw = await SharedPrefsHelper.getString('measured_back_cw');
+        
+        // 測定値が全て存在する場合のみ初期値として設定
+        if (measuredFrontCh != null && measuredBackCh != null && 
+            measuredFrontCw != null && measuredBackCw != null) {
+          
+          setState(() {
+            _initialMeasurements = {
+              'front_ch': measuredFrontCh,
+              'back_ch': measuredBackCh,
+              'front_cw': measuredFrontCw,
+              'back_cw': measuredBackCw,
+            };
+          });
+          
+          debugPrint('📋 測定値初期値設定: $_initialMeasurements');
+        }
+      } else {
+        debugPrint('❌ block_terminals不一致 → 測定値クリア');
+        setState(() {
+          _initialMeasurements = null;
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ 測定値初期値チェックエラー: $e');
+    }
+  }
 
   // ワークフロー制御メソッド
   void _onCrimpConditionValidationChanged(bool isValid) {
@@ -514,9 +571,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                             Builder(
                                               builder: (context) {
                                                 debugPrint(
-                                                  '📏 [efu_detail] Measurementウィジェット作成: focusNode=${_measurementFocusNode.hashCode}',
+                                                  '📏 [efu_detail] Measurementウィジェット作成: focusNode=${_measurementFocusNode.hashCode}, initialMeasurements=$_initialMeasurements',
                                                 );
                                                 return Measurement(
+                                                  key: ValueKey(_initialMeasurements), // キーを追加して再構築を制御
                                                   chListData: widget.chListData,
                                                   onHindDialRecommendation:
                                                       _onHindDialRecommendation,
@@ -532,6 +590,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                       _onMeasurementValidationChanged,
                                                   focusNode:
                                                       _measurementFocusNode,
+                                                  initialMeasurements: _initialMeasurements,
                                                 );
                                               },
                                             ),

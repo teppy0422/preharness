@@ -357,12 +357,11 @@ samples, guidance on mobile development, and a full API reference.
 #### commit 062
 
 - SharedPreferences に measurement.dart の値を measured として保存
+- SharedPreferences に block_terminal_0 と 1 の値を measured として保存
 
 #### commit 063
 
-- SharedPreferences に block_terminal_0 と 1 の値を measured として保存
-
-- efu_detail.dart に入った時に SharedPreferences.measured と条件が異なる場合は空にする
+- efu_detail.dart に入った時に SharedPreferences.measured と条件が同じなら値を入力済みにする
 
 - 照合 OK ならカウント開始を追加
 

@@ -14,6 +14,7 @@ class Measurement extends StatefulWidget {
   final String? currentBottomDial;
   final Function(bool)? onValidationComplete;
   final FocusNode? focusNode;
+  final Map<String, String>? initialMeasurements;
 
   const Measurement({
     super.key,
@@ -25,6 +26,7 @@ class Measurement extends StatefulWidget {
     this.currentBottomDial,
     this.onValidationComplete,
     this.focusNode,
+    this.initialMeasurements,
   });
 
   @override
@@ -78,6 +80,42 @@ class _StandardInfoCardState extends State<Measurement> {
       debugPrint('📏 [measurement] フォーカスリスナー登録完了');
     } else {
       debugPrint('📏 [measurement] 外部フォーカスノードがnull');
+    }
+    
+    // 初期値が提供されている場合、TextFieldに設定
+    _setInitialValues();
+  }
+  
+  void _setInitialValues() {
+    debugPrint('📋 [measurement] _setInitialValues呼び出し: ${widget.initialMeasurements}');
+    
+    if (widget.initialMeasurements != null) {
+      debugPrint('📋 [measurement] 初期値設定開始: ${widget.initialMeasurements}');
+      
+      final measurements = widget.initialMeasurements!;
+      final labels = ["前足C/H", "後足C/H", "前足C/W", "後足C/W"];
+      final keys = ["front_ch", "back_ch", "front_cw", "back_cw"];
+      
+      // 遅延して初期値を設定（ウィジェット構築完了後）
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        for (int i = 0; i < labels.length; i++) {
+          final value = measurements[keys[i]];
+          if (value != null) {
+            _controllers[i].text = value;
+            _statuses[i] = "OK"; // 初期値がある場合はOK状態
+            debugPrint('📋 [measurement] ${labels[i]} = $value (OK)');
+          }
+        }
+        
+        // 全ての測定値がセットされた場合、バリデーションをチェック
+        setState(() {
+          _checkAllMeasurements();
+        });
+        
+        debugPrint('📋 [measurement] 初期値設定完了');
+      });
+    } else {
+      debugPrint('📋 [measurement] 初期値なし');
     }
   }
 
