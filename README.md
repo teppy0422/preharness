@@ -367,6 +367,8 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 064
 
+- 全て OK の時にフォーカスを無くす
+
 ---
 
 ### now

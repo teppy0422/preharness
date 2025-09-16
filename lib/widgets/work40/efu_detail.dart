@@ -62,10 +62,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   // フォーカス管理用
   late FocusNode _measurementFocusNode;
-  
+
   // 測定値の初期値管理
   Map<String, String>? _initialMeasurements;
-  
+
   // アニメーション制御
   bool _isZooming = false;
 
@@ -189,33 +189,54 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   Future<void> _checkMeasurementInitialValues() async {
     try {
       // 現在のblock_terminals値を取得
-      final currentBlockTerminal0 = await SharedPrefsHelper.getString('block_terminals_0');
-      final currentBlockTerminal1 = await SharedPrefsHelper.getString('block_terminals_1');
-      
+      final currentBlockTerminal0 = await SharedPrefsHelper.getString(
+        'block_terminals_0',
+      );
+      final currentBlockTerminal1 = await SharedPrefsHelper.getString(
+        'block_terminals_1',
+      );
+
       // 保存済みのblock_terminals値を取得
-      final measuredBlockTerminal0 = await SharedPrefsHelper.getString('measured_block_terminals_0');
-      final measuredBlockTerminal1 = await SharedPrefsHelper.getString('measured_block_terminals_1');
-      
-      debugPrint('🔍 block_terminals比較: 現在0=$currentBlockTerminal0, 保存済み0=$measuredBlockTerminal0');
-      debugPrint('🔍 block_terminals比較: 現在1=$currentBlockTerminal1, 保存済み1=$measuredBlockTerminal1');
-      
+      final measuredBlockTerminal0 = await SharedPrefsHelper.getString(
+        'measured_block_terminals_0',
+      );
+      final measuredBlockTerminal1 = await SharedPrefsHelper.getString(
+        'measured_block_terminals_1',
+      );
+
+      debugPrint(
+        '🔍 block_terminals比較: 現在0=$currentBlockTerminal0, 保存済み0=$measuredBlockTerminal0',
+      );
+      debugPrint(
+        '🔍 block_terminals比較: 現在1=$currentBlockTerminal1, 保存済み1=$measuredBlockTerminal1',
+      );
+
       // 両方が一致する場合のみ測定値を取得
-      if (currentBlockTerminal0 == measuredBlockTerminal0 && 
+      if (currentBlockTerminal0 == measuredBlockTerminal0 &&
           currentBlockTerminal1 == measuredBlockTerminal1 &&
-          currentBlockTerminal0 != null && currentBlockTerminal1 != null) {
-        
+          currentBlockTerminal0 != null &&
+          currentBlockTerminal1 != null) {
         debugPrint('✅ block_terminals一致 → 測定値を取得');
-        
+
         // 保存済みの測定値を取得
-        final measuredFrontCh = await SharedPrefsHelper.getString('measured_front_ch');
-        final measuredBackCh = await SharedPrefsHelper.getString('measured_back_ch');
-        final measuredFrontCw = await SharedPrefsHelper.getString('measured_front_cw');
-        final measuredBackCw = await SharedPrefsHelper.getString('measured_back_cw');
-        
+        final measuredFrontCh = await SharedPrefsHelper.getString(
+          'measured_front_ch',
+        );
+        final measuredBackCh = await SharedPrefsHelper.getString(
+          'measured_back_ch',
+        );
+        final measuredFrontCw = await SharedPrefsHelper.getString(
+          'measured_front_cw',
+        );
+        final measuredBackCw = await SharedPrefsHelper.getString(
+          'measured_back_cw',
+        );
+
         // 測定値が全て存在する場合のみ初期値として設定
-        if (measuredFrontCh != null && measuredBackCh != null && 
-            measuredFrontCw != null && measuredBackCw != null) {
-          
+        if (measuredFrontCh != null &&
+            measuredBackCh != null &&
+            measuredFrontCw != null &&
+            measuredBackCw != null) {
           setState(() {
             _initialMeasurements = {
               'front_ch': measuredFrontCh,
@@ -224,7 +245,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               'back_cw': measuredBackCw,
             };
           });
-          
+
           debugPrint('📋 測定値初期値設定: $_initialMeasurements');
         }
       } else {
@@ -302,12 +323,12 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     // 生産開始準備 - zoomアニメーション実行
     _triggerZoomAnimation();
   }
-  
+
   void _triggerZoomAnimation() {
     setState(() {
       _isZooming = true;
     });
-    
+
     // 1秒後にアニメーション終了
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
@@ -316,10 +337,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
         });
       }
     });
-    
+
     debugPrint('🎊 生産準備完了 - zoomアニメーション実行');
   }
-
 
   // ステータスカードの表示制御
   String _getStatusCardText() {
@@ -336,7 +356,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   Color _getStatusCardColor() {
     if (_workflowState.productionStarted) {
-      return Colors.green.shade100;
+      return Colors.transparent;
     } else if (_workflowState.canStartProduction) {
       return Colors.blue.shade100;
     } else if (_workflowState.crimpConditionComplete) {
@@ -427,13 +447,12 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               event.logicalKey == LogicalKeyboardKey.f1 ||
               event.logicalKey == LogicalKeyboardKey.insert ||
               event.physicalKey == PhysicalKeyboardKey.f13) {
-            
             // 生産準備OKの時のみカウント有効
             if (!_workflowState.canStartProduction) {
               debugPrint('⚠️ 生産準備未完了のため、カウント無効');
               return KeyEventResult.handled;
             }
-            
+
             final now = DateTime.now();
             // 速度計算（カウント/分）
             if (_lastCountTime != null) {
@@ -576,7 +595,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                   '📏 [efu_detail] Measurementウィジェット作成: focusNode=${_measurementFocusNode.hashCode}, initialMeasurements=$_initialMeasurements',
                                                 );
                                                 return Measurement(
-                                                  key: ValueKey(_initialMeasurements), // キーを追加して再構築を制御
+                                                  key: ValueKey(
+                                                    _initialMeasurements,
+                                                  ), // キーを追加して再構築を制御
                                                   chListData: widget.chListData,
                                                   onHindDialRecommendation:
                                                       _onHindDialRecommendation,
@@ -592,14 +613,17 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                       _onMeasurementValidationChanged,
                                                   focusNode:
                                                       _measurementFocusNode,
-                                                  initialMeasurements: _initialMeasurements,
+                                                  initialMeasurements:
+                                                      _initialMeasurements,
                                                 );
                                               },
                                             ),
                                             const SizedBox(height: 25),
                                             AnimatedScale(
                                               scale: _isZooming ? 1.2 : 1.0,
-                                              duration: const Duration(milliseconds: 500),
+                                              duration: const Duration(
+                                                milliseconds: 500,
+                                              ),
                                               curve: Curves.elasticOut,
                                               child: SizedBox(
                                                 width: 180,
