@@ -65,6 +65,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   
   // 測定値の初期値管理
   Map<String, String>? _initialMeasurements;
+  
+  // アニメーション制御
+  bool _isZooming = false;
 
   @override
   void initState() {
@@ -296,8 +299,25 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   }
 
   void _prepareForProduction() {
-    // 生産開始準備
-    _showProductionReadyDialog();
+    // 生産開始準備 - zoomアニメーション実行
+    _triggerZoomAnimation();
+  }
+  
+  void _triggerZoomAnimation() {
+    setState(() {
+      _isZooming = true;
+    });
+    
+    // 1秒後にアニメーション終了
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        setState(() {
+          _isZooming = false;
+        });
+      }
+    });
+    
+    debugPrint('🎊 生産準備完了 - zoomアニメーション実行');
   }
 
   void _startProduction() {
@@ -307,29 +327,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     debugPrint('🚀 生産開始！');
     // 生産カウント開始
     _focusNode.requestFocus(); // F13キー入力にフォーカス戻す
-  }
-
-  void _showProductionReadyDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('🎉 準備完了'),
-        content: const Text('全ての確認が完了しました。\n生産を開始しますか？'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _startProduction();
-            },
-            child: const Text(
-              '生産開始',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   // ステータスカードの表示制御
@@ -595,27 +592,32 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                               },
                                             ),
                                             const SizedBox(height: 25),
-                                            SizedBox(
-                                              width: 180,
-                                              height: 50,
-                                              child: Card(
-                                                color: _getStatusCardColor(),
-                                                elevation: 4,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        8.0,
+                                            AnimatedScale(
+                                              scale: _isZooming ? 1.2 : 1.0,
+                                              duration: const Duration(milliseconds: 500),
+                                              curve: Curves.elasticOut,
+                                              child: SizedBox(
+                                                width: 180,
+                                                height: 50,
+                                                child: Card(
+                                                  color: _getStatusCardColor(),
+                                                  elevation: 4,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8.0,
+                                                        ),
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      _getStatusCardText(),
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color:
+                                                            _getStatusTextColor(),
                                                       ),
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    _getStatusCardText(),
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color:
-                                                          _getStatusTextColor(),
                                                     ),
                                                   ),
                                                 ),
