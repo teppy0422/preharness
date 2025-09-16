@@ -6,11 +6,8 @@ import 'package:preharness/widgets/custom_input_card.dart';
 
 class CrimpCondition extends StatefulWidget {
   final Function(bool)? onValidationComplete;
-  
-  const CrimpCondition({
-    super.key,
-    this.onValidationComplete,
-  });
+
+  const CrimpCondition({super.key, this.onValidationComplete});
 
   @override
   State<CrimpCondition> createState() => _CrimpConditionState();
@@ -32,7 +29,6 @@ class _CrimpConditionState extends State<CrimpCondition> {
   final FocusNode _applicatorFocusNode = FocusNode();
   final FocusNode _terminalFocusNode = FocusNode();
 
-  final bool _hasInitialized = false;
   bool _isValidating = false;
   DateTime? _lastAutoTapTime;
 
@@ -200,16 +196,19 @@ class _CrimpConditionState extends State<CrimpCondition> {
     });
 
     // バリデーション結果を親に通知
-    final allValid = _micrometerValidation == ValidationState.valid &&
+    final allValid =
+        _micrometerValidation == ValidationState.valid &&
         _applicatorValidation == ValidationState.valid &&
         _terminalValidation == ValidationState.valid;
-    
-    debugPrint('🔧 crimp_condition バリデーション結果: '
-        'micrometer=$_micrometerValidation, '
-        'applicator=$_applicatorValidation, '
-        'terminal=$_terminalValidation, '
-        'allValid=$allValid');
-    
+
+    debugPrint(
+      '🔧 crimp_condition バリデーション結果: '
+      'micrometer=$_micrometerValidation, '
+      'applicator=$_applicatorValidation, '
+      'terminal=$_terminalValidation, '
+      'allValid=$allValid',
+    );
+
     if (widget.onValidationComplete != null) {
       debugPrint('🔧 親に通知: allValid=$allValid');
       widget.onValidationComplete!(allValid);
@@ -220,7 +219,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
       // エラーがある場合は常に自動タップを実行（順番が変わった時も対応）
       final now = DateTime.now();
       // 前回の自動タップから500ms以上経過している場合のみ実行（連続実行防止）
-      if (_lastAutoTapTime == null || 
+      if (_lastAutoTapTime == null ||
           now.difference(_lastAutoTapTime!).inMilliseconds > 500) {
         Future.delayed(Duration(milliseconds: 100), () {
           if (mounted) {

@@ -180,8 +180,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   // ワークフロー制御メソッド
   void _onCrimpConditionValidationChanged(bool isValid) {
-    debugPrint('🔧 部材照合バリデーション変更: $isValid (previous: ${_workflowState.crimpConditionComplete})');
-    
+    debugPrint(
+      '🔧 部材照合バリデーション変更: $isValid (previous: ${_workflowState.crimpConditionComplete})',
+    );
+
     // 状態を更新
     if (_workflowState.crimpConditionComplete != isValid) {
       setState(() {
@@ -189,7 +191,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       });
       debugPrint('🔧 ワークフロー状態更新: crimpConditionComplete = $isValid');
     }
-    
+
     // isValidがtrueで、測定がまだ完了していない場合はフォーカス移動
     if (isValid && !_workflowState.measurementComplete) {
       debugPrint('🔧 部材照合完了 → 測定にフォーカス移動');
@@ -200,46 +202,47 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       debugPrint('🔧 測定完了済みのため、フォーカス移動スキップ');
     }
   }
-  
+
   void _onMeasurementValidationChanged(bool isValid) {
     setState(() {
       _workflowState.measurementComplete = isValid;
     });
-    
+
     if (isValid && _workflowState.canStartProduction) {
       // 全工程完了 → 生産開始準備
       _prepareForProduction();
     }
   }
-  
+
   void _moveToMeasurement() {
     // 測定セクションにフォーカス移動
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        debugPrint('[efu_detail] 測定セクションへのフォーカスを要求します。');
         debugPrint(
-            '[efu_detail] 測定セクションへのフォーカスを要求します。');
-        debugPrint(
-            '[efu_detail] requestFocus 前: _measurementFocusNode.hasFocus = ${_measurementFocusNode.hasFocus}');
-        
+          '[efu_detail] requestFocus 前: _measurementFocusNode.hasFocus = ${_measurementFocusNode.hasFocus}',
+        );
+
         // FocusScopeを使用してより確実にフォーカス移動
         FocusScope.of(context).requestFocus(_measurementFocusNode);
-        
+
         // requestFocusが非同期に処理される場合を考慮し、少し待ってから状態を再確認
         Future.delayed(const Duration(milliseconds: 100), () {
           if (mounted) {
             debugPrint(
-                '[efu_detail] requestFocus 後: _measurementFocusNode.hasFocus = ${_measurementFocusNode.hasFocus}');
+              '[efu_detail] requestFocus 後: _measurementFocusNode.hasFocus = ${_measurementFocusNode.hasFocus}',
+            );
           }
         });
       }
     });
   }
-  
+
   void _prepareForProduction() {
     // 生産開始準備
     _showProductionReadyDialog();
   }
-  
+
   void _startProduction() {
     setState(() {
       _workflowState.productionStarted = true;
@@ -248,8 +251,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     // 生産カウント開始
     _focusNode.requestFocus(); // F13キー入力にフォーカス戻す
   }
-  
-  
+
   void _showProductionReadyDialog() {
     showDialog(
       context: context,
@@ -263,7 +265,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               Navigator.of(context).pop();
               _startProduction();
             },
-            child: const Text('生産開始', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: const Text(
+              '生産開始',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -282,7 +287,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       return "部材照合中";
     }
   }
-  
+
   Color _getStatusCardColor() {
     if (_workflowState.productionStarted) {
       return Colors.green.shade100;
@@ -294,7 +299,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       return Colors.grey.shade100;
     }
   }
-  
+
   Color _getStatusTextColor() {
     if (_workflowState.productionStarted) {
       return Colors.green.shade800;
@@ -366,7 +371,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   @override
   Widget build(BuildContext context) {
     Color baseLineColor = AppColors.getLineColor(context);
-
     return Focus(
       focusNode: _focusNode,
       autofocus: true,
@@ -441,7 +445,8 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                       containerForeColor: _containerForeColor,
                                     ),
                                     CrimpCondition(
-                                      onValidationComplete: _onCrimpConditionValidationChanged,
+                                      onValidationComplete:
+                                          _onCrimpConditionValidationChanged,
                                     ),
                                     const SizedBox(width: 0), // 左右の間隔
                                   ],
@@ -508,19 +513,25 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                             SizedBox(height: 4),
                                             Builder(
                                               builder: (context) {
-                                                debugPrint('📏 [efu_detail] Measurementウィジェット作成: focusNode=${_measurementFocusNode.hashCode}');
+                                                debugPrint(
+                                                  '📏 [efu_detail] Measurementウィジェット作成: focusNode=${_measurementFocusNode.hashCode}',
+                                                );
                                                 return Measurement(
                                                   chListData: widget.chListData,
                                                   onHindDialRecommendation:
                                                       _onHindDialRecommendation,
                                                   onFrontDialRecommendation:
                                                       _onFrontDialRecommendation,
-                                                  currentHindDial: _currentHindDial,
-                                                  currentTopDial: _currentTopDial,
+                                                  currentHindDial:
+                                                      _currentHindDial,
+                                                  currentTopDial:
+                                                      _currentTopDial,
                                                   currentBottomDial:
                                                       _currentBottomDial,
-                                                  onValidationComplete: _onMeasurementValidationChanged,
-                                                  focusNode: _measurementFocusNode,
+                                                  onValidationComplete:
+                                                      _onMeasurementValidationChanged,
+                                                  focusNode:
+                                                      _measurementFocusNode,
                                                 );
                                               },
                                             ),
@@ -532,15 +543,20 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                 color: _getStatusCardColor(),
                                                 elevation: 4,
                                                 shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(8.0),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        8.0,
+                                                      ),
                                                 ),
                                                 child: Center(
                                                   child: Text(
                                                     _getStatusCardText(),
                                                     style: TextStyle(
                                                       fontSize: 16,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: _getStatusTextColor(),
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color:
+                                                          _getStatusTextColor(),
                                                     ),
                                                   ),
                                                 ),

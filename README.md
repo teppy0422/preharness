@@ -360,6 +360,8 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 063
 
+- SharedPreferences に block_terminal_0 と 1 の値を measured として保存
+
 - efu_detail.dart に入った時に SharedPreferences.measured と条件が異なる場合は空にする
 
 - 照合 OK ならカウント開始を追加

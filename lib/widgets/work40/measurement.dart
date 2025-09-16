@@ -89,12 +89,59 @@ class _StandardInfoCardState extends State<Measurement> {
     if (allOK != _allMeasurementsValid) {
       _allMeasurementsValid = allOK;
       
+      // 全てOKの場合、全ての測定値を保存
+      if (allOK) {
+        _saveAllMeasurements();
+      }
+      
       // 親に通知
       if (widget.onValidationComplete != null) {
         widget.onValidationComplete!(allOK);
       }
       
       debugPrint('📏 測定結果: ${allOK ? "全てOK" : "未完了またはNG"}');
+    }
+  }
+
+  // 全ての測定値をSharedPreferencesに保存
+  Future<void> _saveAllMeasurements() async {
+    debugPrint('💾 全ての測定値を保存開始');
+    
+    // 測定値を保存
+    final labels = ["前足C/H", "後足C/H", "前足C/W", "後足C/W"];
+    
+    for (int i = 0; i < labels.length; i++) {
+      final text = _controllers[i].text;
+      final value = double.tryParse(text);
+      
+      if (value != null) {
+        await _saveMeasurementValue(labels[i], value);
+      }
+    }
+    
+    // block_terminals の値も一緒に保存
+    await _saveBlockTerminals();
+    
+    debugPrint('💾 全ての測定値保存完了');
+  }
+  
+  // block_terminals の値を measured_ として保存
+  Future<void> _saveBlockTerminals() async {
+    try {
+      final blockTerminal0 = await SharedPrefsHelper.getString('block_terminals_0');
+      final blockTerminal1 = await SharedPrefsHelper.getString('block_terminals_1');
+      
+      if (blockTerminal0 != null) {
+        await SharedPrefsHelper.saveStringWithNotify('measured_block_terminals_0', blockTerminal0);
+        debugPrint('💾 block_terminals保存: measured_block_terminals_0 = $blockTerminal0');
+      }
+      
+      if (blockTerminal1 != null) {
+        await SharedPrefsHelper.saveStringWithNotify('measured_block_terminals_1', blockTerminal1);
+        debugPrint('💾 block_terminals保存: measured_block_terminals_1 = $blockTerminal1');
+      }
+    } catch (e) {
+      debugPrint('❌ block_terminals保存エラー: $e');
     }
   }
 
@@ -467,11 +514,10 @@ class _StandardInfoCardState extends State<Measurement> {
                               debugPrint('📏 [measurement] OK判定: $label = $input');
                               setState(() {
                                 _statuses[index] = "OK";
-                                _checkAllMeasurements();
                               });
-
-                              // 測定値をSharedPreferencesに保存
-                              await _saveMeasurementValue(label, input);
+                              
+                              // 全ての測定値チェック後、全てOKなら保存
+                              _checkAllMeasurements();
 
                               // OK判定の場合は推奨値をクリア
                               if (label == "後足C/H" &&
