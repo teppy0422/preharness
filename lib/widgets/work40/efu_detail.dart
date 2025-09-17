@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:preharness/services/database_service.dart';
+import 'package:preharness/services/work_results_service.dart';
 import 'package:preharness/widgets/work40/dial_selector_with_db.dart';
 import 'package:preharness/widgets/work40/measurement.dart';
 import 'package:preharness/utils/color_utils.dart';
@@ -278,29 +278,37 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   Future<void> _handleWorkCompletion() async {
     try {
       // 平均速度計算
-      final averageSpeed = _speedData.isNotEmpty 
-          ? _speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length 
+      final averageSpeed = _speedData.isNotEmpty
+          ? _speedData.map((e) => e.value).reduce((a, b) => a + b) /
+                _speedData.length
           : 0.0;
 
       // PostgreSQLに保存（SharedPreferences全項目を自動取得）
-      final success = await DatabaseService.saveWorkResult(
+      final result = await WorkResultsService.saveWorkResult(
         actualCount: _f13KeyCount,
         averageSpeed: averageSpeed,
       );
 
       if (mounted) {
-        if (success) {
+        if (result['success']) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('作業完了しました！データを保存しました。'),
+            SnackBar(
+              content: Text(result['message'] ?? '作業完了しました！データを保存しました。'),
               backgroundColor: Colors.green,
             ),
           );
         } else {
+          // エラーの詳細を表示
+          final errors = result['errors'] as List<String>? ?? [];
+          final errorMessage = errors.isNotEmpty
+              ? errors.join('\n')
+              : result['message'] ?? 'データ保存でエラーが発生しました';
+
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('作業完了！（データ保存でエラーが発生しました）'),
+            SnackBar(
+              content: Text('作業完了！\n$errorMessage'),
               backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 5), // エラー詳細を読む時間を確保
             ),
           );
         }

@@ -5,6 +5,7 @@ class SettingsService {
   static const _keyMainPath = 'main_path';
   static const _keyPath01 = 'path_01';
   static const _keyMachineType = 'machine_type';
+  static const _keyMachineNumber = 'machine_number';
   static const _keyMachineSerial = 'machine_serial';
   static const _keyWorkName = 'work_name';
 
@@ -12,6 +13,7 @@ class SettingsService {
     required String mainPath,
     required String path01,
     required String machineType,
+    required String machineNumber,
     required String machineSerial,
     required String workName,
   }) async {
@@ -19,6 +21,7 @@ class SettingsService {
     await prefs.setString(_keyMainPath, mainPath);
     await prefs.setString(_keyPath01, path01);
     await prefs.setString(_keyMachineType, machineType);
+    await prefs.setString(_keyMachineNumber, machineNumber);
     await prefs.setString(_keyMachineSerial, machineSerial);
     await prefs.setString(_keyWorkName, workName);
   }

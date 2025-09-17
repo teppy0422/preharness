@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // RawKeyEventのために追加
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preharness/services/api_service.dart';
 import 'package:preharness/widgets/work40/efu.dart';
 import 'package:preharness/widgets/work40/efu_detail.dart'; // 詳細ページをインポート
@@ -323,7 +324,32 @@ void showCustomDialog(BuildContext context, Widget child) {
   );
 }
 
-class _EquipmentInfoCard extends StatelessWidget {
+class _EquipmentInfoCard extends StatefulWidget {
+  @override
+  State<_EquipmentInfoCard> createState() => _EquipmentInfoCardState();
+}
+
+class _EquipmentInfoCardState extends State<_EquipmentInfoCard> {
+  String _machineNumber = '';  // 号機
+  String _machineType = '';    // 機種
+  String _machineSerial = '';  // 管理No
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      _machineNumber = prefs.getString('machine_number') ?? '未設定';
+      _machineType = prefs.getString('machine_type') ?? '未設定';
+      _machineSerial = prefs.getString('machine_serial') ?? '未設定';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -342,12 +368,12 @@ class _EquipmentInfoCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    "号機: 5号機",
+                    "号機: $_machineNumber",
                     style: TextStyle(color: AppColors.getLineSubColor(context)),
                   ),
                 ),
-                Expanded(child: Text("機種: CM20")),
-                Expanded(child: Text("管理No: 3456")),
+                Expanded(child: Text("機種: $_machineType")),
+                Expanded(child: Text("管理No: $_machineSerial")),
               ],
             ),
           ],

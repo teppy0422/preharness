@@ -371,6 +371,7 @@ samples, guidance on mobile development, and a full API reference.
 - 全て OK の時にフォーカスを無くす
 - measurement.dart のフォーマットを 0.000 に変更
 - 作業実績を postregSQL に保存
+- 作業実績に号機を追加
 
 #### commit 065
 

@@ -51,6 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final _mainController = TextEditingController();
   final _pathController = TextEditingController();
   final _typeController = TextEditingController();
+  final _machineNumberController = TextEditingController();
   final _serialController = TextEditingController();
   final _workNameController = TextEditingController();
 
@@ -91,7 +92,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
     _mainController.text = withDefault(settings['main_path'], mainPath);
     _pathController.text = withDefault(settings['path_01'], pathPath);
-    _typeController.text = withDefault(settings['machine_type'], 'CM20');
+    _typeController.text = withDefault(settings['machine_type'], 'CM00');
+    _machineNumberController.text = withDefault(
+      settings['machine_number'],
+      '1号機',
+    );
     _serialController.text = withDefault(settings['machine_serial'], '0000');
     _workNameController.text = withDefault(settings['work_name'], '圧着');
 
@@ -104,6 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
       mainPath: _mainController.text,
       path01: _pathController.text,
       machineType: _typeController.text,
+      machineNumber: _machineNumberController.text,
       machineSerial: _serialController.text,
       workName: _workNameController.text,
     );
@@ -236,6 +242,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   label: '機種',
                   hint: '例: CM20',
                   controller: _typeController,
+                ),
+                _buildLabeledField(
+                  label: '号機',
+                  hint: '例: 5号機',
+                  controller: _machineNumberController,
                 ),
                 _buildLabeledField(
                   label: '管理ナンバー',
