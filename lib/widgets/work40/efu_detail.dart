@@ -52,7 +52,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   // フォーカスノードを追加
   late final FocusNode _focusNode;
-  
+
   // Arduino対応：見えないTextFieldでキーボード入力を初期化
   late final TextEditingController _dummyController;
   late final FocusNode _dummyFocusNode;
@@ -79,15 +79,17 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     super.initState();
     _focusNode = FocusNode();
     _measurementFocusNode = FocusNode(); // FocusNodeをここで初期化
-    
+
     // Arduino対応：ダミーコントローラーとフォーカスノードを初期化
     _dummyController = TextEditingController();
     _dummyFocusNode = FocusNode();
-    
+
     _loadColor(); // Call a method to load the color
 
     // WorkflowStateを初期化
-    debugPrint('🔧 [efu_detail] WorkflowState初期化: crimpConditionComplete=${_workflowState.crimpConditionComplete}, measurementComplete=${_workflowState.measurementComplete}, canStartProduction=${_workflowState.canStartProduction}');
+    debugPrint(
+      '🔧 [efu_detail] WorkflowState初期化: crimpConditionComplete=${_workflowState.crimpConditionComplete}, measurementComplete=${_workflowState.measurementComplete}, canStartProduction=${_workflowState.canStartProduction}',
+    );
 
     // ★★★ リアクティブな状態管理のための変更点 ★★★
     _updateComparisonData(); // 初期データをロード
@@ -98,24 +100,28 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _saveCurrentDataToPrefs(); // データ保存を確実に完了
       await _checkMeasurementInitialValues(); // 測定値の初期値をチェック
-      
+
       // フォーカスを確実に取得
       if (mounted) {
         _focusNode.requestFocus();
-        debugPrint('🎯 [efu_detail] 初期フォーカス要求: hasFocus=${_focusNode.hasFocus}');
-        
+        debugPrint(
+          '🎯 [efu_detail] 初期フォーカス要求: hasFocus=${_focusNode.hasFocus}',
+        );
+
         // Arduino Leonardo等の外部デバイス対応：キーボード入力システムを初期化
         Future.delayed(const Duration(milliseconds: 200), () {
           if (mounted) {
-            debugPrint('🎯 [efu_detail] フォーカス確認: hasFocus=${_focusNode.hasFocus}');
+            debugPrint(
+              '🎯 [efu_detail] フォーカス確認: hasFocus=${_focusNode.hasFocus}',
+            );
             if (!_focusNode.hasFocus) {
               _focusNode.requestFocus();
               debugPrint('🎯 [efu_detail] 再フォーカス要求');
             }
-            
+
             // キーボード入力システムを強制的に初期化（Arduino対応）
             FocusScope.of(context).requestFocus(_focusNode);
-            
+
             // Arduino対応：既に全て照合完了している場合は即座に実行
             Future.delayed(const Duration(milliseconds: 300), () {
               if (mounted && _workflowState.canStartProduction) {
@@ -125,8 +131,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                 debugPrint('🎯 [efu_detail] Arduino対応は測定完了後に実行予定');
               }
             });
-            
-            debugPrint('🎯 [efu_detail] Arduino対応：FocusScope経由でフォーカス設定 (緑ボーダー確認用)');
+
+            debugPrint(
+              '🎯 [efu_detail] Arduino対応：FocusScope経由でフォーカス設定 (緑ボーダー確認用)',
+            );
           }
         });
       }
@@ -169,27 +177,27 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     try {
       // 最新のHardwareKeyboard APIを使用してダミーキー入力をシミュレート
       final now = Duration(milliseconds: DateTime.now().millisecondsSinceEpoch);
-      
+
       final keyDownEvent = KeyDownEvent(
         logicalKey: LogicalKeyboardKey.backspace,
         physicalKey: PhysicalKeyboardKey.backspace,
         timeStamp: now,
       );
-      
+
       final keyUpEvent = KeyUpEvent(
         logicalKey: LogicalKeyboardKey.backspace,
         physicalKey: PhysicalKeyboardKey.backspace,
         timeStamp: now,
       );
-      
+
       // キーダウンとキーアップをシミュレート
       HardwareKeyboard.instance.handleKeyEvent(keyDownEvent);
-      
+
       // 即座にキーアップ（実際の入力にならないようにする）
       Future.delayed(const Duration(milliseconds: 1), () {
         HardwareKeyboard.instance.handleKeyEvent(keyUpEvent);
       });
-      
+
       debugPrint('🎯 [efu_detail] ダミーキー入力（Backspace）実行完了');
     } catch (e) {
       debugPrint('🎯 [efu_detail] ダミーキー入力エラー: $e');
@@ -197,17 +205,17 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       _fallbackFocusActivation();
     }
   }
-  
+
   // Arduino対応：全て照合OK時のみキーボード入力を初期化
   void _activateArduinoKeyboardSupport() {
     debugPrint('🎯 [efu_detail] Arduino対応開始（全て照合OK時）');
-    
+
     // キーボード入力システムを初期化してからメインFocusNodeにフォーカス
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         // 1. まずダミーTextFieldで一時的にキーボードシステムを初期化
         _dummyFocusNode.requestFocus();
-        
+
         // 2. キーボード入力システムを「刺激」
         Future.delayed(const Duration(milliseconds: 50), () {
           if (mounted) {
@@ -215,7 +223,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             Future.delayed(const Duration(milliseconds: 50), () {
               if (mounted) {
                 _dummyController.clear(); // すぐクリア
-                
+
                 // 3. メインのFocusNode（F1キーハンドラーがある）にフォーカスを移す
                 Future.delayed(const Duration(milliseconds: 50), () {
                   if (mounted) {
@@ -225,12 +233,16 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                       if (mounted) {
                         _focusNode.requestFocus();
                         FocusScope.of(context).requestFocus(_focusNode);
-                        debugPrint('🎯 [efu_detail] メインFocusNodeにフォーカス完了 - Arduino F1キー準備OK');
-                        
+                        debugPrint(
+                          '🎯 [efu_detail] メインFocusNodeにフォーカス完了 - Arduino F1キー準備OK',
+                        );
+
                         // 追加でフォーカスを確実に維持
                         Future.delayed(const Duration(milliseconds: 200), () {
                           if (mounted && !_focusNode.hasFocus) {
-                            debugPrint('🔄 [efu_detail] フォーカス最終確認: Arduino F1キー対応');
+                            debugPrint(
+                              '🔄 [efu_detail] フォーカス最終確認: Arduino F1キー対応',
+                            );
                             _focusNode.requestFocus();
                             FocusScope.of(context).requestFocus(_focusNode);
                           }
@@ -265,7 +277,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   void dispose() {
     _focusNode.dispose();
     _measurementFocusNode.dispose();
-    
+
     // Arduino対応：ダミーリソースをクリーンアップ
     _dummyController.dispose();
     _dummyFocusNode.dispose();
@@ -430,19 +442,21 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     debugPrint('📏 測定バリデーション結果受信: isValid=$isValid');
     setState(() {
       _workflowState.measurementComplete = isValid;
-      debugPrint('📏 WorkflowState更新: measurementComplete=${_workflowState.measurementComplete}, canStartProduction=${_workflowState.canStartProduction}');
+      debugPrint(
+        '📏 WorkflowState更新: measurementComplete=${_workflowState.measurementComplete}, canStartProduction=${_workflowState.canStartProduction}',
+      );
     });
 
     if (isValid && _workflowState.canStartProduction) {
       // 全工程完了 → 生産開始準備
       debugPrint('📏 全工程完了 → 生産開始準備実行');
       _prepareForProduction();
-      
+
       // 測定完了後、Arduino対応のキーボード初期化を実行
       Future.delayed(const Duration(milliseconds: 200), () {
         if (mounted) {
           _activateArduinoKeyboardSupport();
-          
+
           // さらに確実にメインFocusNodeにフォーカスを戻す
           Future.delayed(const Duration(milliseconds: 500), () {
             if (mounted && !_focusNode.hasFocus) {
@@ -639,7 +653,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             ),
           ),
         ),
-        
+
         // メインのFocusウィジェット
         Focus(
           focusNode: _focusNode,
@@ -648,257 +662,273 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             debugPrint('🎯 [efu_detail] フォーカス変更: hasFocus=$hasFocus');
           },
           onKeyEvent: (node, event) {
-        debugPrint('🎹 [efu_detail] キーイベント受信: ${event.runtimeType}, フォーカス状態: ${_focusNode.hasFocus}');
-        if (event is KeyDownEvent) {
-          debugPrint('🎹 キー押下検出: logical=${event.logicalKey}, physical=${event.physicalKey}');
-          // F13、F1、またはInsertキーをチェック（Android対応）
-          if (event.logicalKey == LogicalKeyboardKey.f13 ||
-              event.logicalKey == LogicalKeyboardKey.f1 ||
-              event.logicalKey == LogicalKeyboardKey.insert ||
-              event.physicalKey == PhysicalKeyboardKey.f13) {
-            debugPrint('🎯 対象キー検出: ${event.logicalKey}');
-            // 生産準備OKの時のみカウント有効
-            debugPrint('🔍 カウント判定: crimpConditionComplete=${_workflowState.crimpConditionComplete}, measurementComplete=${_workflowState.measurementComplete}, canStartProduction=${_workflowState.canStartProduction}');
-            
-            if (!_workflowState.canStartProduction) {
-              debugPrint('⚠️ 生産準備未完了のため、カウント無効');
-              return KeyEventResult.handled;
-            }
+            debugPrint(
+              '🎹 [efu_detail] キーイベント受信: ${event.runtimeType}, フォーカス状態: ${_focusNode.hasFocus}',
+            );
+            if (event is KeyDownEvent) {
+              debugPrint(
+                '🎹 キー押下検出: logical=${event.logicalKey}, physical=${event.physicalKey}',
+              );
+              // F13、F1、またはInsertキーをチェック（Android対応）
+              if (event.logicalKey == LogicalKeyboardKey.f13 ||
+                  event.logicalKey == LogicalKeyboardKey.f1 ||
+                  event.logicalKey == LogicalKeyboardKey.insert ||
+                  event.physicalKey == PhysicalKeyboardKey.f13) {
+                debugPrint('🎯 対象キー検出: ${event.logicalKey}');
+                // 生産準備OKの時のみカウント有効
+                debugPrint(
+                  '🔍 カウント判定: crimpConditionComplete=${_workflowState.crimpConditionComplete}, measurementComplete=${_workflowState.measurementComplete}, canStartProduction=${_workflowState.canStartProduction}',
+                );
 
-            final now = DateTime.now();
-            // 速度計算（カウント/分）
-            if (_lastCountTime != null) {
-              final timeDiff = now.difference(_lastCountTime!).inMilliseconds;
-              if (timeDiff > 0) {
-                _currentSpeed = 60000.0 / timeDiff; // 1分間あたりのカウント数
-                // データを追加（最大60秒分保持）
-                _speedData.add(MapEntry(now, _currentSpeed));
+                if (!_workflowState.canStartProduction) {
+                  debugPrint('⚠️ 生産準備未完了のため、カウント無効');
+                  return KeyEventResult.handled;
+                }
 
-                // 60秒より古いデータを削除
-                final cutoff = now.subtract(const Duration(seconds: 60));
-                _speedData.removeWhere((entry) => entry.key.isBefore(cutoff));
+                final now = DateTime.now();
+                // 速度計算（カウント/分）
+                if (_lastCountTime != null) {
+                  final timeDiff = now
+                      .difference(_lastCountTime!)
+                      .inMilliseconds;
+                  if (timeDiff > 0) {
+                    _currentSpeed = 60000.0 / timeDiff; // 1分間あたりのカウント数
+                    // データを追加（最大60秒分保持）
+                    _speedData.add(MapEntry(now, _currentSpeed));
+
+                    // 60秒より古いデータを削除
+                    final cutoff = now.subtract(const Duration(seconds: 60));
+                    _speedData.removeWhere(
+                      (entry) => entry.key.isBefore(cutoff),
+                    );
+                  }
+                }
+
+                setState(() {
+                  _previousF13Count = _f13KeyCount;
+                  _f13KeyCount++;
+                  _lastCountTime = now;
+                  // 生産開始フラグも設定
+                  if (!_workflowState.productionStarted) {
+                    _workflowState.productionStarted = true;
+                    debugPrint('🚀 生産開始！初回カウント');
+                  }
+                });
+
+                debugPrint('✅ カウント実行: $_f13KeyCount');
+                return KeyEventResult.handled;
               }
             }
+            return KeyEventResult.ignored;
+          },
 
-            setState(() {
-              _previousF13Count = _f13KeyCount;
-              _f13KeyCount++;
-              _lastCountTime = now;
-              // 生産開始フラグも設定
-              if (!_workflowState.productionStarted) {
-                _workflowState.productionStarted = true;
-                debugPrint('🚀 生産開始！初回カウント');
-              }
-            });
-
-            debugPrint('✅ カウント実行: $_f13KeyCount');
-            return KeyEventResult.handled;
-          }
-        }
-        return KeyEventResult.ignored;
-      },
-
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Stack(
               children: [
-                Divider(
-                  height: 1,
-                  thickness: .5,
-                  color: AppColors.getLineColor(context),
-                ),
-                SizedBox(height: 5),
-                Row(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Rowで左右に分割
-                          Row(
+                    Divider(
+                      height: 1,
+                      thickness: .5,
+                      color: AppColors.getLineColor(context),
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // 左側: 情報グループ
-                              Expanded(
-                                flex: 3,
-                                child: Column(
-                                  children: [
-                                    ProductInfoCard(
-                                      processingConditions:
-                                          widget.processingConditions,
-                                      onBack: widget.onBack,
-                                      containerColor: _containerColor,
-                                      containerForeColor: _containerForeColor,
-                                    ),
-                                    CrimpCondition(
-                                      onValidationComplete:
-                                          _onCrimpConditionValidationChanged,
-                                    ),
-                                    const SizedBox(width: 0), // 左右の間隔
-                                  ],
-                                ),
-                              ),
-
-                              Expanded(
-                                flex: 6,
-                                child: Column(
-                                  children: [
-                                    TerminalInfoCard(
-                                      terminal1:
-                                          widget.blockInfo['terminals']?[0] ??
-                                          "",
-                                      terminal2:
-                                          widget.blockInfo['terminals']?[1] ??
-                                          "",
-                                      wireType:
-                                          widget
-                                              .processingConditions['wire_type']
-                                              ?.toString() ??
-                                          '',
-                                      wireSize:
-                                          widget
-                                              .processingConditions['wire_size']
-                                              ?.toString() ??
-                                          '',
-                                    ),
-
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                              // Rowで左右に分割
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // 左側: 情報グループ
+                                  Expanded(
+                                    flex: 3,
+                                    child: Column(
                                       children: [
-                                        Expanded(
-                                          child: Column(
-                                            children: [
-                                              DialSelectorWithDb(
-                                                processingConditions:
-                                                    widget.processingConditions,
-                                                blockInfo: widget.blockInfo,
-                                                recommendedHindDial:
-                                                    _recommendedHindDial,
-                                                recommendedTopDial:
-                                                    _recommendedTopDial,
-                                                recommendedBottomDial:
-                                                    _recommendedBottomDial,
-                                                onDialChanged: _onDialChanged,
-                                              ),
-                                              InteractiveImageViewer(
-                                                imagePath:
-                                                    'assets/images/71144020-2.jpg',
-                                                scale: 2.4,
-                                                panX: 0.168,
-                                                panY: 0.35,
-                                                height: 255,
-                                                width: 500,
-                                              ),
-                                            ],
-                                          ),
+                                        ProductInfoCard(
+                                          processingConditions:
+                                              widget.processingConditions,
+                                          onBack: widget.onBack,
+                                          containerColor: _containerColor,
+                                          containerForeColor:
+                                              _containerForeColor,
                                         ),
-                                        SizedBox(width: 8),
-                                        Column(
+                                        CrimpCondition(
+                                          onValidationComplete:
+                                              _onCrimpConditionValidationChanged,
+                                        ),
+                                        const SizedBox(width: 0), // 左右の間隔
+                                      ],
+                                    ),
+                                  ),
+
+                                  Expanded(
+                                    flex: 6,
+                                    child: Column(
+                                      children: [
+                                        TerminalInfoCard(
+                                          terminal1:
+                                              widget
+                                                  .blockInfo['terminals']?[0] ??
+                                              "",
+                                          terminal2:
+                                              widget
+                                                  .blockInfo['terminals']?[1] ??
+                                              "",
+                                          wireType:
+                                              widget
+                                                  .processingConditions['wire_type']
+                                                  ?.toString() ??
+                                              '',
+                                          wireSize:
+                                              widget
+                                                  .processingConditions['wire_size']
+                                                  ?.toString() ??
+                                              '',
+                                        ),
+
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            SizedBox(height: 4),
-                                            Builder(
-                                              builder: (context) {
-                                                debugPrint(
-                                                  '📏 [efu_detail] Measurementウィジェット作成: focusNode=${_measurementFocusNode.hashCode}, initialMeasurements=$_initialMeasurements',
-                                                );
-                                                return Measurement(
-                                                  key: ValueKey(
-                                                    _initialMeasurements,
-                                                  ), // キーを追加して再構築を制御
-                                                  chListData: widget.chListData,
-                                                  onHindDialRecommendation:
-                                                      _onHindDialRecommendation,
-                                                  onFrontDialRecommendation:
-                                                      _onFrontDialRecommendation,
-                                                  currentHindDial:
-                                                      _currentHindDial,
-                                                  currentTopDial:
-                                                      _currentTopDial,
-                                                  currentBottomDial:
-                                                      _currentBottomDial,
-                                                  onValidationComplete:
-                                                      _onMeasurementValidationChanged,
-                                                  focusNode:
-                                                      _measurementFocusNode,
-                                                  initialMeasurements:
-                                                      _initialMeasurements,
-                                                );
-                                              },
-                                            ),
-                                            const SizedBox(height: 25),
-                                            AnimatedScale(
-                                              scale: _isZooming ? 1.2 : 1.0,
-                                              duration: const Duration(
-                                                milliseconds: 500,
-                                              ),
-                                              curve: Curves.elasticOut,
-                                              child: SizedBox(
-                                                width: 180,
-                                                height: 50,
-                                                child: Card(
-                                                  color: _getStatusCardColor(),
-                                                  elevation: 4,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8.0,
-                                                        ),
+                                            Expanded(
+                                              child: Column(
+                                                children: [
+                                                  DialSelectorWithDb(
+                                                    processingConditions: widget
+                                                        .processingConditions,
+                                                    blockInfo: widget.blockInfo,
+                                                    recommendedHindDial:
+                                                        _recommendedHindDial,
+                                                    recommendedTopDial:
+                                                        _recommendedTopDial,
+                                                    recommendedBottomDial:
+                                                        _recommendedBottomDial,
+                                                    onDialChanged:
+                                                        _onDialChanged,
                                                   ),
-                                                  child: Center(
-                                                    child: Text(
-                                                      _getStatusCardText(),
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color:
-                                                            _getStatusTextColor(),
+                                                  InteractiveImageViewer(
+                                                    imagePath:
+                                                        'assets/images/71144020-2.jpg',
+                                                    scale: 2.4,
+                                                    panX: 0.168,
+                                                    panY: 0.35,
+                                                    height: 255,
+                                                    width: 500,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Column(
+                                              children: [
+                                                SizedBox(height: 4),
+                                                Builder(
+                                                  builder: (context) {
+                                                    debugPrint(
+                                                      '📏 [efu_detail] Measurementウィジェット作成: focusNode=${_measurementFocusNode.hashCode}, initialMeasurements=$_initialMeasurements',
+                                                    );
+                                                    return Measurement(
+                                                      key: ValueKey(
+                                                        _initialMeasurements,
+                                                      ), // キーを追加して再構築を制御
+                                                      chListData:
+                                                          widget.chListData,
+                                                      onHindDialRecommendation:
+                                                          _onHindDialRecommendation,
+                                                      onFrontDialRecommendation:
+                                                          _onFrontDialRecommendation,
+                                                      currentHindDial:
+                                                          _currentHindDial,
+                                                      currentTopDial:
+                                                          _currentTopDial,
+                                                      currentBottomDial:
+                                                          _currentBottomDial,
+                                                      onValidationComplete:
+                                                          _onMeasurementValidationChanged,
+                                                      focusNode:
+                                                          _measurementFocusNode,
+                                                      initialMeasurements:
+                                                          _initialMeasurements,
+                                                    );
+                                                  },
+                                                ),
+                                                const SizedBox(height: 25),
+                                                AnimatedScale(
+                                                  scale: _isZooming ? 1.2 : 1.0,
+                                                  duration: const Duration(
+                                                    milliseconds: 500,
+                                                  ),
+                                                  curve: Curves.elasticOut,
+                                                  child: SizedBox(
+                                                    width: 180,
+                                                    height: 50,
+                                                    child: Card(
+                                                      color:
+                                                          _getStatusCardColor(),
+                                                      elevation: 4,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              8.0,
+                                                            ),
+                                                      ),
+                                                      child: Center(
+                                                        child: Text(
+                                                          _getStatusCardText(),
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color:
+                                                                _getStatusTextColor(),
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
+                                              ],
                                             ),
                                           ],
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                    Divider(height: 10, thickness: 0.5, color: baseLineColor),
                   ],
                 ),
-                Divider(height: 10, thickness: 0.5, color: baseLineColor),
+
+                Positioned(
+                  bottom: -40,
+                  right: 0,
+                  left: 0, // 左端の位置を指定してスペースを確保
+                  child: Row(
+                    children: [
+                      Expanded(child: _buildSpeedGraph()),
+                      const SizedBox(width: 16),
+                      _buildAnimatedCounter(),
+                    ],
+                  ),
+                ),
               ],
             ),
-
-            Positioned(
-              bottom: -40,
-              right: 0,
-              left: 0, // 左端の位置を指定してスペースを確保
-              child: Row(
-                children: [
-                  Expanded(child: _buildSpeedGraph()),
-                  const SizedBox(width: 16),
-                  _buildAnimatedCounter(),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
-    ),
-    ], // Stack の children 閉じ
+      ], // Stack の children 閉じ
     ); // Stack 閉じ
   }
 
@@ -907,91 +937,97 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
         int.tryParse(widget.processingConditions['wire_cnt'].toString()) ?? 0;
     final isCompleted = _f13KeyCount >= targetCount && targetCount > 0;
     final counterString = "$_f13KeyCount/$targetCount";
-    return Stack(
-      clipBehavior: Clip.none, // ❗ Containerの外にはみ出させたい場合必要
+
+    return Column(
       children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.getCardColor(context),
-            border: Border.all(
-              color: AppColors.getLineColor(context),
-              width: 0.5,
-            ),
-          ),
-          child: ClipOval(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (!isCompleted) ...[
-                    _buildFlipCounter(),
-                    Divider(
-                      color: AppColors.getLineColor(context),
-                      thickness: 0.5,
-                      height: 10,
-                    ),
-                    Text(
-                      '$targetCount',
-                      style: TextStyle(
-                        fontSize: 28,
-                        height: 0.8,
-                        letterSpacing: 3.0,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.getHighLightColor(context),
-                      ),
-                    ),
-                  ] else ...[
-                    ElevatedButton(
-                      onPressed: () {
-                        // 完了処理をここに実装
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('作業完了しました！')),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.getHighLightColor(
-                          context,
-                        ), // 背景色
-                        elevation: 2, // 影の高さ
-                        padding: EdgeInsets.zero, // SizedBoxでサイズ管理するので余白はゼロ
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8), // 角丸
+        Stack(
+          clipBehavior: Clip.none, // ❗ Containerの外にはみ出させたい場合必要
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.getCardColor(context),
+                border: Border.all(
+                  color: AppColors.getLineColor(context),
+                  width: 0.5,
+                ),
+              ),
+              child: ClipOval(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!isCompleted) ...[
+                        _buildFlipCounter(),
+                        Divider(
+                          color: AppColors.getLineColor(context),
+                          thickness: 0.5,
+                          height: 10,
                         ),
-                      ),
-                      child: SizedBox(
-                        width: 78,
-                        height: 78,
-                        child: Center(
-                          // ← これでTextが縦横中央
-                          child: Text(
-                            '完了',
-                            style: TextStyle(
-                              color: AppColors.paperBlack,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                            textAlign: TextAlign.center,
+                        Text(
+                          '$targetCount',
+                          style: TextStyle(
+                            fontSize: 28,
+                            height: 0.8,
+                            letterSpacing: 3.0,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.getHighLightColor(context),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ],
+                      ] else ...[
+                        ElevatedButton(
+                          onPressed: () {
+                            // 完了処理をここに実装
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('作業完了しました！')),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.getHighLightColor(
+                              context,
+                            ), // 背景色
+                            elevation: 2, // 影の高さ
+                            padding: EdgeInsets.zero, // SizedBoxでサイズ管理するので余白はゼロ
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8), // 角丸
+                            ),
+                          ),
+                          child: SizedBox(
+                            width: 78,
+                            height: 78,
+                            child: Center(
+                              // ← これでTextが縦横中央
+                              child: Text(
+                                '完了',
+                                style: TextStyle(
+                                  color: AppColors.paperBlack,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
-        if (isCompleted) ...[
-          Positioned(
-            bottom: -10,
-            right: -20,
-            width: 100,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end, // ✅ 右寄せ
-              children: [
+        // 例：Positionedは常に表示
+        Positioned(
+          bottom: -10,
+          right: 0,
+          width: 100,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (isCompleted)
                 Text(
                   counterString,
                   style: TextStyle(
@@ -999,11 +1035,15 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
+                )
+              else
+                const SizedBox(
+                  height: 14, // Textと同じ高さを確保
+                  width: 0,
                 ),
-              ],
-            ),
+            ],
           ),
-        ],
+        ),
       ],
     );
   }

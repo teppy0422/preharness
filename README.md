@@ -373,6 +373,8 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 065
 
+- 作業実績を postregSQL に保存
+
 ---
 
 ### now
