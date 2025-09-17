@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:preharness/services/database_service.dart';
 import 'package:preharness/widgets/work40/dial_selector_with_db.dart';
 import 'package:preharness/widgets/work40/measurement.dart';
 import 'package:preharness/utils/color_utils.dart';
@@ -271,6 +272,50 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       });
     }
     debugPrint('🎯 [efu_detail] フォールバック：複数回フォーカス要求実行');
+  }
+
+  // 作業完了処理（PostgreSQL保存）
+  Future<void> _handleWorkCompletion() async {
+    try {
+      // 平均速度計算
+      final averageSpeed = _speedData.isNotEmpty 
+          ? _speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length 
+          : 0.0;
+
+      // PostgreSQLに保存（SharedPreferences全項目を自動取得）
+      final success = await DatabaseService.saveWorkResult(
+        actualCount: _f13KeyCount,
+        averageSpeed: averageSpeed,
+      );
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('作業完了しました！データを保存しました。'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('作業完了！（データ保存でエラーが発生しました）'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ 作業完了処理エラー: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('作業完了！（保存処理でエラーが発生しました）'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -978,11 +1023,8 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                         ),
                       ] else ...[
                         ElevatedButton(
-                          onPressed: () {
-                            // 完了処理をここに実装
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('作業完了しました！')),
-                            );
+                          onPressed: () async {
+                            await _handleWorkCompletion();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.getHighLightColor(

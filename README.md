@@ -370,10 +370,9 @@ samples, guidance on mobile development, and a full API reference.
 - Arduino の F1 キーを受け取らない事への対応
 - 全て OK の時にフォーカスを無くす
 - measurement.dart のフォーマットを 0.000 に変更
+- 作業実績を postregSQL に保存
 
 #### commit 065
-
-- 作業実績を postregSQL に保存
 
 ---
 
