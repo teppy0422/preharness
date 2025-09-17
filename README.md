@@ -372,8 +372,11 @@ samples, guidance on mobile development, and a full API reference.
 - measurement.dart のフォーマットを 0.000 に変更
 - 作業実績を postregSQL に保存
 - 作業実績に号機を追加
+- ログインしてない場合(username が無い場合)は作業実績を保存しない。警告表示。
 
 #### commit 065
+
+- すでに同じデータが作業実績にある場合は保存しない
 
 ---
 

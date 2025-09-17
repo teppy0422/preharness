@@ -304,11 +304,44 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               ? errors.join('\n')
               : result['message'] ?? 'データ保存でエラーが発生しました';
 
+          // ユーザー名がない場合は特別な警告
+          final hasUsernameError = errors.any((error) => error.contains('ユーザー名'));
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('作業完了！\n$errorMessage'),
-              backgroundColor: Colors.orange,
-              duration: const Duration(seconds: 5), // エラー詳細を読む時間を確保
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (hasUsernameError) ...[
+                    const Row(
+                      children: [
+                        Icon(Icons.warning, color: Colors.white, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'ユーザーログインが必要です',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    const Text('設定画面でユーザー情報を登録してください。'),
+                    const SizedBox(height: 8),
+                  ],
+                  Text('詳細エラー:\n$errorMessage'),
+                ],
+              ),
+              backgroundColor: hasUsernameError ? Colors.red : Colors.orange,
+              duration: const Duration(seconds: 7), // 警告を読む時間を確保
+              action: hasUsernameError
+                  ? SnackBarAction(
+                      label: '設定へ',
+                      textColor: Colors.white,
+                      onPressed: () {
+                        // 設定画面に遷移する処理（必要に応じて実装）
+                      },
+                    )
+                  : null,
             ),
           );
         }
