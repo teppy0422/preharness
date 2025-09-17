@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:preharness/widgets/work40/dial_selector_with_db.dart';
@@ -51,6 +52,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   // フォーカスノードを追加
   late final FocusNode _focusNode;
+  
+  // Arduino対応：見えないTextFieldでキーボード入力を初期化
+  late final TextEditingController _dummyController;
+  late final FocusNode _dummyFocusNode;
 
   // ★★★ リアクティブな状態管理のための変更点 ★★★
   Map<String, String?>? _comparisonData; // 比較データを保持する状態変数
@@ -74,10 +79,15 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     super.initState();
     _focusNode = FocusNode();
     _measurementFocusNode = FocusNode(); // FocusNodeをここで初期化
+    
+    // Arduino対応：ダミーコントローラーとフォーカスノードを初期化
+    _dummyController = TextEditingController();
+    _dummyFocusNode = FocusNode();
+    
     _loadColor(); // Call a method to load the color
 
-    // WorkflowStateを初期化（画面再表示時のリセット）
-    _workflowState.reset();
+    // WorkflowStateを初期化
+    debugPrint('🔧 [efu_detail] WorkflowState初期化: crimpConditionComplete=${_workflowState.crimpConditionComplete}, measurementComplete=${_workflowState.measurementComplete}, canStartProduction=${_workflowState.canStartProduction}');
 
     // ★★★ リアクティブな状態管理のための変更点 ★★★
     _updateComparisonData(); // 初期データをロード
@@ -88,7 +98,38 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _saveCurrentDataToPrefs(); // データ保存を確実に完了
       await _checkMeasurementInitialValues(); // 測定値の初期値をチェック
-      _focusNode.requestFocus();
+      
+      // フォーカスを確実に取得
+      if (mounted) {
+        _focusNode.requestFocus();
+        debugPrint('🎯 [efu_detail] 初期フォーカス要求: hasFocus=${_focusNode.hasFocus}');
+        
+        // Arduino Leonardo等の外部デバイス対応：キーボード入力システムを初期化
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (mounted) {
+            debugPrint('🎯 [efu_detail] フォーカス確認: hasFocus=${_focusNode.hasFocus}');
+            if (!_focusNode.hasFocus) {
+              _focusNode.requestFocus();
+              debugPrint('🎯 [efu_detail] 再フォーカス要求');
+            }
+            
+            // キーボード入力システムを強制的に初期化（Arduino対応）
+            FocusScope.of(context).requestFocus(_focusNode);
+            
+            // Arduino対応：既に全て照合完了している場合は即座に実行
+            Future.delayed(const Duration(milliseconds: 300), () {
+              if (mounted && _workflowState.canStartProduction) {
+                debugPrint('🎯 [efu_detail] 既に照合完了状態 - Arduino対応を自動実行');
+                _activateArduinoKeyboardSupport();
+              } else {
+                debugPrint('🎯 [efu_detail] Arduino対応は測定完了後に実行予定');
+              }
+            });
+            
+            debugPrint('🎯 [efu_detail] Arduino対応：FocusScope経由でフォーカス設定 (緑ボーダー確認用)');
+          }
+        });
+      }
     });
   }
 
@@ -123,10 +164,111 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     print('🔥 efu_detail: _saveCurrentDataToPrefs 完了');
   }
 
+  // Arduino対応：ダミーキー入力でキーボード入力システムを初期化
+  void _simulateDummyKeyInput() {
+    try {
+      // 最新のHardwareKeyboard APIを使用してダミーキー入力をシミュレート
+      final now = Duration(milliseconds: DateTime.now().millisecondsSinceEpoch);
+      
+      final keyDownEvent = KeyDownEvent(
+        logicalKey: LogicalKeyboardKey.backspace,
+        physicalKey: PhysicalKeyboardKey.backspace,
+        timeStamp: now,
+      );
+      
+      final keyUpEvent = KeyUpEvent(
+        logicalKey: LogicalKeyboardKey.backspace,
+        physicalKey: PhysicalKeyboardKey.backspace,
+        timeStamp: now,
+      );
+      
+      // キーダウンとキーアップをシミュレート
+      HardwareKeyboard.instance.handleKeyEvent(keyDownEvent);
+      
+      // 即座にキーアップ（実際の入力にならないようにする）
+      Future.delayed(const Duration(milliseconds: 1), () {
+        HardwareKeyboard.instance.handleKeyEvent(keyUpEvent);
+      });
+      
+      debugPrint('🎯 [efu_detail] ダミーキー入力（Backspace）実行完了');
+    } catch (e) {
+      debugPrint('🎯 [efu_detail] ダミーキー入力エラー: $e');
+      // エラーが発生した場合は別のアプローチを試す
+      _fallbackFocusActivation();
+    }
+  }
+  
+  // Arduino対応：全て照合OK時のみキーボード入力を初期化
+  void _activateArduinoKeyboardSupport() {
+    debugPrint('🎯 [efu_detail] Arduino対応開始（全て照合OK時）');
+    
+    // キーボード入力システムを初期化してからメインFocusNodeにフォーカス
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        // 1. まずダミーTextFieldで一時的にキーボードシステムを初期化
+        _dummyFocusNode.requestFocus();
+        
+        // 2. キーボード入力システムを「刺激」
+        Future.delayed(const Duration(milliseconds: 50), () {
+          if (mounted) {
+            _dummyController.text = ' '; // 空白文字で刺激
+            Future.delayed(const Duration(milliseconds: 50), () {
+              if (mounted) {
+                _dummyController.clear(); // すぐクリア
+                
+                // 3. メインのFocusNode（F1キーハンドラーがある）にフォーカスを移す
+                Future.delayed(const Duration(milliseconds: 50), () {
+                  if (mounted) {
+                    // より強力にメインFocusNodeにフォーカス
+                    FocusScope.of(context).unfocus(); // 全てのフォーカスをクリア
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      if (mounted) {
+                        _focusNode.requestFocus();
+                        FocusScope.of(context).requestFocus(_focusNode);
+                        debugPrint('🎯 [efu_detail] メインFocusNodeにフォーカス完了 - Arduino F1キー準備OK');
+                        
+                        // 追加でフォーカスを確実に維持
+                        Future.delayed(const Duration(milliseconds: 200), () {
+                          if (mounted && !_focusNode.hasFocus) {
+                            debugPrint('🔄 [efu_detail] フォーカス最終確認: Arduino F1キー対応');
+                            _focusNode.requestFocus();
+                            FocusScope.of(context).requestFocus(_focusNode);
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+
+  // フォールバック：別の方法でフォーカスをアクティブ化
+  void _fallbackFocusActivation() {
+    // 複数回のフォーカス要求でシステムを刺激
+    for (int i = 0; i < 3; i++) {
+      Future.delayed(Duration(milliseconds: i * 50), () {
+        if (mounted) {
+          FocusScope.of(context).requestFocus(_focusNode);
+          _focusNode.requestFocus();
+        }
+      });
+    }
+    debugPrint('🎯 [efu_detail] フォールバック：複数回フォーカス要求実行');
+  }
+
   @override
   void dispose() {
     _focusNode.dispose();
     _measurementFocusNode.dispose();
+    
+    // Arduino対応：ダミーリソースをクリーンアップ
+    _dummyController.dispose();
+    _dummyFocusNode.dispose();
     // ★★★ リアクティブな状態管理のための変更点 ★★★
     // リスナーをクリーンアップ
     if (_prefsListener != null) {
@@ -285,13 +427,37 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   }
 
   void _onMeasurementValidationChanged(bool isValid) {
+    debugPrint('📏 測定バリデーション結果受信: isValid=$isValid');
     setState(() {
       _workflowState.measurementComplete = isValid;
+      debugPrint('📏 WorkflowState更新: measurementComplete=${_workflowState.measurementComplete}, canStartProduction=${_workflowState.canStartProduction}');
     });
 
     if (isValid && _workflowState.canStartProduction) {
       // 全工程完了 → 生産開始準備
+      debugPrint('📏 全工程完了 → 生産開始準備実行');
       _prepareForProduction();
+      
+      // 測定完了後、Arduino対応のキーボード初期化を実行
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          _activateArduinoKeyboardSupport();
+          
+          // さらに確実にメインFocusNodeにフォーカスを戻す
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted && !_focusNode.hasFocus) {
+              debugPrint('🔄 [efu_detail] 測定完了後のフォーカス復旧');
+              FocusScope.of(context).unfocus(); // 一度すべてクリア
+              Future.delayed(const Duration(milliseconds: 100), () {
+                if (mounted) {
+                  _focusNode.requestFocus();
+                  FocusScope.of(context).requestFocus(_focusNode);
+                }
+              });
+            }
+          });
+        }
+      });
     }
   }
 
@@ -437,17 +603,63 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   @override
   Widget build(BuildContext context) {
     Color baseLineColor = AppColors.getLineColor(context);
-    return Focus(
-      focusNode: _focusNode,
-      autofocus: true,
-      onKeyEvent: (node, event) {
+    return Stack(
+      children: [
+        // Arduino対応：見えないTextFieldでキーボード入力システムを初期化
+        Positioned(
+          left: -1000, // 画面外に配置
+          top: -1000,
+          child: SizedBox(
+            width: 1,
+            height: 1,
+            child: TextField(
+              controller: _dummyController,
+              focusNode: _dummyFocusNode,
+              style: const TextStyle(color: Colors.transparent),
+              keyboardType: TextInputType.none, // ソフトキーボードを完全に無効化
+              enableInteractiveSelection: false, // 選択を無効化
+              showCursor: false, // カーソルを非表示
+              autofocus: false, // 自動フォーカスしない
+              readOnly: false, // ハードウェアキー入力は受け付ける
+              onChanged: (text) {
+                // キーボード入力をテストしてログ出力
+                debugPrint('🎯 [efu_detail] ダミーTextField入力検出: "$text"');
+                if (text.isNotEmpty) {
+                  _dummyController.clear(); // 入力内容をクリア
+                }
+              },
+              onSubmitted: (text) {
+                debugPrint('🎯 [efu_detail] ダミーTextField送信検出: "$text"');
+              },
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isCollapsed: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+        ),
+        
+        // メインのFocusウィジェット
+        Focus(
+          focusNode: _focusNode,
+          autofocus: true,
+          onFocusChange: (hasFocus) {
+            debugPrint('🎯 [efu_detail] フォーカス変更: hasFocus=$hasFocus');
+          },
+          onKeyEvent: (node, event) {
+        debugPrint('🎹 [efu_detail] キーイベント受信: ${event.runtimeType}, フォーカス状態: ${_focusNode.hasFocus}');
         if (event is KeyDownEvent) {
+          debugPrint('🎹 キー押下検出: logical=${event.logicalKey}, physical=${event.physicalKey}');
           // F13、F1、またはInsertキーをチェック（Android対応）
           if (event.logicalKey == LogicalKeyboardKey.f13 ||
               event.logicalKey == LogicalKeyboardKey.f1 ||
               event.logicalKey == LogicalKeyboardKey.insert ||
               event.physicalKey == PhysicalKeyboardKey.f13) {
+            debugPrint('🎯 対象キー検出: ${event.logicalKey}');
             // 生産準備OKの時のみカウント有効
+            debugPrint('🔍 カウント判定: crimpConditionComplete=${_workflowState.crimpConditionComplete}, measurementComplete=${_workflowState.measurementComplete}, canStartProduction=${_workflowState.canStartProduction}');
+            
             if (!_workflowState.canStartProduction) {
               debugPrint('⚠️ 生産準備未完了のため、カウント無効');
               return KeyEventResult.handled;
@@ -685,7 +897,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
           ],
         ),
       ),
-    );
+    ),
+    ], // Stack の children 閉じ
+    ); // Stack 閉じ
   }
 
   Widget _buildAnimatedCounter() {

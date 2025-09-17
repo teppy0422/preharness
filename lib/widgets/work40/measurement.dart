@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import "package:preharness/constants/app_colors.dart";
 import 'package:preharness/utils/shared_prefs_helper.dart';
 
@@ -64,7 +66,9 @@ class _StandardInfoCardState extends State<Measurement> {
     if (widget.focusNode != null) {
       debugPrint('📏 [measurement] 外部フォーカスノード受信: ${widget.focusNode.hashCode}');
       _focusListener = () {
-        debugPrint('📏 [measurement] フォーカスリスナー呼び出し: hasFocus=${widget.focusNode!.hasFocus}, mounted=$mounted');
+        debugPrint(
+          '📏 [measurement] フォーカスリスナー呼び出し: hasFocus=${widget.focusNode!.hasFocus}, mounted=$mounted',
+        );
         if (widget.focusNode!.hasFocus && mounted) {
           debugPrint('📏 測定セクションにフォーカス受信');
           // 外部フォーカスが当たったら最初のTextFieldにフォーカス
@@ -81,37 +85,46 @@ class _StandardInfoCardState extends State<Measurement> {
     } else {
       debugPrint('📏 [measurement] 外部フォーカスノードがnull');
     }
-    
+
     // 初期値が提供されている場合、TextFieldに設定
     _setInitialValues();
   }
-  
+
   void _setInitialValues() {
-    debugPrint('📋 [measurement] _setInitialValues呼び出し: ${widget.initialMeasurements}');
-    
+    debugPrint(
+      '📋 [measurement] _setInitialValues呼び出し: ${widget.initialMeasurements}',
+    );
+
     if (widget.initialMeasurements != null) {
       debugPrint('📋 [measurement] 初期値設定開始: ${widget.initialMeasurements}');
-      
+
       final measurements = widget.initialMeasurements!;
       final labels = ["前足C/H", "後足C/H", "前足C/W", "後足C/W"];
       final keys = ["front_ch", "back_ch", "front_cw", "back_cw"];
-      
+
       // 遅延して初期値を設定（ウィジェット構築完了後）
       WidgetsBinding.instance.addPostFrameCallback((_) {
         for (int i = 0; i < labels.length; i++) {
           final value = measurements[keys[i]];
           if (value != null) {
-            _controllers[i].text = value;
+            // 初期値を3桁フォーマットで設定
+            final double? parsed = double.tryParse(value);
+            if (parsed != null) {
+              final formatter = NumberFormat('0.000');
+              _controllers[i].text = formatter.format(parsed);
+            } else {
+              _controllers[i].text = value;
+            }
             _statuses[i] = "OK"; // 初期値がある場合はOK状態
-            debugPrint('📋 [measurement] ${labels[i]} = $value (OK)');
+            debugPrint('📋 [measurement] ${labels[i]} = ${_controllers[i].text} (OK)');
           }
         }
-        
+
         // 全ての測定値がセットされた場合、バリデーションをチェック
         setState(() {
           _checkAllMeasurements();
         });
-        
+
         debugPrint('📋 [measurement] 初期値設定完了');
       });
     } else {
@@ -121,22 +134,25 @@ class _StandardInfoCardState extends State<Measurement> {
 
   void _checkAllMeasurements() {
     // 4つの測定値すべてがOKかどうかをチェック
-    final allOK = _statuses.length == 4 && 
-        _statuses.every((status) => status == "OK");
-    
+    final allOK =
+        _statuses.length == 4 && _statuses.every((status) => status == "OK");
+
     if (allOK != _allMeasurementsValid) {
       _allMeasurementsValid = allOK;
-      
+
       // 全てOKの場合、全ての測定値を保存
       if (allOK) {
         _saveAllMeasurements();
       }
-      
+
       // 親に通知
       if (widget.onValidationComplete != null) {
+        debugPrint('📏 親への通知実行: onValidationComplete($allOK)');
         widget.onValidationComplete!(allOK);
+      } else {
+        debugPrint('📏 ⚠️ onValidationCompleteコールバックがnull');
       }
-      
+
       debugPrint('📏 測定結果: ${allOK ? "全てOK" : "未完了またはNG"}');
     }
   }
@@ -144,39 +160,53 @@ class _StandardInfoCardState extends State<Measurement> {
   // 全ての測定値をSharedPreferencesに保存
   Future<void> _saveAllMeasurements() async {
     debugPrint('💾 全ての測定値を保存開始');
-    
+
     // 測定値を保存
     final labels = ["前足C/H", "後足C/H", "前足C/W", "後足C/W"];
-    
+
     for (int i = 0; i < labels.length; i++) {
       final text = _controllers[i].text;
       final value = double.tryParse(text);
-      
+
       if (value != null) {
         await _saveMeasurementValue(labels[i], value);
       }
     }
-    
+
     // block_terminals の値も一緒に保存
     await _saveBlockTerminals();
-    
+
     debugPrint('💾 全ての測定値保存完了');
   }
-  
+
   // block_terminals の値を measured_ として保存
   Future<void> _saveBlockTerminals() async {
     try {
-      final blockTerminal0 = await SharedPrefsHelper.getString('block_terminals_0');
-      final blockTerminal1 = await SharedPrefsHelper.getString('block_terminals_1');
-      
+      final blockTerminal0 = await SharedPrefsHelper.getString(
+        'block_terminals_0',
+      );
+      final blockTerminal1 = await SharedPrefsHelper.getString(
+        'block_terminals_1',
+      );
+
       if (blockTerminal0 != null) {
-        await SharedPrefsHelper.saveStringWithNotify('measured_block_terminals_0', blockTerminal0);
-        debugPrint('💾 block_terminals保存: measured_block_terminals_0 = $blockTerminal0');
+        await SharedPrefsHelper.saveStringWithNotify(
+          'measured_block_terminals_0',
+          blockTerminal0,
+        );
+        debugPrint(
+          '💾 block_terminals保存: measured_block_terminals_0 = $blockTerminal0',
+        );
       }
-      
+
       if (blockTerminal1 != null) {
-        await SharedPrefsHelper.saveStringWithNotify('measured_block_terminals_1', blockTerminal1);
-        debugPrint('💾 block_terminals保存: measured_block_terminals_1 = $blockTerminal1');
+        await SharedPrefsHelper.saveStringWithNotify(
+          'measured_block_terminals_1',
+          blockTerminal1,
+        );
+        debugPrint(
+          '💾 block_terminals保存: measured_block_terminals_1 = $blockTerminal1',
+        );
       }
     } catch (e) {
       debugPrint('❌ block_terminals保存エラー: $e');
@@ -202,7 +232,7 @@ class _StandardInfoCardState extends State<Measurement> {
       default:
         return; // 不明なラベルの場合は保存しない
     }
-    
+
     await SharedPrefsHelper.saveStringWithNotify(key, value.toString());
     debugPrint('💾 測定値保存: $key = $value');
   }
@@ -229,16 +259,6 @@ class _StandardInfoCardState extends State<Measurement> {
       return double.tryParse(value) ?? defaultValue;
     }
     return defaultValue;
-  }
-
-  bool _hasRecommendation(String label) {
-    if (label == "後足C/H") {
-      return _statuses.length > 1 && _statuses[1] == "NG"; // 後足C/Hは2番目の項目
-    }
-    if (label == "前足C/H") {
-      return _statuses.isNotEmpty && _statuses[0] == "NG"; // 前足C/Hは1番目の項目
-    }
-    return false;
   }
 
   void _calculateRecommendedHindDial(
@@ -301,7 +321,6 @@ class _StandardInfoCardState extends State<Measurement> {
 
     // bottomDialによる微調整 (1段階=0.02mm、bottomDial=1が基準値)
     // bottomDial=1→計測値+0mm, bottomDial=2→計測値+0.02mm, bottomDial=3→計測値+0.04mm, bottomDial=4→計測値+0.06mm
-    final currentBottomAdjustment = (currentBottomDial - 1) * 0.02;
 
     // 目標への調整が必要な量 (正の値なら計測値を大きくする、負の値なら計測値を小さくする)
     final neededAdjustment = -difference; // 差分を埋めるのに必要な調整量
@@ -433,6 +452,18 @@ class _StandardInfoCardState extends State<Measurement> {
     );
   }
 
+  // 小数点3桁フォーマットを適用（シンプル版）
+  void _formatToThreeDecimals(TextEditingController controller) {
+    if (controller.text.isNotEmpty) {
+      final double? parsed = double.tryParse(controller.text);
+      if (parsed != null) {
+        final formatter = NumberFormat('0.000');
+        final formatted = formatter.format(parsed);
+        controller.text = formatted;
+      }
+    }
+  }
+
   Widget _buildRow(
     String label,
     double minValue,
@@ -500,6 +531,10 @@ class _StandardInfoCardState extends State<Measurement> {
                           showCursor: true,
                           textAlign: TextAlign.right,
                           keyboardType: TextInputType.none,
+                          onEditingComplete: () {
+                            // フォーカスが外れた時に3桁フォーマットを適用
+                            _formatToThreeDecimals(controller);
+                          },
                           onTap: () {
                             // テキストフィールドタップ時に全選択
                             controller.selection = TextSelection(
@@ -542,18 +577,27 @@ class _StandardInfoCardState extends State<Measurement> {
                             ),
                           ),
                           onSubmitted: (_) async {
-                            debugPrint('📏 [measurement] onSubmitted: label=$label, text=${controller.text}');
-                            final input = double.tryParse(controller.text);
-                            debugPrint('📏 [measurement] parsed value: $input, range: $minValue-$maxValue');
+                            // まず3桁フォーマットを適用
+                            _formatToThreeDecimals(controller);
                             
+                            debugPrint(
+                              '📏 [measurement] onSubmitted: label=$label, text=${controller.text}',
+                            );
+                            final input = double.tryParse(controller.text);
+                            debugPrint(
+                              '📏 [measurement] parsed value: $input, range: $minValue-$maxValue',
+                            );
+
                             if (input != null &&
                                 input >= minValue &&
                                 input <= maxValue) {
-                              debugPrint('📏 [measurement] OK判定: $label = $input');
+                              debugPrint(
+                                '📏 [measurement] OK判定: $label = $input',
+                              );
                               setState(() {
                                 _statuses[index] = "OK";
                               });
-                              
+
                               // 全ての測定値チェック後、全てOKなら保存
                               _checkAllMeasurements();
 
@@ -663,3 +707,4 @@ class _StandardInfoCardState extends State<Measurement> {
     );
   }
 }
+

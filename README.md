@@ -367,7 +367,11 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 064
 
+- Arduino の F1 キーを受け取らない事への対応
 - 全て OK の時にフォーカスを無くす
+- measurement.dart のフォーマットを 0.000 に変更
+
+#### commit 065
 
 ---
 
