@@ -513,7 +513,7 @@ class _SearchCardState extends State<_SearchCard> {
         },
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           decoration: BoxDecoration(
             color: AppColors.getCardColor(context),
             border: Border.all(
@@ -527,7 +527,7 @@ class _SearchCardState extends State<_SearchCard> {
           child: Text(
             _inputText.isEmpty ? 'エフをQRリーダーで読む' : _inputText,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 10,
               color: _inputText.isEmpty
                   ? Theme.of(context).hintColor
                   : Theme.of(context).textTheme.bodyLarge?.color,
