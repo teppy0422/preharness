@@ -394,6 +394,11 @@ samples, guidance on mobile development, and a full API reference.
 #### commit 068
 
 - 圧着履歴のデータの見直し
+
+1. app.js のテーブル作成の修正
+2. 圧着履歴の登録を修正
+3. 圧着履歴の取得を修正
+
 - 端子交換した場合の圧着履歴を保存
 
 #### 検討
