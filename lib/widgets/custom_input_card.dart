@@ -4,6 +4,69 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preharness/constants/app_colors.dart';
 
+// グローバルフォーカス管理クラス
+class GlobalFocusManager {
+  static final GlobalFocusManager _instance = GlobalFocusManager._internal();
+  factory GlobalFocusManager() => _instance;
+  GlobalFocusManager._internal();
+
+  String? _activeFocusKey;
+  final Set<String> _errorKeys = {};
+  Timer? _focusDebounceTimer;
+
+  // エラー状態のキーを登録
+  void registerErrorKey(String key) {
+    _errorKeys.add(key);
+    _trySetActiveFocus();
+  }
+
+  // エラー状態から回復したキーを削除
+  void unregisterErrorKey(String key) {
+    _errorKeys.remove(key);
+    if (_activeFocusKey == key) {
+      _activeFocusKey = null;
+      _trySetActiveFocus();
+    }
+  }
+
+  // アクティブフォーカスを設定（最初のエラーキーを優先）
+  void _trySetActiveFocus() {
+    if (_errorKeys.isNotEmpty && _activeFocusKey == null) {
+      _activeFocusKey = _errorKeys.first;
+      debugPrint('🎯 GlobalFocusManager: アクティブフォーカス設定 = $_activeFocusKey');
+    }
+  }
+
+  // 指定キーがアクティブフォーカス対象かチェック
+  bool isActiveFocusKey(String key) {
+    return _activeFocusKey == key;
+  }
+
+  // フォーカス要求（デバウンス付き）
+  void requestFocus(String key, VoidCallback focusAction) {
+    if (!isActiveFocusKey(key)) {
+      debugPrint('🚫 GlobalFocusManager: フォーカス要求拒否 = $key (active: $_activeFocusKey)');
+      return;
+    }
+
+    // デバウンス処理で連続実行を防ぐ
+    _focusDebounceTimer?.cancel();
+    _focusDebounceTimer = Timer(const Duration(milliseconds: 100), () {
+      if (isActiveFocusKey(key)) {
+        debugPrint('✅ GlobalFocusManager: フォーカス実行 = $key');
+        focusAction();
+      }
+    });
+  }
+
+  // クリーンアップ
+  void dispose() {
+    _focusDebounceTimer?.cancel();
+    _errorKeys.clear();
+    _activeFocusKey = null;
+  }
+}
+
 class SubItem {
   final String label;
   final String value;
@@ -53,10 +116,21 @@ class CustomInputCardState extends State<CustomInputCard> {
   final Map<String, String> _savedValues = {};
   bool _justSearched = false;
   final FocusNode _keyboardListenerFocusNode = FocusNode();
+  final GlobalFocusManager _globalFocusManager = GlobalFocusManager();
+  String? _myFocusKey; // このCardのフォーカスキー
 
   @override
   void initState() {
     super.initState();
+
+    // このCardのフォーカスキーを設定（最初の入力可能なSubItemのprefsKey）
+    final inputSubItem = widget.subItems.firstWhere(
+      (item) => item.prefsKey != null,
+      orElse: () => widget.subItems.first,
+    );
+    if (inputSubItem.prefsKey != null) {
+      _myFocusKey = '${widget.title}_${inputSubItem.prefsKey!}';
+    }
 
     for (var subItem in widget.subItems) {
       if (subItem.prefsKey != null) {
@@ -71,7 +145,20 @@ class CustomInputCardState extends State<CustomInputCard> {
         _focusNodes[key]!.addListener(() {
           setState(() {
             if (!_focusNodes[key]!.hasFocus) {
-              _showTextFields[key] = false;
+              // ValidationStateがerrorの場合はTextFieldを表示し続ける
+              if (widget.externalValidation != ValidationState.error) {
+                _showTextFields[key] = false;
+              } else if (_myFocusKey != null) {
+                // エラー状態でフォーカスが失われた場合、GlobalFocusManager経由で回復試行
+                debugPrint('⚠️ エラー状態でフォーカス失い検知: $key');
+                _globalFocusManager.requestFocus(_myFocusKey!, () {
+                  if (mounted && widget.externalValidation == ValidationState.error &&
+                      _showTextFields[key] == true && !_focusNodes[key]!.hasFocus) {
+                    debugPrint('🔄 エラー状態フォーカス回復試行: $key');
+                    FocusScope.of(context).requestFocus(_focusNodes[key]!);
+                  }
+                });
+              }
             }
           });
         });
@@ -83,6 +170,62 @@ class CustomInputCardState extends State<CustomInputCard> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         triggerExternalFocus();
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(CustomInputCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // ValidationStateの変化を監視
+    if (oldWidget.externalValidation != widget.externalValidation) {
+      _handleValidationStateChange(oldWidget.externalValidation, widget.externalValidation);
+    }
+  }
+
+  void _handleValidationStateChange(ValidationState? oldState, ValidationState? newState) {
+    if (_myFocusKey == null) return;
+
+    // エラー状態になった場合：GlobalFocusManagerに登録してフォーカス制御
+    if (newState == ValidationState.error && oldState != ValidationState.error) {
+      _globalFocusManager.registerErrorKey(_myFocusKey!);
+
+      final inputSubItem = widget.subItems.firstWhere(
+        (item) => item.prefsKey != null,
+        orElse: () => widget.subItems.first,
+      );
+      if (inputSubItem.prefsKey != null) {
+        final key = inputSubItem.prefsKey!;
+        setState(() {
+          _showTextFields[key] = true;
+        });
+
+        // GlobalFocusManager経由でフォーカス設定
+        _globalFocusManager.requestFocus(_myFocusKey!, () {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && _focusNodes[key] != null) {
+              FocusScope.of(context).requestFocus(_focusNodes[key]!);
+              debugPrint('🎯 ValidationState.error → グローバル管理フォーカス設定: $key');
+            }
+          });
+        });
+      }
+    }
+
+    // エラー状態から回復した場合：GlobalFocusManagerから登録解除
+    else if (oldState == ValidationState.error && newState != ValidationState.error) {
+      _globalFocusManager.unregisterErrorKey(_myFocusKey!);
+
+      for (var subItem in widget.subItems) {
+        if (subItem.prefsKey != null) {
+          final key = subItem.prefsKey!;
+          if (!_focusNodes[key]!.hasFocus) {
+            setState(() {
+              _showTextFields[key] = false;
+            });
+          }
+        }
+      }
     }
   }
 
@@ -112,7 +255,7 @@ class CustomInputCardState extends State<CustomInputCard> {
   void triggerTap() {
     // 入力可能なSubItemがあるかチェック
     final hasAnyInput = widget.subItems.any((item) => item.prefsKey != null);
-    
+
     if (hasAnyInput) {
       // 入力可能なSubItemの最初のprefsKeyでフィールドを表示
       final inputSubItem = widget.subItems.firstWhere(
@@ -122,13 +265,30 @@ class CustomInputCardState extends State<CustomInputCard> {
       setState(() {
         _showTextFields[key] = true;
       });
+
+      // より確実なフォーカス設定（エラー状態を考慮）
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(_focusNodes[key]!);
-        if (_controllers[key]!.text.isNotEmpty) {
-          _controllers[key]!.selection = TextSelection(
-            baseOffset: 0,
-            extentOffset: _controllers[key]!.text.length,
-          );
+        if (mounted && _focusNodes[key] != null) {
+          FocusScope.of(context).requestFocus(_focusNodes[key]!);
+          debugPrint('🎯 triggerTap → フォーカス設定: $key');
+
+          // テキスト選択処理
+          if (_controllers[key]!.text.isNotEmpty) {
+            _controllers[key]!.selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: _controllers[key]!.text.length,
+            );
+          }
+
+          // フォーカス確認と再試行（エラー状態時はGlobalFocusManager経由）
+          if (widget.externalValidation == ValidationState.error && _myFocusKey != null) {
+            _globalFocusManager.requestFocus(_myFocusKey!, () {
+              if (mounted && _focusNodes[key] != null && !_focusNodes[key]!.hasFocus) {
+                debugPrint('🔄 triggerTap フォーカス再試行（グローバル管理）: $key');
+                _focusNodes[key]!.requestFocus();
+              }
+            });
+          }
         }
       });
     }
@@ -168,6 +328,11 @@ class CustomInputCardState extends State<CustomInputCard> {
 
   @override
   void dispose() {
+    // GlobalFocusManagerからの登録解除
+    if (_myFocusKey != null && widget.externalValidation == ValidationState.error) {
+      _globalFocusManager.unregisterErrorKey(_myFocusKey!);
+    }
+
     for (var timer in _selectionTimers.values) {
       timer?.cancel();
     }

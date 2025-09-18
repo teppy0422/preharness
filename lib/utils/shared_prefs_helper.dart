@@ -73,9 +73,15 @@ class SharedPrefsHelper {
         );
       }
     }
-    
+
     // 一括保存完了を通知
     await saveStringWithNotify('${prefix}_save_completed', DateTime.now().millisecondsSinceEpoch.toString());
+  }
+
+  // キーの変更通知を強制送信（フォーカス制御用）
+  static void notifyKeyChanged(String key) {
+    final currentValue = _notifier._cache[key] ?? '';
+    _notifier._notify(key, currentValue);
   }
 }
 

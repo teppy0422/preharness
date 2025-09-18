@@ -1,7 +1,8 @@
 #include "Keyboard.h"
 
 // ボタン接続ピン
-const int buttonPin = 5; // デジタルピン5にボタンを接続
+const int buttonPin = 5; // デジタルピン2にボタンを接続
+const int ledPin = 4;    // デジタルピン4をLED出力に使用
 
 // チャタリング対策用変数
 const unsigned long debounceDelay = 50; // デバウンス時間（ミリ秒）
@@ -19,11 +20,13 @@ void setup() {
   
   // 内蔵LEDピンを出力に設定
   pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(ledPin, LOW); // 初期状態：消灯
+
   
   // ボタンピンを入力プルアップに設定
   pinMode(buttonPin, INPUT_PULLUP);
   
-  Serial.println("Arduino Leonardo F1 Key with Button Ready (Pin 5)");
+  Serial.println("Arduino Leonardo F1 Key with Button Ready (Pin 2)");
 }
 
 // シリアル入力のチャタリング対策用変数
@@ -72,16 +75,21 @@ void loop() {
 void sendF1Key() {
   // LEDを点灯してキー送信を示す
   digitalWrite(LED_BUILTIN, HIGH);
+
+    // 4番ピンのLEDを点灯
+  digitalWrite(ledPin, HIGH);
   
+  Keyboard.print("abc");
   // F1キーを押す
   Keyboard.press(KEY_F1);
   delay(50); // 短い遅延
-  
   // F1キーを離す
   Keyboard.release(KEY_F1);
+
   
   // LEDを消灯
   digitalWrite(LED_BUILTIN, LOW);
-  
+  // digitalWrite(ledPin, LOW);
+
   Serial.println("F1 key sent by button press!");
 }

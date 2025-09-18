@@ -378,10 +378,9 @@ samples, guidance on mobile development, and a full API reference.
 
 - 作業実績ページを追加
 - work40_page.dart の検索フィールドのサイズ修正
+- applicatorserial がアンマッチの場合にフォーカスがあたらない不具合の修正
 
 #### commit 066
-
-- applicatorserial がアンマッチの場合にフォーカスがあたらない不具合の修正
 
 - すでに同じデータが作業実績にある場合は保存しない
 

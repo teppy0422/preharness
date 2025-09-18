@@ -521,7 +521,8 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       debugPrint('🔧 部材照合完了 → 測定にフォーカス移動');
       _moveToMeasurement();
     } else if (!isValid) {
-      debugPrint('🔧 部材照合未完了のため、フォーカス移動なし');
+      debugPrint('🔧 部材照合未完了 → CustomInputCardのValidationState制御でフォーカス管理');
+      // CustomInputCardのValidationStateによる自動フォーカス制御に任せる
     } else {
       debugPrint('🔧 測定完了済みのため、フォーカス移動スキップ');
     }

@@ -225,7 +225,7 @@ class _CrimpConditionState extends State<CrimpCondition> {
           if (mounted) {
             _lastAutoTapTime = DateTime.now(); // 自動タップ実行時刻を記録
             firstErrorKey!.currentState?.triggerTap();
-            debugPrint('🎯 自動フォーカス実行: エラー項目');
+            debugPrint('🎯 自動フォーカス実行: エラー項目 (CustomInputCard自動制御)');
           }
         });
       }
