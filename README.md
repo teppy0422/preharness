@@ -389,10 +389,12 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 067
 
-- 端子交換のボタンを追加
-- 端子交換した場合の圧着履歴を保存
+- 端子交換のボタンと処理を追加
 
 #### commit 068
+
+- 圧着履歴のデータの見直し
+- 端子交換した場合の圧着履歴を保存
 
 #### 検討
 
