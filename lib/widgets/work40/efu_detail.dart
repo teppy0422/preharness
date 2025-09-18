@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:preharness/services/work_results_service.dart';
-import 'package:preharness/pages/work_results_page.dart';
 import 'package:preharness/widgets/work40/dial_selector_with_db.dart';
 import 'package:preharness/widgets/work40/measurement.dart';
 import 'package:preharness/utils/color_utils.dart';
@@ -172,40 +171,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     print('🔥 efu_detail: block_save_completed を通知');
 
     print('🔥 efu_detail: _saveCurrentDataToPrefs 完了');
-  }
-
-  // Arduino対応：ダミーキー入力でキーボード入力システムを初期化
-  void _simulateDummyKeyInput() {
-    try {
-      // 最新のHardwareKeyboard APIを使用してダミーキー入力をシミュレート
-      final now = Duration(milliseconds: DateTime.now().millisecondsSinceEpoch);
-
-      final keyDownEvent = KeyDownEvent(
-        logicalKey: LogicalKeyboardKey.backspace,
-        physicalKey: PhysicalKeyboardKey.backspace,
-        timeStamp: now,
-      );
-
-      final keyUpEvent = KeyUpEvent(
-        logicalKey: LogicalKeyboardKey.backspace,
-        physicalKey: PhysicalKeyboardKey.backspace,
-        timeStamp: now,
-      );
-
-      // キーダウンとキーアップをシミュレート
-      HardwareKeyboard.instance.handleKeyEvent(keyDownEvent);
-
-      // 即座にキーアップ（実際の入力にならないようにする）
-      Future.delayed(const Duration(milliseconds: 1), () {
-        HardwareKeyboard.instance.handleKeyEvent(keyUpEvent);
-      });
-
-      debugPrint('🎯 [efu_detail] ダミーキー入力（Backspace）実行完了');
-    } catch (e) {
-      debugPrint('🎯 [efu_detail] ダミーキー入力エラー: $e');
-      // エラーが発生した場合は別のアプローチを試す
-      _fallbackFocusActivation();
-    }
   }
 
   // Arduino対応：全て照合OK時のみキーボード入力を初期化
