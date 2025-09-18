@@ -49,7 +49,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   final List<MapEntry<DateTime, double>> _speedData = []; // 速度データ（時刻、速度）
   DateTime? _lastCountTime; // 最後にカウントした時刻
   double _currentSpeed = 0.0; // 現在の速度（カウント/分）
-  bool _showComparisonFormula = true; // 比較式表示フラグ（デフォルトで比較式を表示）
+  bool _showComparisonFormula = false; // 比較式表示フラグ（デフォルトで比較式を表示）
 
   // フォーカスノードを追加
   late final FocusNode _focusNode;
@@ -581,7 +581,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     if (_workflowState.productionStarted) {
       return "生産中";
     } else if (_workflowState.canStartProduction) {
-      return "生産準備OK";
+      return "圧着準備OK";
     } else if (_workflowState.crimpConditionComplete) {
       return "測定確認中";
     } else {
@@ -605,7 +605,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     if (_workflowState.productionStarted) {
       return AppColors.getHighLightColor(context);
     } else if (_workflowState.canStartProduction) {
-      return Colors.blue.shade800;
+      return AppColors.getHighLightColor(context);
     } else if (_workflowState.crimpConditionComplete) {
       return Colors.orange.shade800;
     } else {
@@ -1255,7 +1255,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                       'データなし',
                       style: TextStyle(
                         fontSize: 10,
-                        color: AppColors.getHighLightColor(context),
+                        color: AppColors.getLineSubColor(context),
                       ),
                     ),
                   )

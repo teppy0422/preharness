@@ -116,7 +116,9 @@ class _StandardInfoCardState extends State<Measurement> {
               _controllers[i].text = value;
             }
             _statuses[i] = "OK"; // 初期値がある場合はOK状態
-            debugPrint('📋 [measurement] ${labels[i]} = ${_controllers[i].text} (OK)');
+            debugPrint(
+              '📋 [measurement] ${labels[i]} = ${_controllers[i].text} (OK)',
+            );
           }
         }
 
@@ -579,7 +581,7 @@ class _StandardInfoCardState extends State<Measurement> {
                           onSubmitted: (_) async {
                             // まず3桁フォーマットを適用
                             _formatToThreeDecimals(controller);
-                            
+
                             debugPrint(
                               '📏 [measurement] onSubmitted: label=$label, text=${controller.text}',
                             );
@@ -689,9 +691,9 @@ class _StandardInfoCardState extends State<Measurement> {
                               status == "OK"
                                   ? Icons.check_circle
                                   : Icons.cancel, // アイコンを条件で分ける
-                              size: 16,
+                              size: 15,
                               color: status == "OK"
-                                  ? AppColors.getHighLightColor(context)
+                                  ? AppColors.getLineSubColor(context)
                                   : AppColors.getErrorColor(context),
                             ),
                           ),
@@ -707,4 +709,3 @@ class _StandardInfoCardState extends State<Measurement> {
     );
   }
 }
-

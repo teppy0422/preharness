@@ -119,7 +119,6 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
 
   Widget _buildResultsTable() {
     if (_workResults.isEmpty) return Container();
-
     // テーブル列の定義（表示名とDBフィールド名）
     final columnDefinitions = [
       {'label': '準完日', 'field': 'efu_delivery_date'},
@@ -325,10 +324,7 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
           .post(
             Uri.parse('$baseUrl/api/work_results/export'),
             headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'outputPath': path01,
-              'format': 'csv'
-            }),
+            body: jsonEncode({'outputPath': path01, 'format': 'csv'}),
           )
           .timeout(const Duration(seconds: 30));
 
@@ -338,7 +334,9 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
         final result = jsonDecode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('CSV出力完了: ${result['filename']} (${result['recordCount']}件)'),
+            content: Text(
+              'CSV出力完了: ${result['filename']} (${result['recordCount']}件)',
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 4),
           ),
@@ -355,10 +353,7 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('CSV出力エラー: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('CSV出力エラー: $e'), backgroundColor: Colors.red),
       );
     }
   }

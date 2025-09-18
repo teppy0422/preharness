@@ -385,6 +385,9 @@ samples, guidance on mobile development, and a full API reference.
 #### commit 066
 
 - ストライプボタンを横にアニメーション
+- measurement.dart の照合 OK 時の色を修正
+
+#### commit 067
 
 - すでに同じデータが作業実績にある場合は保存しない
 

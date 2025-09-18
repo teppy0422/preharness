@@ -223,16 +223,29 @@ class _Work40PageState extends State<Work40Page>
                     child: _EquipmentInfoCard(),
                   ),
                 ),
-                const SizedBox(width: 0),
+                const SizedBox(width: 10),
                 Expanded(
                   flex: 1,
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: SizedBox(
                       height: 34, // 他の要素と高さを合わせる
-                      child: WorkResultsButton(
+                      child: PatternButton(
                         label: '実績',
+                        fontSize: 14,
+                        width: double.infinity,
+                        height: 34,
                         icon: Icons.analytics,
+                        iconSize: 16,
+                        iconTextSpacing: 2,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const WorkResultsPage(),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
