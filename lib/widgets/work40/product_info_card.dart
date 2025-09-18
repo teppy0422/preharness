@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:preharness/constants/app_colors.dart';
 import 'package:preharness/utils/global.dart';
 import 'package:preharness/widgets/ui/pattern_button.dart';
+import 'package:preharness/pages/work_results_page.dart';
 
 class ProductInfoCard extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
@@ -49,6 +50,7 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                 }
               },
             ),
+            const SizedBox(width: 8),
           ],
         ),
         const SizedBox(height: 12),

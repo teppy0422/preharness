@@ -13,6 +13,7 @@ import 'package:preharness/widgets/flip_animation.dart';
 import 'package:preharness/widgets/slide_animation.dart';
 import 'package:preharness/widgets/fade_scale_animation.dart';
 import 'package:preharness/widgets/ui/pattern_button.dart';
+import 'package:preharness/pages/work_results_page.dart';
 
 class Work40Page extends StatefulWidget {
   const Work40Page({super.key});
@@ -194,6 +195,7 @@ class _Work40PageState extends State<Work40Page>
       currentPage: AppRoutes.work40,
       child: Stack(
         children: [
+          // WorkResultsButton at the top
           Positioned(
             top: 32,
             left: 10,
@@ -202,7 +204,7 @@ class _Work40PageState extends State<Work40Page>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 6,
+                  flex: 7,
                   child: Padding(
                     padding: const EdgeInsets.only(top: 0),
                     child: _SearchCard(
@@ -215,12 +217,27 @@ class _Work40PageState extends State<Work40Page>
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: Padding(
                     padding: const EdgeInsets.only(),
                     child: _EquipmentInfoCard(),
                   ),
                 ),
+                const SizedBox(width: 0),
+                Expanded(
+                  flex: 1,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      height: 34, // 他の要素と高さを合わせる
+                      child: WorkResultsButton(
+                        label: '実績',
+                        icon: Icons.analytics,
+                      ),
+                    ),
+                  ),
+                ),
+
                 const SizedBox(width: 72),
               ],
             ),
@@ -330,9 +347,9 @@ class _EquipmentInfoCard extends StatefulWidget {
 }
 
 class _EquipmentInfoCardState extends State<_EquipmentInfoCard> {
-  String _machineNumber = '';  // 号機
-  String _machineType = '';    // 機種
-  String _machineSerial = '';  // 管理No
+  String _machineNumber = ''; // 号機
+  String _machineType = ''; // 機種
+  String _machineSerial = ''; // 管理No
 
   @override
   void initState() {
