@@ -305,7 +305,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               : result['message'] ?? 'データ保存でエラーが発生しました';
 
           // ユーザー名がない場合は特別な警告
-          final hasUsernameError = errors.any((error) => error.contains('ユーザー名'));
+          final hasUsernameError = errors.any(
+            (error) => error.contains('ユーザー名'),
+          );
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -622,19 +624,19 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   Color _getStatusCardColor() {
     if (_workflowState.productionStarted) {
-      return Colors.transparent;
+      return AppColors.getCardColor(context);
     } else if (_workflowState.canStartProduction) {
-      return Colors.blue.shade100;
+      return AppColors.getCardColor(context);
     } else if (_workflowState.crimpConditionComplete) {
-      return Colors.orange.shade100;
+      return AppColors.getCardColor(context);
     } else {
-      return Colors.grey.shade100;
+      return AppColors.getCardColor(context);
     }
   }
 
   Color _getStatusTextColor() {
     if (_workflowState.productionStarted) {
-      return Colors.green.shade800;
+      return AppColors.getHighLightColor(context);
     } else if (_workflowState.canStartProduction) {
       return Colors.blue.shade800;
     } else if (_workflowState.crimpConditionComplete) {
@@ -953,7 +955,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                   ),
                                                   curve: Curves.elasticOut,
                                                   child: SizedBox(
-                                                    width: 180,
+                                                    width: 190,
                                                     height: 50,
                                                     child: Card(
                                                       color:
@@ -964,6 +966,14 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                             BorderRadius.circular(
                                                               8.0,
                                                             ),
+                                                        side: BorderSide(
+                                                          // ←ここでボーダー指定
+                                                          color:
+                                                              AppColors.getLineColor(
+                                                                context,
+                                                              ),
+                                                          width: .5,
+                                                        ),
                                                       ),
                                                       child: Center(
                                                         child: Text(
