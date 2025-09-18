@@ -380,8 +380,11 @@ samples, guidance on mobile development, and a full API reference.
 - work40_page.dart の検索フィールドのサイズ修正
 - applicatorserial がアンマッチの場合にフォーカスがあたらない不具合の修正
 - work_results_page.dart の日付にフォーマットを追加
+- 作業実績をサーバーで.csv 保存を追加
 
 #### commit 066
+
+- ストライプボタンを横にアニメーション
 
 - すでに同じデータが作業実績にある場合は保存しない
 

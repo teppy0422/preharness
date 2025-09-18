@@ -291,6 +291,78 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
     );
   }
 
+  Future<void> _exportToCsv() async {
+    try {
+      // loading表示
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('CSV出力中...'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      // 設定からpath01を取得
+      final settingsService = SettingsService();
+      final settings = await settingsService.loadSettings();
+      final path01 = settings['path_01'];
+
+      if (path01 == null || path01.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('出力先パス（path01）が設定されていません'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // APIリクエスト
+      final baseUrl = await _getBaseUrl();
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/api/work_results/export'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'outputPath': path01,
+              'format': 'csv'
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('CSV出力完了: ${result['filename']} (${result['recordCount']}件)'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      } else {
+        final error = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('CSV出力エラー: ${error['error']}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('CSV出力エラー: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -304,6 +376,11 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
             onPressed: _loadWorkResults,
             icon: const Icon(Icons.refresh),
             tooltip: '更新',
+          ),
+          IconButton(
+            onPressed: _exportToCsv,
+            icon: const Icon(Icons.download),
+            tooltip: 'CSV出力',
           ),
         ],
       ),
