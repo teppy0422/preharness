@@ -79,155 +79,214 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
     }
   }
 
-  Widget _buildResultCard(Map<String, dynamic> result) {
-    final actualCount = result['actual_count'] ?? 0;
-    final averageSpeed = result['average_speed'] ?? 0.0;
-    final workName = result['work_name'] ?? '未設定';
-    final username = result['username'] ?? '未設定';
-    final machineType = result['machine_type'] ?? '未設定';
-    final machineNumber = result['machine_number'] ?? '未設定';
-    final createdAt = _formatDateTime(result['created_at']);
+  String _formatDeliveryDate(String? deliveryDateStr) {
+    if (deliveryDateStr == null ||
+        deliveryDateStr.isEmpty ||
+        deliveryDateStr == '未設定') {
+      return '未設定';
+    }
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: AppColors.getLineColor(context), width: 0.5),
+    try {
+      // YYMMDD形式（6桁）の場合
+      if (deliveryDateStr.length == 6) {
+        final year = int.parse(deliveryDateStr.substring(0, 2));
+        final month = int.parse(deliveryDateStr.substring(2, 4));
+        final day = int.parse(deliveryDateStr.substring(4, 6));
+
+        // 年の補正（2桁年 -> 4桁年）
+        // 50未満なら2000年代、50以上なら1900年代と仮定
+        final fullYear = year < 50 ? 2000 + year : 1900 + year;
+
+        return '$fullYear/${month.toString().padLeft(2, '0')}/${day.toString().padLeft(2, '0')}';
+      }
+
+      // YYYYMMDD形式（8桁）の場合
+      if (deliveryDateStr.length == 8) {
+        final year = int.parse(deliveryDateStr.substring(0, 4));
+        final month = int.parse(deliveryDateStr.substring(4, 6));
+        final day = int.parse(deliveryDateStr.substring(6, 8));
+
+        return '$year/${month.toString().padLeft(2, '0')}/${day.toString().padLeft(2, '0')}';
+      }
+
+      // その他の形式はそのまま表示
+      return deliveryDateStr;
+    } catch (e) {
+      // パースエラーの場合は元の文字列をそのまま返す
+      return deliveryDateStr;
+    }
+  }
+
+  Widget _buildResultsTable() {
+    if (_workResults.isEmpty) return Container();
+
+    // テーブル列の定義（表示名とDBフィールド名）
+    final columnDefinitions = [
+      {'label': '準完日', 'field': 'efu_delivery_date'},
+      {'label': '作業名', 'field': 'work_name'},
+      {'label': 'ユーザー', 'field': 'username'},
+      {'label': '実績数', 'field': 'actual_count'},
+      {'label': '平均速度', 'field': 'average_speed'},
+      {'label': '機種', 'field': 'machine_type'},
+      {'label': '号機', 'field': 'machine_number'},
+      {'label': '管理No', 'field': 'machine_serial'},
+      {'label': 'ロット番号', 'field': 'efu_lot_num'},
+      {'label': '品番', 'field': 'efu_p_number'},
+      {'label': 'CFG No', 'field': 'efu_cfg_no'},
+      {'label': 'ワイヤータイプ', 'field': 'efu_wire_type'},
+      {'label': 'ワイヤーサイズ', 'field': 'efu_wire_size'},
+      {'label': 'ワイヤー色', 'field': 'efu_wire_color'},
+      {'label': 'ワイヤー長', 'field': 'efu_wire_len'},
+      {'label': 'ワイヤー本数', 'field': 'efu_wire_cnt'},
+      {'label': '端子1', 'field': 'block_terminals_0'},
+      {'label': '端子2', 'field': 'block_terminals_1'},
+      {'label': '端子長', 'field': 'block_terminals_length'},
+      {'label': '作業日時', 'field': 'created_at'},
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.getLineColor(context)),
+        borderRadius: BorderRadius.circular(0),
       ),
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                '$workName - $username',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.getHighLightColor(context),
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.getHighLightColor(context),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '$actualCount個',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: columnDefinitions.length * 120.0, // 全列の合計幅
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('速度: ${averageSpeed.toStringAsFixed(1)}個/分'),
-              Text(
-                '$machineType $machineNumber | $createdAt',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.getLineColor(context),
+              // テーブルヘッダー
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.getCardColor(context),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
+                  ),
+                ),
+                child: Row(
+                  children: columnDefinitions
+                      .map(
+                        (column) => _buildHeaderCell(
+                          column['label']!,
+                          column['field']!,
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+
+              // テーブルボディ（Y方向スクロール）
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Column(
+                    children: _workResults
+                        .map(
+                          (result) => _buildDataRow(result, columnDefinitions),
+                        )
+                        .toList(),
+                  ),
                 ),
               ),
             ],
           ),
         ),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _buildDetailSection('機械情報', [
-                  _buildDetailRow('機種', machineType),
-                  _buildDetailRow('号機', machineNumber),
-                  _buildDetailRow('管理No', result['machine_serial']),
-                ]),
-                const SizedBox(height: 16),
-                _buildDetailSection('製品情報', [
-                  _buildDetailRow('ロット番号', result['efu_lot_num']),
-                  _buildDetailRow('品番', result['efu_p_number']),
-                  _buildDetailRow('CFG No', result['efu_cfg_no']),
-                  _buildDetailRow('ワイヤータイプ', result['efu_wire_type']),
-                  _buildDetailRow('ワイヤーサイズ', result['efu_wire_size']),
-                  _buildDetailRow('ワイヤー色', result['efu_wire_color']),
-                  _buildDetailRow('ワイヤー長', result['efu_wire_len']),
-                  _buildDetailRow('ワイヤー本数', result['efu_wire_cnt']),
-                ]),
-                const SizedBox(height: 16),
-                _buildDetailSection('端子情報', [
-                  _buildDetailRow('端子1', result['block_terminals_0']),
-                  _buildDetailRow('端子2', result['block_terminals_1']),
-                  _buildDetailRow('端子長', result['block_terminals_length']),
-                ]),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _buildDetailSection(String title, List<Widget> rows) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.getHighLightColor(context),
+  Widget _buildHeaderCell(String label, String fieldName) {
+    return Container(
+      width: 120,
+      height: 50,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border(
+          right: BorderSide(color: AppColors.getLineColor(context), width: 0.5),
+          bottom: BorderSide(
+            color: AppColors.getLineColor(context),
+            width: 0.5,
           ),
         ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.getCardColor(context),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(
-              color: AppColors.getLineColor(context),
-              width: 0.5,
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: AppColors.getHighLightColor(context),
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          child: Column(children: rows),
+            const SizedBox(height: 2),
+            Text(
+              fieldName,
+              style: TextStyle(
+                fontSize: 8,
+                color: AppColors.getLineColor(context),
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildDetailRow(String label, dynamic value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              '$label:',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.getLineColor(context),
-              ),
-            ),
+  Widget _buildDataRow(
+    Map<String, dynamic> result,
+    List<Map<String, String>> columnDefinitions,
+  ) {
+    final cells = columnDefinitions.map((columnDef) {
+      final fieldName = columnDef['field']!;
+
+      // 特別な表示形式の処理
+      if (fieldName == 'actual_count') {
+        return '${result[fieldName] ?? 0}個';
+      } else if (fieldName == 'average_speed') {
+        return '${(result[fieldName] ?? 0.0).toStringAsFixed(1)}個/分';
+      } else if (fieldName == 'created_at') {
+        return _formatDateTime(result[fieldName]);
+      } else if (fieldName == 'efu_delivery_date') {
+        return _formatDeliveryDate(result[fieldName]?.toString());
+      } else {
+        return result[fieldName]?.toString() ?? '未設定';
+      }
+    }).toList();
+
+    return Row(
+      children: cells.map((cell) => _buildDataCell(cell.toString())).toList(),
+    );
+  }
+
+  Widget _buildDataCell(String text) {
+    return Container(
+      width: 120,
+      height: 40,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border(
+          right: BorderSide(color: AppColors.getLineColor(context), width: 0.5),
+          bottom: BorderSide(
+            color: AppColors.getLineColor(context),
+            width: 0.5,
           ),
-          Expanded(
-            child: Text(
-              value?.toString() ?? '未設定',
-              style: const TextStyle(fontSize: 12),
-            ),
-          ),
-        ],
+        ),
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 11),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
   }
@@ -317,11 +376,9 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: _workResults.length,
-                    itemBuilder: (context, index) {
-                      return _buildResultCard(_workResults[index]);
-                    },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: _buildResultsTable(),
                   ),
                 ),
               ],

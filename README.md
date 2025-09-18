@@ -379,6 +379,7 @@ samples, guidance on mobile development, and a full API reference.
 - 作業実績ページを追加
 - work40_page.dart の検索フィールドのサイズ修正
 - applicatorserial がアンマッチの場合にフォーカスがあたらない不具合の修正
+- work_results_page.dart の日付にフォーマットを追加
 
 #### commit 066
 
