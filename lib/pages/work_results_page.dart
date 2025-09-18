@@ -373,11 +373,16 @@ class WorkResultsButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16), // アイコンサイズ調整
+          Icon(
+            icon,
+            size: 16,
+            color: AppColors.getLineColor(context),
+          ), // アイコンサイズ調整
           const SizedBox(width: 2), // ✅ アイコンとテキスト間隔
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
+              color: AppColors.getLineColor(context),
               fontSize: 14, // ✅ フォントサイズ調整
               fontWeight: FontWeight.w500,
             ),
