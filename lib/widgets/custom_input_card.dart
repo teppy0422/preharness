@@ -219,10 +219,13 @@ class CustomInputCardState extends State<CustomInputCard> {
       for (var subItem in widget.subItems) {
         if (subItem.prefsKey != null) {
           final key = subItem.prefsKey!;
-          if (!_focusNodes[key]!.hasFocus) {
-            setState(() {
-              _showTextFields[key] = false;
-            });
+          // バリデーション成功時は、フォーカス状態に関係なくTextFieldを閉じる
+          setState(() {
+            _showTextFields[key] = false;
+          });
+          // フォーカスも外す
+          if (_focusNodes[key]!.hasFocus) {
+            _focusNodes[key]!.unfocus();
           }
         }
       }

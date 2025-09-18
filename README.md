@@ -389,6 +389,8 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 067
 
+- カウント用の textfield を追加
+
 - すでに同じデータが作業実績にある場合は保存しない
 
 ---
