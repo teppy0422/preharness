@@ -389,6 +389,13 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 067
 
+- 端子交換のボタンを追加
+- 端子交換した場合の圧着履歴を保存
+
+#### commit 068
+
+#### 検討
+
 - カウント用の textfield を追加
 
 - すでに同じデータが作業実績にある場合は保存しない

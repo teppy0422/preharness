@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:preharness/utils/global.dart';
 import 'package:preharness/utils/shared_prefs_helper.dart';
 import 'package:preharness/widgets/custom_input_card.dart';
+import 'package:preharness/constants/app_colors.dart';
+import 'package:preharness/widgets/ui/selection_modal.dart';
 
 class CrimpCondition extends StatefulWidget {
   final Function(bool)? onValidationComplete;
@@ -236,6 +238,18 @@ class _CrimpConditionState extends State<CrimpCondition> {
     _isValidating = false;
   }
 
+  // 端子データリセット処理
+  void _resetTerminalData() async {
+    await SharedPrefsHelper.saveStringWithNotify('terminal_name', '');
+    await SharedPrefsHelper.saveStringWithNotify('terminal_serial_number', '');
+    setState(() {
+      _terminalName = '';
+      _terminalSerialNumber = '';
+    });
+    _performValidation();
+    debugPrint('✅ 端子データリセット完了');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -310,44 +324,100 @@ class _CrimpConditionState extends State<CrimpCondition> {
             ),
           ],
         ),
-        CustomInputCard(
-          key: _terminalCardKey,
-          title: '端子リール',
-          externalValidation: _terminalValidation,
-          subItems: [
-            SubItem(
-              label: '端子品番:',
-              value: formatCode(_terminalName, "-"),
-              valueFont: 20,
-              flex: 5,
-              prefsKey: 'terminal_name',
-              onInputComplete: (value) async {
-                if (value.length > 10) {
-                  final terminalName = value.substring(0, 10);
-                  final terminalSerialNumber = value.substring(10);
-                  await SharedPrefsHelper.saveStringWithNotify(
-                    'terminal_name',
-                    terminalName,
-                  );
-                  await SharedPrefsHelper.saveStringWithNotify(
-                    'terminal_serial_number',
-                    terminalSerialNumber,
-                  );
-                  setState(() {
-                    _terminalName = terminalName;
-                    _terminalSerialNumber = terminalSerialNumber;
-                    _lastAutoTapTime = null; // 入力完了時にリセット
-                  });
-                  // 通知機能により自動的にバリデーション実行される
-                  _performValidation();
-                }
-              },
+        Stack(
+          children: [
+            CustomInputCard(
+              key: _terminalCardKey,
+              title: '端子リール',
+              externalValidation: _terminalValidation,
+              subItems: [
+                SubItem(
+                  label: '端子品番:',
+                  value: formatCode(_terminalName, "-"),
+                  valueFont: 20,
+                  flex: 5,
+                  prefsKey: 'terminal_name',
+                  onInputComplete: (value) async {
+                    if (value.length > 10) {
+                      final terminalName = value.substring(0, 10);
+                      final terminalSerialNumber = value.substring(10);
+                      await SharedPrefsHelper.saveStringWithNotify(
+                        'terminal_name',
+                        terminalName,
+                      );
+                      await SharedPrefsHelper.saveStringWithNotify(
+                        'terminal_serial_number',
+                        terminalSerialNumber,
+                      );
+                      setState(() {
+                        _terminalName = terminalName;
+                        _terminalSerialNumber = terminalSerialNumber;
+                        _lastAutoTapTime = null; // 入力完了時にリセット
+                      });
+                      // 通知機能により自動的にバリデーション実行される
+                      _performValidation();
+                    }
+                  },
+                ),
+                SubItem(
+                  label: 'ロットNo:',
+                  value: _terminalSerialNumber,
+                  valueFont: 20,
+                  flex: 5,
+                ),
+              ],
             ),
-            SubItem(
-              label: 'ロットNo:',
-              value: _terminalSerialNumber,
-              valueFont: 20,
-              flex: 5,
+            Positioned(
+              right: 40,
+              bottom: 8,
+              child: GestureDetector(
+                onTap: () {
+                  // 端子交換モーダル表示
+                  SelectionModal.show(
+                    context,
+                    title: '端子交換しますか？',
+                    options: [
+                      SelectionOption(
+                        title: '端子交換する',
+                        subtitle: '新しい端子品番をスキャンしてください',
+                        icon: Icons.qr_code_scanner,
+                        color: AppColors.getHighLightColor(context),
+                        onTap: () {
+                          debugPrint('🔄 端子リール交換実行');
+                          // 端子リール交換処理
+                          _resetTerminalData();
+                        },
+                      ),
+                      SelectionOption(
+                        title: 'キャンセル',
+                        subtitle: '操作を中止します',
+                        icon: Icons.cancel,
+                        color: Colors.grey,
+                        onTap: () {
+                          debugPrint('🔄 端子交換キャンセル');
+                        },
+                      ),
+                    ],
+                  );
+                },
+                child: Container(
+                  width: 50,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.getCardColor(context),
+                    border: Border.all(
+                      color: AppColors.getHighLightSubColor(context),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Icon(
+                    Icons.swap_horiz,
+                    color: AppColors.getHighLightSubColor(context),
+                    size: 32,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

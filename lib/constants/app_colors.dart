@@ -9,12 +9,14 @@ class AppColors {
   static const Color darkGreen = Color.fromARGB(255, 30, 60, 35);
   static const Color deepGreen = Color.fromARGB(255, 26, 173, 33);
   static const Color neonGreen = Color(0xFF39FF14); // Electric Green
+  static const Color neonOrange = Color(0xFFFF6B14); // Electric Green
 
   static const Color errorRed = Color(0xFFFF3B30);
 
   static const Color red = Color(0xFFF44336); // ラベル赤
   static const Color coralRed = Color.fromARGB(255, 225, 75, 25); //
   static const Color highlightOrange = Color(0xFFF57C00);
+  static const Color forestGreen = Color(0xFF006B33);
 
   static const Color teal = Color(0xFF009688); //
   static const Color olive = Color(0xFF708238); //
@@ -33,6 +35,11 @@ class AppColors {
   static Color getHighLightColor(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return isDark ? neonGreen : highlightOrange;
+  }
+
+  static Color getHighLightSubColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? neonOrange : forestGreen;
   }
 
   static Color getErrorColor(BuildContext context) {
