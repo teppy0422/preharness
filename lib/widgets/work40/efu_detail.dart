@@ -1755,172 +1755,127 @@ class SpeedGraphPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (speedData.isEmpty) return;
 
+    // 表示するポイント数を制限（最大30ポイント）
+    const maxPoints = 30;
+    final displayData = speedData.length > maxPoints
+        ? speedData.skip(speedData.length - maxPoints).toList()
+        : speedData;
+
+    if (displayData.isEmpty) return;
+
     // 平均値を計算
     final averageSpeed =
-        speedData.map((e) => e.value).reduce((a, b) => a + b) /
-        speedData.length;
+        displayData.map((e) => e.value).reduce((a, b) => a + b) /
+        displayData.length;
 
-    // 平均値からの差分の最大値を計算（上下対称にするため）
-    final maxDiff = speedData
-        .map((e) => (e.value - averageSpeed).abs())
-        .reduce((a, b) => a > b ? a : b);
+    // 速度の最小値と最大値を取得（グラフ範囲決定用）
+    final speeds = displayData.map((e) => e.value).toList();
+    final minSpeed = speeds.reduce((a, b) => a < b ? a : b);
+    final maxSpeed = speeds.reduce((a, b) => a > b ? a : b);
 
-    if (maxDiff == 0) {
-      // 全て同じ値の場合は平均線のみ描画
-      final averageLinePaint = Paint()
-        ..color = lineColor
-        ..strokeWidth = 0.5
-        ..style = PaintingStyle.stroke;
-      canvas.drawLine(
-        Offset(0, size.height / 2),
-        Offset(size.width, size.height / 2),
-        averageLinePaint,
-      );
-      return;
-    }
+    // 最小値と最大値の差が小さい場合の調整
+    final speedRange = (maxSpeed - minSpeed) == 0 ? 1.0 : (maxSpeed - minSpeed);
+    final margin = speedRange * 0.50; // 上下15%のマージンで余裕を持たせる
 
-    // 時間範囲を取得
-    final now = DateTime.now();
-    final startTime = now.subtract(const Duration(seconds: 60));
+    // Y軸の範囲を設定
+    final yMin = minSpeed - margin;
+    final yMax = maxSpeed + margin;
+    final yRange = yMax - yMin;
 
-    // 平均線を描画（中央に水平線）
+    // 平均線を描画
     final averageLinePaint = Paint()
-      ..color = lineColor
-      ..strokeWidth = 0.5
+      ..color = lineColor.withOpacity(0.5)
+      ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
-    final centerY = size.height / 2;
+    final averageY =
+        size.height - ((averageSpeed - yMin) / yRange) * size.height;
     canvas.drawLine(
-      Offset(0, centerY),
-      Offset(size.width, centerY),
+      Offset(0, averageY),
+      Offset(size.width, averageY),
       averageLinePaint,
     );
 
-    // 差分グラフのパスを作成
-    final path = Path();
-    final fillPathAbove = Path(); // 平均より上（速い）
-    final fillPathBelow = Path(); // 平均より下（遅い）
+    // 各ポイントの座標を計算（等間隔配置）
+    final points = <Offset>[];
+    for (int i = 0; i < displayData.length; i++) {
+      final speed = displayData[i].value;
 
-    bool hasAbove = false;
-    bool hasBelow = false;
+      // X座標: 等間隔に配置
+      final x = displayData.length == 1
+          ? size.width / 3
+          : (i / (displayData.length - 1)) * size.width;
 
-    // すべての点の座標を事前に計算
-    List<Offset> points = [];
-    for (int i = 0; i < speedData.length; i++) {
-      final entry = speedData[i];
-      final timeProgress =
-          entry.key.difference(startTime).inMilliseconds / 60000.0;
-      final speedDiff = entry.value - averageSpeed;
+      // Y座標: 速度に応じて配置（範囲内に収まるように）
+      final y = size.height - ((speed - yMin) / yRange) * size.height;
 
-      // 差分を-1.0〜1.0にノーマライズ（平均が0）
-      final normalizedDiff = speedDiff / maxDiff;
+      // Y座標が範囲内に収まるようにクランプ
+      final clampedY = y.clamp(0.0, size.height);
 
-      final x = timeProgress * size.width;
-      final y = centerY - (normalizedDiff * size.height * 0.4); // ±40%の範囲で表示
-
-      points.add(Offset(x, y));
+      points.add(Offset(x, clampedY));
     }
 
-    // スムーズな曲線を作成
-    for (int i = 0; i < points.length; i++) {
-      if (i == 0) {
-        path.moveTo(points[i].dx, points[i].dy);
-      } else {
-        // ベジェ曲線で滑らかに接続
-        final prev = points[i - 1];
-        final current = points[i];
-
-        if (i == 1) {
-          // 最初の線分は直線
-          path.lineTo(current.dx, current.dy);
-        } else {
-          // 制御点を計算してスムーズな曲線を作成
-          final prevPrev = i >= 2 ? points[i - 2] : prev;
-          final next = i < points.length - 1 ? points[i + 1] : current;
-
-          // 制御点を前後の点を使って滑らかに計算
-          final controlPoint1 = Offset(
-            prev.dx + (current.dx - prevPrev.dx) * 0.05,
-            prev.dy + (current.dy - prevPrev.dy) * 0.05,
-          );
-          final controlPoint2 = Offset(
-            current.dx - (next.dx - prev.dx) * 0.05,
-            current.dy - (next.dy - prev.dy) * 0.05,
-          );
-
-          path.cubicTo(
-            controlPoint1.dx,
-            controlPoint1.dy,
-            controlPoint2.dx,
-            controlPoint2.dy,
-            current.dx,
-            current.dy,
-          );
-        }
-      }
-
-      // 塗りつぶし用パスの処理
-      final entry = speedData[i];
-      final speedDiff = entry.value - averageSpeed;
-      final x = points[i].dx;
-      final y = points[i].dy;
-
-      // 平均より上（速い）の塗りつぶし用パス
-      if (speedDiff > 0) {
-        if (!hasAbove) {
-          fillPathAbove.moveTo(x, centerY);
-          fillPathAbove.lineTo(x, y);
-          hasAbove = true;
-        } else {
-          fillPathAbove.lineTo(x, y);
-        }
-      } else if (hasAbove) {
-        fillPathAbove.lineTo(x, centerY);
-        hasAbove = false;
-      }
-
-      // 平均より下（遅い）の塗りつぶし用パス
-      if (speedDiff < 0) {
-        if (!hasBelow) {
-          fillPathBelow.moveTo(x, centerY);
-          fillPathBelow.lineTo(x, y);
-          hasBelow = true;
-        } else {
-          fillPathBelow.lineTo(x, y);
-        }
-      } else if (hasBelow) {
-        fillPathBelow.lineTo(x, centerY);
-        hasBelow = false;
-      }
-    }
-
-    // パスを閉じる
-    if (hasAbove && speedData.isNotEmpty) {
-      final lastEntry = speedData.last;
-      final lastTimeProgress =
-          lastEntry.key.difference(startTime).inMilliseconds / 60000.0;
-      final lastX = lastTimeProgress * size.width;
-      fillPathAbove.lineTo(lastX, centerY);
-      fillPathAbove.close();
-    }
-
-    if (hasBelow && speedData.isNotEmpty) {
-      final lastEntry = speedData.last;
-      final lastTimeProgress =
-          lastEntry.key.difference(startTime).inMilliseconds / 60000.0;
-      final lastX = lastTimeProgress * size.width;
-      fillPathBelow.lineTo(lastX, centerY);
-      fillPathBelow.close();
-    }
-
-    // 線を描画
+    // スムーズな曲線を描画
     final linePaint = Paint()
       ..color = color
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
-    canvas.drawPath(path, linePaint);
 
-    // 点は描画しない（スムーズな線のみ）
+    if (points.isNotEmpty) {
+      final path = Path();
+
+      if (points.length == 1) {
+        // 1点の場合は点のみ
+        // ポイント描画で対応
+      } else if (points.length == 2) {
+        // 2点の場合は直線
+        path.moveTo(points[0].dx, points[0].dy);
+        path.lineTo(points[1].dx, points[1].dy);
+      } else {
+        // 3点以上の場合はスムーズな曲線（Catmull-Rom風）
+        path.moveTo(points[0].dx, points[0].dy);
+
+        for (int i = 0; i < points.length - 1; i++) {
+          final current = points[i];
+          final next = points[i + 1];
+
+          // 前後の点を取得（境界では現在の点を使用）
+          final prev = i > 0 ? points[i - 1] : current;
+          final afterNext = i < points.length - 2 ? points[i + 2] : next;
+
+          // 制御点を計算（tangentベース）
+          final tension = 0.3; // 張力（0.0-1.0、小さいほどスムーズ）
+
+          final cp1x = current.dx + (next.dx - prev.dx) * tension;
+          final cp1y = current.dy + (next.dy - prev.dy) * tension;
+
+          final cp2x = next.dx - (afterNext.dx - current.dx) * tension;
+          final cp2y = next.dy - (afterNext.dy - current.dy) * tension;
+
+          path.cubicTo(cp1x, cp1y, cp2x, cp2y, next.dx, next.dy);
+        }
+      }
+
+      if (points.length > 1) {
+        canvas.drawPath(path, linePaint);
+      }
+    }
+
+    // ポイントを描画
+    for (int i = 0; i < points.length; i++) {
+      final point = points[i];
+
+      // 最新のポイントは大きく、古いポイントは小さく
+      final isLatest = i == points.length - 1;
+      final radius = isLatest ? 4.0 : 2.5;
+      final alpha = isLatest ? 1.0 : 0.7;
+
+      final pointPaint = Paint()
+        ..color = color.withOpacity(alpha)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(point, radius, pointPaint);
+    }
   }
 
   @override

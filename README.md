@@ -413,10 +413,15 @@ samples, guidance on mobile development, and a full API reference.
 - カウントサークルを F1 キー入力用の textfield として使用
 - 生産中じゃ無い場合、端子交換アイコンを非表示
 - 端子交換した場合の圧着履歴を保存
+- グラフをリアルタイムから固定に変更
 
 #### commit 070
 
+- CFM 番号を追加
+
 - QR リーダー接続が切れたらアプリトップに戻る不具合
+-
+- CFM の切り替え
 
 #### 検討
 
