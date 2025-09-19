@@ -130,6 +130,19 @@ class WorkResultsService {
         'block_terminals_1': prefs.getString('block_terminals_1'),
         'block_terminals_length': prefs.getString('block_terminals_length'),
         'block_save_completed': prefs.getString('block_save_completed'),
+
+        // crimp_condition
+        'micrometer_serial_number': prefs.getString('micrometer_serial_number'),
+        'applicator_name': prefs.getString('applicator_name'),
+        'applicator_serial_number': prefs.getString('applicator_serial_number'),
+        'terminal_name': prefs.getString('terminal_name'),
+        'terminal_serial_number': prefs.getString('terminal_serial_number'),
+
+        // measurement
+        'measured_front_ch': prefs.getString('measured_front_ch'),
+        'measured_back_ch': prefs.getString('measured_back_ch'),
+        'measured_front_cw': prefs.getString('measured_front_cw'),
+        'measured_back_cw': prefs.getString('measured_back_cw'),
       };
 
       // バリデーション実行

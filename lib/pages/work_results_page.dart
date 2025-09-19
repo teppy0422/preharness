@@ -117,6 +117,7 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
     }
   }
 
+  // memo0022
   Widget _buildResultsTable() {
     if (_workResults.isEmpty) return Container();
     // テーブル列の定義（表示名とDBフィールド名）
@@ -141,6 +142,15 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
       {'label': '端子2', 'field': 'block_terminals_1'},
       {'label': '端子長', 'field': 'block_terminals_length'},
       {'label': '作業日時', 'field': 'created_at'},
+      {'label': 'マイクロメーター', 'field': 'micrometer_serial_number'},
+      {'label': 'アプリ品番', 'field': 'applicator_name'},
+      {'label': 'アプリシリアル', 'field': 'applicator_serial_number'},
+      {'label': '端子品番', 'field': 'terminal_name'},
+      {'label': 'ロットNo', 'field': 'terminal_serial_number'},
+      {'label': '前足ch', 'field': 'measured_front_ch'},
+      {'label': '後足ch', 'field': 'measured_back_ch'},
+      {'label': '前足cw', 'field': 'measured_front_cw'},
+      {'label': '後足cw', 'field': 'measured_back_cw'},
     ];
 
     return Container(

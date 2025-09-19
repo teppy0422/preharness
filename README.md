@@ -396,9 +396,20 @@ samples, guidance on mobile development, and a full API reference.
 - 圧着履歴のデータの見直し
 
 1. app.js のテーブル作成の修正
-2. 圧着履歴の登録を修正
-3. 圧着履歴の取得を修正
+   async function ensureWorkResultsTableExists()
 
+2. 圧着履歴の登録を修正
+   work_results_service
+
+3. 圧着履歴の取得を修正
+   work_results 取得 API
+   work_results_page
+4. csv のダウンロードを修正
+   CSV 生成関数
+
+#### commit 069
+
+- QR リーダー接続が切れたらアプリトップに戻る不具合
 - 端子交換した場合の圧着履歴を保存
 
 #### 検討
