@@ -12,11 +12,14 @@ import 'package:preharness/widgets/work40/product_info_card.dart';
 import 'package:preharness/widgets/work40/crimp_condition.dart';
 import 'package:preharness/utils/shared_prefs_helper.dart';
 import 'package:preharness/models/workflow_state.dart';
+import 'package:preharness/widgets/ui/pattern_button.dart';
+import 'package:preharness/widgets/ui/cfm_number_modal.dart';
 
 class EfuDetailPage extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
   final Map<String, dynamic> blockInfo;
   final VoidCallback onBack;
+  final VoidCallback? onCfmTap;
   final List<Map<String, dynamic>>? chListData;
   final bool isLoadingChList;
   final String? chListError;
@@ -26,6 +29,7 @@ class EfuDetailPage extends StatefulWidget {
     required this.processingConditions,
     required this.blockInfo,
     required this.onBack,
+    this.onCfmTap,
     this.chListData,
     this.isLoadingChList = false,
     this.chListError,
@@ -968,25 +972,47 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                     flex: 6,
                                     child: Column(
                                       children: [
-                                        TerminalInfoCard(
-                                          terminal1:
-                                              widget
-                                                  .blockInfo['terminals']?[0] ??
-                                              "",
-                                          terminal2:
-                                              widget
-                                                  .blockInfo['terminals']?[1] ??
-                                              "",
-                                          wireType:
-                                              widget
-                                                  .processingConditions['wire_type']
-                                                  ?.toString() ??
-                                              '',
-                                          wireSize:
-                                              widget
-                                                  .processingConditions['wire_size']
-                                                  ?.toString() ??
-                                              '',
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 8,
+                                              child: TerminalInfoCard(
+                                                terminal1:
+                                                    widget
+                                                        .blockInfo['terminals']?[0] ??
+                                                    "",
+                                                wireType:
+                                                    widget
+                                                        .processingConditions['wire_type']
+                                                        ?.toString() ??
+                                                    '',
+                                                wireSize:
+                                                    widget
+                                                        .processingConditions['wire_size']
+                                                        ?.toString() ??
+                                                    '',
+                                                terminal2:
+                                                    widget
+                                                        .blockInfo['terminals']?[1] ??
+                                                    "",
+                                                cfgNo: widget.processingConditions['cfg_no']?.toString(),
+                                                onCfmTap: () async {
+                                                  final result = await showDialog<String>(
+                                                    context: context,
+                                                    builder: (context) => CfmNumberModal(
+                                                      initialValue: widget.processingConditions['cfg_no']?.toString() ?? '001',
+                                                      onConfirm: (value) => Navigator.of(context).pop(value),
+                                                      onCancel: () => Navigator.of(context).pop(),
+                                                    ),
+                                                  );
+                                                  if (result != null) {
+                                                    debugPrint('CFM番号選択: $result');
+                                                    widget.onCfmTap?.call();
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                          ],
                                         ),
 
                                         Row(
