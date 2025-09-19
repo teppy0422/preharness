@@ -520,12 +520,14 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   // 端子交換時の処理
   void _onTerminalExchange() async {
     if (_f13KeyCount > 0) {
-      debugPrint('🔄 端子交換前の作業実績保存: カウント=${_f13KeyCount}');
+      debugPrint('🔄 端子交換前の作業実績保存: カウント=$_f13KeyCount');
 
       // 現在の平均速度を計算
       double averageSpeed = 0.0;
       if (_speedData.isNotEmpty) {
-        averageSpeed = _speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length;
+        averageSpeed =
+            _speedData.map((e) => e.value).reduce((a, b) => a + b) /
+            _speedData.length;
       }
 
       try {
@@ -568,7 +570,8 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     final now = DateTime.now();
     if (_lastCountTime != null) {
       final timeSinceLastCount = now.difference(_lastCountTime!).inMilliseconds;
-      if (timeSinceLastCount < 100) { // 100ms以内の連続実行は無視
+      if (timeSinceLastCount < 100) {
+        // 100ms以内の連続実行は無視
         debugPrint('⚠️ 重複F1キー検出: ${timeSinceLastCount}ms前に実行済み');
         return;
       }
@@ -588,9 +591,13 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
         // 平均速度計算
         if (_speedData.isNotEmpty) {
-          final averageSpeed = _speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length;
+          final averageSpeed =
+              _speedData.map((e) => e.value).reduce((a, b) => a + b) /
+              _speedData.length;
           _currentSpeed = averageSpeed;
-          debugPrint('⚡ 速度更新: ${speed.toStringAsFixed(1)}個/分, 平均: ${averageSpeed.toStringAsFixed(1)}個/分');
+          debugPrint(
+            '⚡ 速度更新: ${speed.toStringAsFixed(1)}個/分, 平均: ${averageSpeed.toStringAsFixed(1)}個/分',
+          );
         }
       }
     }
@@ -947,8 +954,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                         CrimpCondition(
                                           onValidationComplete:
                                               _onCrimpConditionValidationChanged,
-                                          onTerminalExchange: _onTerminalExchange,
-                                          isProductionStarted: _workflowState.productionStarted,
+                                          onTerminalExchange:
+                                              _onTerminalExchange,
+                                          isProductionStarted:
+                                              _workflowState.productionStarted,
                                         ),
                                         const SizedBox(width: 0), // 左右の間隔
                                       ],
@@ -1181,86 +1190,86 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             shape: BoxShape.circle,
           ),
           child: ClipOval(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (!isCompleted) ...[
-                    _buildFlipCounter(),
-                    Divider(
-                      color: AppColors.getLineColor(context),
-                      thickness: 0.5,
-                      height: 10,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (!isCompleted) ...[
+                  const SizedBox(height: 5),
+                  _buildFlipCounter(),
+                  Divider(
+                    color: AppColors.getLineColor(context),
+                    thickness: 0.5,
+                    height: 10,
+                  ),
+                  Text(
+                    '$targetCount',
+                    style: TextStyle(
+                      fontSize: 28,
+                      height: 0.8,
+                      letterSpacing: 3.0,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.getHighLightColor(context),
                     ),
-                    Text(
-                      '$targetCount',
-                      style: TextStyle(
-                        fontSize: 28,
-                        height: 0.8,
-                        letterSpacing: 3.0,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.getHighLightColor(context),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 4),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _handleWorkCompletion();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.getHighLightColor(context),
+                      elevation: 2,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ] else ...[
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _handleWorkCompletion();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.getHighLightColor(context),
-                        elevation: 2,
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: SizedBox(
-                        width: 78,
-                        height: 78,
-                        child: Center(
-                          child: Text(
-                            '完了',
-                            style: TextStyle(
-                              color: AppColors.paperBlack,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                            textAlign: TextAlign.center,
+                    child: SizedBox(
+                      width: 72,
+                      height: 72,
+                      child: Center(
+                        child: Text(
+                          '完了',
+                          style: TextStyle(
+                            color: AppColors.paperBlack,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
                           ),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
         Positioned(
-          bottom: -10,
+          bottom: 0,
           right: 0,
-          width: 100,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (isCompleted)
-                Text(
-                  counterString,
-                  style: TextStyle(
-                    color: AppColors.getHighLightColor(context),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                )
-              else
-                const SizedBox(
-                  height: 14,
-                  width: 0,
-                ),
-            ],
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.getCardColor(context).withOpacity(0.9),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppColors.getLineColor(context).withOpacity(0.3),
+                width: 0.5,
+              ),
+            ),
+            child: Text(
+              isCompleted ? counterString : '',
+              style: TextStyle(
+                color: AppColors.getHighLightColor(context),
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
           ),
         ),
+        const SizedBox(height: 10),
       ],
     );
   }

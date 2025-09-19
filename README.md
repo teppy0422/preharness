@@ -412,11 +412,11 @@ samples, guidance on mobile development, and a full API reference.
 - 端子交換時に圧着数が 0 を超える場合に作業実績を保存
 - カウントサークルを F1 キー入力用の textfield として使用
 - 生産中じゃ無い場合、端子交換アイコンを非表示
+- 端子交換した場合の圧着履歴を保存
 
 #### commit 070
 
 - QR リーダー接続が切れたらアプリトップに戻る不具合
-- 端子交換した場合の圧着履歴を保存
 
 #### 検討
 
