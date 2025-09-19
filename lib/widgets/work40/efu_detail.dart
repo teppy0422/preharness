@@ -58,6 +58,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   late final TextEditingController _dummyController;
   late final FocusNode _dummyFocusNode;
 
+  // 生産中F1キー専用FocusNode
+  late final FocusNode _productionFocusNode;
+
   // ★★★ リアクティブな状態管理のための変更点 ★★★
   Map<String, String?>? _comparisonData; // 比較データを保持する状態変数
   VoidCallback? _prefsListener; // リスナーを保持するための変数
@@ -84,6 +87,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     // Arduino対応：ダミーコントローラーとフォーカスノードを初期化
     _dummyController = TextEditingController();
     _dummyFocusNode = FocusNode();
+
+    // 生産中F1キー専用FocusNode初期化
+    _productionFocusNode = FocusNode();
 
     _loadColor(); // Call a method to load the color
 
@@ -335,6 +341,9 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     // Arduino対応：ダミーリソースをクリーンアップ
     _dummyController.dispose();
     _dummyFocusNode.dispose();
+
+    // 生産中F1キー専用FocusNode dispose
+    _productionFocusNode.dispose();
     // ★★★ リアクティブな状態管理のための変更点 ★★★
     // リスナーをクリーンアップ
     if (_prefsListener != null) {
@@ -481,6 +490,21 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       debugPrint('🔧 ワークフロー状態更新: crimpConditionComplete = $isValid');
     }
 
+    // 端子交換後の生産復帰チェック
+    if (isValid && _f13KeyCount > 0 && !_workflowState.productionStarted) {
+      debugPrint('🔄 端子照合OK + カウント>0 → 生産状態復帰');
+      setState(() {
+        _workflowState.productionStarted = true;
+      });
+      // 生産状態復帰時にF1キー専用TextFieldにフォーカス
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _productionFocusNode.requestFocus();
+          debugPrint('🎯 生産復帰 → F1キー専用TextFieldにフォーカス設定');
+        }
+      });
+    }
+
     // isValidがtrueで、測定がまだ完了していない場合はフォーカス移動
     if (isValid && !_workflowState.measurementComplete) {
       debugPrint('🔧 部材照合完了 → 測定にフォーカス移動');
@@ -491,6 +515,97 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     } else {
       debugPrint('🔧 測定完了済みのため、フォーカス移動スキップ');
     }
+  }
+
+  // 端子交換時の処理
+  void _onTerminalExchange() async {
+    if (_f13KeyCount > 0) {
+      debugPrint('🔄 端子交換前の作業実績保存: カウント=${_f13KeyCount}');
+
+      // 現在の平均速度を計算
+      double averageSpeed = 0.0;
+      if (_speedData.isNotEmpty) {
+        averageSpeed = _speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length;
+      }
+
+      try {
+        // PostgreSQLに作業実績を保存
+        final result = await WorkResultsService.saveWorkResult(
+          actualCount: _f13KeyCount,
+          averageSpeed: averageSpeed,
+        );
+
+        if (result['success'] == true) {
+          debugPrint('✅ 端子交換前の作業実績保存完了: ID=${result['id']}');
+          // カウンターはリセットしない（継続して使用）
+          debugPrint('🔄 カウンターは継続: $_f13KeyCount');
+          // 生産開始フラグをリセット（端子再照合まで生産停止）
+          setState(() {
+            _workflowState.productionStarted = false;
+          });
+          debugPrint('🔄 生産開始フラグリセット: 端子再照合まで生産停止');
+        } else {
+          debugPrint('❌ 端子交換前の作業実績保存失敗: ${result['error']}');
+        }
+      } catch (e) {
+        debugPrint('❌ 端子交換前の作業実績保存エラー: $e');
+      }
+    } else {
+      debugPrint('🔄 端子交換: カウント=0のため保存スキップ');
+      // カウント=0でも生産開始フラグはリセット
+      setState(() {
+        _workflowState.productionStarted = false;
+      });
+      debugPrint('🔄 生産開始フラグリセット: 端子再照合まで生産停止');
+    }
+  }
+
+  // F1キー専用処理メソッド
+  void _handleF1KeyPress() {
+    debugPrint('🎯 F1キー専用処理実行');
+
+    // 重複実行防止のため短時間内の連続実行をチェック
+    final now = DateTime.now();
+    if (_lastCountTime != null) {
+      final timeSinceLastCount = now.difference(_lastCountTime!).inMilliseconds;
+      if (timeSinceLastCount < 100) { // 100ms以内の連続実行は無視
+        debugPrint('⚠️ 重複F1キー検出: ${timeSinceLastCount}ms前に実行済み');
+        return;
+      }
+    }
+
+    // 速度計算（カウント/分）
+    if (_lastCountTime != null) {
+      final timeDiff = now.difference(_lastCountTime!).inMilliseconds;
+      if (timeDiff > 0) {
+        final speed = 60000.0 / timeDiff; // カウント/分
+        _speedData.add(MapEntry(now, speed));
+
+        // データ数を制限（直近50件のみ保持）
+        if (_speedData.length > 50) {
+          _speedData.removeAt(0);
+        }
+
+        // 平均速度計算
+        if (_speedData.isNotEmpty) {
+          final averageSpeed = _speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length;
+          _currentSpeed = averageSpeed;
+          debugPrint('⚡ 速度更新: ${speed.toStringAsFixed(1)}個/分, 平均: ${averageSpeed.toStringAsFixed(1)}個/分');
+        }
+      }
+    }
+
+    setState(() {
+      _previousF13Count = _f13KeyCount;
+      _f13KeyCount++;
+      _lastCountTime = now;
+      // 生産開始フラグも設定
+      if (!_workflowState.productionStarted) {
+        _workflowState.productionStarted = true;
+        debugPrint('🚀 生産開始！初回カウント');
+      }
+    });
+    debugPrint('✅ カウント実行: $_f13KeyCount');
   }
 
   void _onMeasurementValidationChanged(bool isValid) {
@@ -557,6 +672,14 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   void _prepareForProduction() {
     // 生産開始準備 - zoomアニメーション実行
     _triggerZoomAnimation();
+
+    // F1キー専用TextFieldにフォーカス設定
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _productionFocusNode.requestFocus();
+        debugPrint('🎯 初回生産開始準備 → F1キー専用TextFieldにフォーカス設定');
+      }
+    });
   }
 
   void _triggerZoomAnimation() {
@@ -730,6 +853,13 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                   event.logicalKey == LogicalKeyboardKey.insert ||
                   event.physicalKey == PhysicalKeyboardKey.f13) {
                 debugPrint('🎯 対象キー検出: ${event.logicalKey}');
+
+                // 生産中は専用TextFieldでF1キーを処理するため、既存処理をスキップ
+                if (_workflowState.productionStarted) {
+                  debugPrint('🔄 生産中につき、F1キー専用TextFieldで処理');
+                  return KeyEventResult.handled;
+                }
+
                 // 生産準備OKの時のみカウント有効
                 debugPrint(
                   '🔍 カウント判定: crimpConditionComplete=${_workflowState.crimpConditionComplete}, measurementComplete=${_workflowState.measurementComplete}, canStartProduction=${_workflowState.canStartProduction}',
@@ -817,6 +947,8 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                         CrimpCondition(
                                           onValidationComplete:
                                               _onCrimpConditionValidationChanged,
+                                          onTerminalExchange: _onTerminalExchange,
+                                          isProductionStarted: _workflowState.productionStarted,
                                         ),
                                         const SizedBox(width: 0), // 左右の間隔
                                       ],
@@ -999,87 +1131,112 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     final targetCount =
         int.tryParse(widget.processingConditions['wire_cnt'].toString()) ?? 0;
     final isCompleted = _f13KeyCount >= targetCount && targetCount > 0;
-    final counterString = "$_f13KeyCount/$targetCount";
 
     return Column(
       children: [
-        Stack(
-          clipBehavior: Clip.none, // ❗ Containerの外にはみ出させたい場合必要
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.getCardColor(context),
-                border: Border.all(
-                  color: AppColors.getLineColor(context),
-                  width: 0.5,
+        // 生産中の場合はF1キー受信可能なカウンターにする
+        _workflowState.productionStarted
+            ? RawKeyboardListener(
+                focusNode: _productionFocusNode,
+                onKey: (RawKeyEvent event) {
+                  if (event is RawKeyDownEvent) {
+                    debugPrint('🎯 カウンター F1キー検出: ${event.logicalKey}');
+                    if (event.logicalKey == LogicalKeyboardKey.f13 ||
+                        event.logicalKey == LogicalKeyboardKey.f1 ||
+                        event.logicalKey == LogicalKeyboardKey.insert) {
+                      _handleF1KeyPress();
+                    }
+                  }
+                },
+                child: GestureDetector(
+                  onTap: () {
+                    // カウンターをタップしたときにフォーカス取得
+                    _productionFocusNode.requestFocus();
+                    debugPrint('🎯 カウンタータップ → フォーカス取得');
+                  },
+                  child: _buildCounterDisplay(targetCount, isCompleted),
                 ),
-              ),
-              child: ClipOval(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (!isCompleted) ...[
-                        _buildFlipCounter(),
-                        Divider(
-                          color: AppColors.getLineColor(context),
-                          thickness: 0.5,
-                          height: 10,
+              )
+            : _buildCounterDisplay(targetCount, isCompleted),
+      ],
+    );
+  }
+
+  Widget _buildCounterDisplay(int targetCount, bool isCompleted) {
+    final counterString = "$_f13KeyCount/$targetCount";
+
+    return Stack(
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: isCompleted
+                ? AppColors.getHighLightColor(context)
+                : AppColors.getCardColor(context),
+            border: Border.all(
+              color: AppColors.getLineColor(context),
+              width: 1,
+            ),
+            shape: BoxShape.circle,
+          ),
+          child: ClipOval(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!isCompleted) ...[
+                    _buildFlipCounter(),
+                    Divider(
+                      color: AppColors.getLineColor(context),
+                      thickness: 0.5,
+                      height: 10,
+                    ),
+                    Text(
+                      '$targetCount',
+                      style: TextStyle(
+                        fontSize: 28,
+                        height: 0.8,
+                        letterSpacing: 3.0,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.getHighLightColor(context),
+                      ),
+                    ),
+                  ] else ...[
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _handleWorkCompletion();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.getHighLightColor(context),
+                        elevation: 2,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        Text(
-                          '$targetCount',
-                          style: TextStyle(
-                            fontSize: 28,
-                            height: 0.8,
-                            letterSpacing: 3.0,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.getHighLightColor(context),
-                          ),
-                        ),
-                      ] else ...[
-                        ElevatedButton(
-                          onPressed: () async {
-                            await _handleWorkCompletion();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.getHighLightColor(
-                              context,
-                            ), // 背景色
-                            elevation: 2, // 影の高さ
-                            padding: EdgeInsets.zero, // SizedBoxでサイズ管理するので余白はゼロ
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8), // 角丸
+                      ),
+                      child: SizedBox(
+                        width: 78,
+                        height: 78,
+                        child: Center(
+                          child: Text(
+                            '完了',
+                            style: TextStyle(
+                              color: AppColors.paperBlack,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
                             ),
-                          ),
-                          child: SizedBox(
-                            width: 78,
-                            height: 78,
-                            child: Center(
-                              // ← これでTextが縦横中央
-                              child: Text(
-                                '完了',
-                                style: TextStyle(
-                                  color: AppColors.paperBlack,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                      ],
-                    ],
-                  ),
-                ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-          ],
+          ),
         ),
-        // 例：Positionedは常に表示
         Positioned(
           bottom: -10,
           right: 0,
@@ -1098,7 +1255,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                 )
               else
                 const SizedBox(
-                  height: 14, // Textと同じ高さを確保
+                  height: 14,
                   width: 0,
                 ),
             ],

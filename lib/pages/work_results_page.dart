@@ -125,7 +125,8 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
       {'label': '準完日', 'field': 'efu_delivery_date'},
       {'label': '作業名', 'field': 'work_name'},
       {'label': 'ユーザー', 'field': 'username'},
-      {'label': '実績数', 'field': 'actual_count'},
+      {'label': '圧着数', 'field': 'actual_count'},
+      {'label': '圧着指示数', 'field': 'efu_wire_cnt'},
       {'label': '平均速度', 'field': 'average_speed'},
       {'label': '機種', 'field': 'machine_type'},
       {'label': '号機', 'field': 'machine_number'},
@@ -137,7 +138,6 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
       {'label': 'ワイヤーサイズ', 'field': 'efu_wire_size'},
       {'label': 'ワイヤー色', 'field': 'efu_wire_color'},
       {'label': 'ワイヤー長', 'field': 'efu_wire_len'},
-      {'label': 'ワイヤー本数', 'field': 'efu_wire_cnt'},
       {'label': '端子1', 'field': 'block_terminals_0'},
       {'label': '端子2', 'field': 'block_terminals_1'},
       {'label': '端子長', 'field': 'block_terminals_length'},
@@ -257,9 +257,7 @@ class _WorkResultsPageState extends State<WorkResultsPage> {
       final fieldName = columnDef['field']!;
 
       // 特別な表示形式の処理
-      if (fieldName == 'actual_count') {
-        return '${result[fieldName] ?? 0}個';
-      } else if (fieldName == 'average_speed') {
+      if (fieldName == 'average_speed') {
         return '${(result[fieldName] ?? 0.0).toStringAsFixed(1)}個/分';
       } else if (fieldName == 'created_at') {
         return _formatDateTime(result[fieldName]);

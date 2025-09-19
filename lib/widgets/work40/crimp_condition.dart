@@ -8,8 +8,15 @@ import 'package:preharness/widgets/ui/selection_modal.dart';
 
 class CrimpCondition extends StatefulWidget {
   final Function(bool)? onValidationComplete;
+  final Function()? onTerminalExchange; // 端子交換時のコールバック
+  final bool isProductionStarted; // 生産開始状態
 
-  const CrimpCondition({super.key, this.onValidationComplete});
+  const CrimpCondition({
+    super.key,
+    this.onValidationComplete,
+    this.onTerminalExchange,
+    this.isProductionStarted = false,
+  });
 
   @override
   State<CrimpCondition> createState() => _CrimpConditionState();
@@ -367,10 +374,12 @@ class _CrimpConditionState extends State<CrimpCondition> {
                 ),
               ],
             ),
-            Positioned(
-              right: 40,
-              bottom: 8,
-              child: GestureDetector(
+            // 端子交換ボタン（生産中のみ表示）
+            if (widget.isProductionStarted)
+              Positioned(
+                right: 40,
+                bottom: 8,
+                child: GestureDetector(
                 onTap: () {
                   // 端子交換モーダル表示
                   SelectionModal.show(
@@ -384,6 +393,10 @@ class _CrimpConditionState extends State<CrimpCondition> {
                         color: AppColors.getHighLightColor(context),
                         onTap: () {
                           debugPrint('🔄 端子リール交換実行');
+                          // 端子交換前に作業実績保存（カウント > 0の場合）
+                          if (widget.onTerminalExchange != null) {
+                            widget.onTerminalExchange!();
+                          }
                           // 端子リール交換処理
                           _resetTerminalData();
                         },
