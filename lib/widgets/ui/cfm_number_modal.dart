@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:preharness/constants/app_colors.dart';
+import 'package:preharness/core/constants/app_colors.dart';
 
 class CfmNumberModal extends StatefulWidget {
   final String initialValue;

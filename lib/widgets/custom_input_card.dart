@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:preharness/constants/app_colors.dart';
+import 'package:preharness/core/constants/app_colors.dart';
 
 // グローバルフォーカス管理クラス
 class GlobalFocusManager {

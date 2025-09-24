@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:preharness/services/settings_service.dart';
-import 'package:preharness/constants/app_colors.dart';
+import 'package:preharness/core/constants/app_colors.dart';
 import 'package:intl/intl.dart';
 
 class WorkResultsPage extends StatefulWidget {

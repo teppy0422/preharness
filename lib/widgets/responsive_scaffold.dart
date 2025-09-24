@@ -1,6 +1,6 @@
 // lib/widgets/responsive_scaffold.dart
 import 'package:flutter/material.dart';
-import "package:preharness/constants/app_colors.dart";
+import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/main.dart'; // themeNotifier 参照用
 import 'package:flutter/services.dart';
 import "package:preharness/widgets/user_icon_button.dart";

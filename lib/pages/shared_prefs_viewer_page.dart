@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preharness/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
 import 'package:preharness/utils/shared_prefs_helper.dart';
-import 'package:preharness/constants/app_colors.dart';
+import 'package:preharness/core/constants/app_colors.dart';
 
 class SharedPrefsViewerPage extends StatefulWidget {
   const SharedPrefsViewerPage({super.key});

@@ -423,6 +423,12 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 071
 
+- テーマとカラー定数の整理
+
+#### commit 072
+
+#### 不具合
+
 - QR リーダー接続が切れたらアプリトップに戻る不具合
 
 #### 実装予定

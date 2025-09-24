@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:preharness/constants/app_colors.dart';
+import 'package:preharness/core/themes/app_theme.dart';
 import 'routes/app_routes.dart';
 import 'package:preharness/utils/user_login_manager.dart'; // ← あなたのloginコードをここに入れる想定
 // Added for Hive
@@ -57,35 +57,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PreHarnessPro',
-      theme: ThemeData(
-        brightness: Brightness.light,
-        fontFamily: 'NotoSansJP',
-        scaffoldBackgroundColor: AppColors.grayWhite,
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(fontWeight: FontWeight.w900),
-          bodyMedium: TextStyle(fontWeight: FontWeight.w600),
-          labelLarge: TextStyle(fontWeight: FontWeight.w900),
-        ),
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        fontFamily: 'NotoSansJP',
-        scaffoldBackgroundColor: AppColors.black,
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: Colors.white,
-          ),
-          bodyMedium: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.white70,
-          ),
-          labelLarge: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: Colors.white,
-          ),
-        ),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: widget.themeMode,
       initialRoute: AppRoutes.home,
       routes: AppRoutes.routes,

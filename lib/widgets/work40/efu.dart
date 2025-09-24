@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import "package:preharness/constants/app_colors.dart";
+import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/utils/global.dart';
 import 'package:preharness/utils/color_utils.dart'; // getColorFromHive関数のため
 import 'package:qr_flutter/qr_flutter.dart';

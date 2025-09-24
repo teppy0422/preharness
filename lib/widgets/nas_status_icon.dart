@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lottie/lottie.dart';
-import "package:preharness/constants/app_colors.dart";
+import 'package:preharness/core/constants/app_colors.dart';
 
 class NasStatusIcon extends StatefulWidget {
   const NasStatusIcon({super.key});

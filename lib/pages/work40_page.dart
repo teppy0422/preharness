@@ -7,7 +7,7 @@ import 'package:preharness/widgets/work40/efu_detail.dart'; // 詳細ページ�
 import 'package:preharness/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
 import 'package:preharness/utils/global.dart';
-import "package:preharness/constants/app_colors.dart";
+import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/services/settings_service.dart';
 import 'package:preharness/widgets/flip_animation.dart';
 import 'package:preharness/widgets/slide_animation.dart';

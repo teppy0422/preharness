@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import "package:preharness/constants/app_colors.dart";
+import 'package:preharness/core/constants/app_colors.dart';
 
 class PatternButton extends StatefulWidget {
   final String label;

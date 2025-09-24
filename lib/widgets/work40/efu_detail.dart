@@ -5,7 +5,7 @@ import 'package:preharness/services/work_results_service.dart';
 import 'package:preharness/widgets/work40/dial_selector_with_db.dart';
 import 'package:preharness/widgets/work40/measurement.dart';
 import 'package:preharness/utils/color_utils.dart';
-import 'package:preharness/constants/app_colors.dart';
+import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/widgets/terminal_info_card.dart';
 import 'package:preharness/widgets/interactive_image_viewer.dart';
 import 'package:preharness/widgets/work40/product_info_card.dart';

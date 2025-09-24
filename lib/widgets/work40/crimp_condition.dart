@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:preharness/utils/global.dart';
 import 'package:preharness/utils/shared_prefs_helper.dart';
 import 'package:preharness/widgets/custom_input_card.dart';
-import 'package:preharness/constants/app_colors.dart';
+import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/widgets/ui/selection_modal.dart';
 
 class CrimpCondition extends StatefulWidget {
