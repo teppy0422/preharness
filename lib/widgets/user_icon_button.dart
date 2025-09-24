@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_modal.dart';
-import "package:preharness/utils/user_login_manager.dart";
+import "package:preharness/core/utils/user_login_manager.dart";
 import "package:preharness/widgets/icon_picker_modal.dart";
 import 'package:preharness/core/constants/app_colors.dart';
 

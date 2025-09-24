@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:preharness/core/themes/app_theme.dart';
 import 'routes/app_routes.dart';
-import 'package:preharness/utils/user_login_manager.dart'; // ← あなたのloginコードをここに入れる想定
+import 'package:preharness/core/core.dart'; // コア機能をインポート
 // Added for Hive
 import 'package:hive_flutter/hive_flutter.dart'; // Added for Hive
-import 'package:preharness/adapters/color_adapter.dart'; // Added for ColorAdapter
-import 'package:preharness/models/color_entry.dart'; // Added for ColorEntry
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.system);
 

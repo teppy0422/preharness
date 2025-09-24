@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:preharness/utils/user_login_manager.dart';
+import 'package:preharness/core/utils/user_login_manager.dart';
 import 'package:preharness/widgets/icon_picker_modal.dart';
-import 'package:preharness/utils/global.dart';
+import 'package:preharness/core/utils/global.dart';
 
 class QrLoginModal extends StatefulWidget {
   const QrLoginModal({super.key});

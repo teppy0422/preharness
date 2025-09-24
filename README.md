@@ -427,6 +427,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 072
 
+- 大きいファイルの分割-99
+
+#### commit 073
+
 #### 不具合
 
 - QR リーダー接続が切れたらアプリトップに戻る不具合
