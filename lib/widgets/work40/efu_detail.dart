@@ -995,18 +995,33 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                                     widget
                                                         .blockInfo['terminals']?[1] ??
                                                     "",
-                                                cfgNo: widget.processingConditions['cfg_no']?.toString(),
+                                                cfgNo: widget
+                                                    .processingConditions['cfg_no']
+                                                    ?.toString(),
                                                 onCfmTap: () async {
                                                   final result = await showDialog<String>(
                                                     context: context,
-                                                    builder: (context) => CfmNumberModal(
-                                                      initialValue: widget.processingConditions['cfg_no']?.toString() ?? '001',
-                                                      onConfirm: (value) => Navigator.of(context).pop(value),
-                                                      onCancel: () => Navigator.of(context).pop(),
-                                                    ),
+                                                    builder: (context) =>
+                                                        CfmNumberModal(
+                                                          initialValue:
+                                                              widget
+                                                                  .processingConditions['cfg_no']
+                                                                  ?.toString() ??
+                                                              '001',
+                                                          onConfirm: (value) =>
+                                                              Navigator.of(
+                                                                context,
+                                                              ).pop(value),
+                                                          onCancel: () =>
+                                                              Navigator.of(
+                                                                context,
+                                                              ).pop(),
+                                                        ),
                                                   );
                                                   if (result != null) {
-                                                    debugPrint('CFM番号選択: $result');
+                                                    debugPrint(
+                                                      'CFM番号選択: $result',
+                                                    );
                                                     widget.onCfmTap?.call();
                                                   }
                                                 },
@@ -1143,7 +1158,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                 ),
 
                 Positioned(
-                  bottom: -40,
+                  bottom: 1,
                   right: 0,
                   left: 0, // 左端の位置を指定してスペースを確保
                   child: Row(
@@ -1220,7 +1235,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 if (!isCompleted) ...[
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 10),
                   _buildFlipCounter(),
                   Divider(
                     color: AppColors.getLineColor(context),
@@ -1272,30 +1287,31 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
             ),
           ),
         ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppColors.getCardColor(context).withOpacity(0.9),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppColors.getLineColor(context).withOpacity(0.3),
-                width: 0.5,
+        if (isCompleted)
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.getCardColor(context).withOpacity(0.9),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppColors.getLineColor(context).withOpacity(0.3),
+                  width: 0.5,
+                ),
               ),
-            ),
-            child: Text(
-              isCompleted ? counterString : '',
-              style: TextStyle(
-                color: AppColors.getHighLightColor(context),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
+              child: Text(
+                isCompleted ? counterString : '',
+                style: TextStyle(
+                  color: AppColors.getHighLightColor(context),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
+        // const SizedBox(height: 10),
       ],
     );
   }
@@ -1433,108 +1449,110 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
 
   Widget _buildSpeedGraph() {
     return SizedBox(
-      height: 210,
-      child: Padding(
-        padding: const EdgeInsets.all(0),
-        child: Stack(
-          children: [
-            // グラフまたは比較式を表示
-            _showComparisonFormula
-                ? _buildComparisonFormula()
-                : _speedData.isEmpty
-                ? Center(
-                    child: Text(
-                      'データなし',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppColors.getLineSubColor(context),
-                      ),
-                    ),
-                  )
-                : CustomPaint(
-                    size: Size.infinite,
-                    painter: SpeedGraphPainter(
-                      speedData: _speedData,
-                      color: AppColors.getHighLightColor(context),
-                      lineColor: AppColors.getLineColor(context),
-                    ),
-                  ),
-            // 平均値テキストを前面に表示（高さを取らない）（比較式表示時は非表示）
-            if (_speedData.isNotEmpty && !_showComparisonFormula)
-              Positioned(
-                top: 0,
-                left: 0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.getCardColor(context),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: AppColors.getLineColor(context),
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Text(
-                    '${(_speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length).toStringAsFixed(1)} /分',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.getLineColor(context),
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ),
-            // 切り替えスイッチを右上に表示
-            Positioned(
-              top: 0,
-              right: 0,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _showComparisonFormula = !_showComparisonFormula;
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.getCardColor(context),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: AppColors.getLineColor(context),
-                      width: 1.0,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _showComparisonFormula
-                            ? Icons.show_chart
-                            : Icons.search,
-                        size: 12,
-                        color: AppColors.getLineColor(context),
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        _showComparisonFormula ? 'グラフ' : '式',
+      height: 174,
+      child: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(0),
+          child: Stack(
+            children: [
+              // グラフまたは比較式を表示
+              _showComparisonFormula
+                  ? _buildComparisonFormula()
+                  : _speedData.isEmpty
+                  ? Center(
+                      child: Text(
+                        'データなし',
                         style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.getLineColor(context),
-                          fontWeight: FontWeight.w900,
+                          fontSize: 10,
+                          color: AppColors.getLineSubColor(context),
                         ),
                       ),
-                    ],
+                    )
+                  : CustomPaint(
+                      size: Size.infinite,
+                      painter: SpeedGraphPainter(
+                        speedData: _speedData,
+                        color: AppColors.getHighLightColor(context),
+                        lineColor: AppColors.getLineColor(context),
+                      ),
+                    ),
+              // 平均値テキストを前面に表示（高さを取らない）（比較式表示時は非表示）
+              if (_speedData.isNotEmpty && !_showComparisonFormula)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.getCardColor(context),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: AppColors.getLineColor(context),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Text(
+                      '${(_speedData.map((e) => e.value).reduce((a, b) => a + b) / _speedData.length).toStringAsFixed(1)} /分',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.getLineColor(context),
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              // 切り替えスイッチを右上に表示
+              Positioned(
+                top: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _showComparisonFormula = !_showComparisonFormula;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.getCardColor(context),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: AppColors.getLineColor(context),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _showComparisonFormula
+                              ? Icons.show_chart
+                              : Icons.search,
+                          size: 12,
+                          color: AppColors.getLineColor(context),
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          _showComparisonFormula ? 'グラフ' : '式',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.getLineColor(context),
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1801,16 +1819,20 @@ class SpeedGraphPainter extends CustomPainter {
 
     // 最小値と最大値の差が小さい場合の調整
     final speedRange = (maxSpeed - minSpeed) == 0 ? 1.0 : (maxSpeed - minSpeed);
-    final margin = speedRange * 0.50; // 上下15%のマージンで余裕を持たせる
+    final margin = speedRange * 0.1; // 上下15%のマージンで余裕を持たせる
 
     // Y軸の範囲を設定
     final yMin = minSpeed - margin;
     final yMax = maxSpeed + margin;
     final yRange = yMax - yMin;
 
+    // X軸の左右マージン
+    final xMargin = size.width * 0.01; // 左右5%のマージン
+    final drawingWidth = size.width - (xMargin * 2);
+
     // 平均線を描画
     final averageLinePaint = Paint()
-      ..color = lineColor.withOpacity(0.5)
+      ..color = lineColor.withAlpha(180)
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
@@ -1827,10 +1849,10 @@ class SpeedGraphPainter extends CustomPainter {
     for (int i = 0; i < displayData.length; i++) {
       final speed = displayData[i].value;
 
-      // X座標: 等間隔に配置
+      // X座標: 等間隔に配置（マージン考慮）
       final x = displayData.length == 1
-          ? size.width / 3
-          : (i / (displayData.length - 1)) * size.width;
+          ? size.width / 2
+          : xMargin + (i / (displayData.length - 1)) * drawingWidth;
 
       // Y座標: 速度に応じて配置（範囲内に収まるように）
       final y = size.height - ((speed - yMin) / yRange) * size.height;
