@@ -435,6 +435,13 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 074
 
+- RLTFA のインポート処理をシールド図面のためにサーバー側に追加
+- インポートボタンへの解説を追加
+
+#### 075
+
+- シールド図面データ呼び出しのための QR 印刷を追加
+
 #### 不具合
 
 - QR リーダー接続が切れたらアプリトップに戻る不具合
