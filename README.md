@@ -433,7 +433,7 @@ samples, guidance on mobile development, and a full API reference.
 
 - 久しぶりの接続で一応保存しておく
 
-#### commit 074
+#### 074
 
 - RLTFA のインポート処理をシールド図面のためにサーバー側に追加
 - インポートボタンへの解説を追加
