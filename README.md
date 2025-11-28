@@ -431,6 +431,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### commit 073
 
+- 久しぶりの接続で一応保存しておく
+
+#### commit 074
+
 #### 不具合
 
 - QR リーダー接続が切れたらアプリトップに戻る不具合
@@ -466,19 +470,98 @@ samples, guidance on mobile development, and a full API reference.
 
 #### flutter command
 
-- 起動とか
-<pre>flutter clean<br/>
-flutter run<br/>
+- 初回起動
+<pre>flutter clean
+flutter run
 flutter pub get
 </pre>
 - 無線接続の有効化(USB 接続した状態で実行)
 - タブレットのワイヤレスデバッグをオフ → オン
 - USB ケーブル接続して下記
-<pre>adb tcpip 5555</pre>
+  <pre>adb kill-server
+  adb start-server
+  adb devices
+  adb tcpip 5555</pre>
+- IP アドレスを調べて実行
+  <pre>adb connect 192.168.11.5:5555
+  </pre>
 - USB ケーブルを抜いて下記実行後に選択
 <pre>flutter run</pre>
+
 - 描画エラーログをフィルターカット
 <pre>flutter logs | grep -v "BLASTBufferQueue"</pre>
+
+- ペアリング接続
+
+1. 開発者オプションを開く
+   - 設定 → システム → 開発者向けオプション
+2. 無線デバッグを有効化
+
+   - 「無線デバッグ」のスイッチを ON にする
+   - 確認ダイアログが表示されたら「許可」をタップ
+
+3. ペア設定コードによるデバイスのペア設定をタップ
+
+   - 以下の情報が表示されます：
+     - IP アドレスとポート（例：192.168.1.100:37829）
+     - 6 桁のペアリングコード（例：123456）
+   - この画面を開いたままにしておく（タイムアウトするため）
+
+ステップ 2: Mac 側でペアリング
+
+ターミナルで以下を実行：
+
+# ペアリング（Android で表示された IP アドレスとポートを使用）
+
+adb pair 192.168.1.100:37829
+
+実行すると、ペアリングコードの入力を求められます：
+
+Enter pairing code:
+
+Android タブレットに表示されている 6 桁のコードを入力して Enter。
+
+成功すると以下のように表示されます：
+Successfully paired to 192.168.1.100:37829 [guid=adb-xxxxx]
+
+ステップ 3: 無線デバッグで接続
+
+Android タブレットで：
+
+1. 無線デバッグ画面に戻る
+2. 画面上部に表示されているデバイス名の下に、IP アドレスとポートが表示さ
+   れています
+   - 例：192.168.1.100:38275
+   - 注意: ペアリング時のポートとは異なります
+
+Mac 側で接続：
+
+# 接続（無線デバッグ画面に表示されている IP アドレスとポートを使用）
+
+adb connect 192.168.1.100:38275
+
+成功すると：
+connected to 192.168.1.100:38275
+
+ステップ 4: 接続確認
+
+# デバイスが認識されているか確認
+
+adb devices
+
+以下のように表示されれば OK：
+List of devices attached
+192.168.1.100:38275 device
+
+ステップ 5: Flutter 実行
+
+# 接続されているデバイスを確認
+
+flutter devices
+
+# アプリを実行
+
+flutter run
 
 ### prompt 4 AI
 
