@@ -7,6 +7,7 @@ import 'package:preharness/routes/app_routes.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import "package:preharness/widgets/user_list_modal.dart";
+import 'package:preharness/features/import_export/qr_print_shield_modal.dart';
 import 'dart:async';
 
 double? freeSpaceGB;
@@ -386,6 +387,16 @@ class _ImportPageState extends State<ImportPage> {
               },
               child: const Text('ユーザー一覧'),
             ),
+            Text("図面QRの印刷"),
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const QrPrintShieldModal(),
+                );
+              },
+              child: const Text('Shield QR印刷'),
+            ),
           ],
         ),
       ),
@@ -478,10 +489,7 @@ class _ProcessStep extends StatelessWidget {
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.only(left: 32.0),
-            child: Text(
-              content,
-              style: const TextStyle(fontSize: 12),
-            ),
+            child: Text(content, style: const TextStyle(fontSize: 12)),
           ),
         ],
       ),
@@ -494,10 +502,7 @@ class _FunctionRow extends StatelessWidget {
   final String name;
   final String description;
 
-  const _FunctionRow({
-    required this.name,
-    required this.description,
-  });
+  const _FunctionRow({required this.name, required this.description});
 
   @override
   Widget build(BuildContext context) {
@@ -518,10 +523,7 @@ class _FunctionRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              description,
-              style: const TextStyle(fontSize: 12),
-            ),
+            child: Text(description, style: const TextStyle(fontSize: 12)),
           ),
         ],
       ),

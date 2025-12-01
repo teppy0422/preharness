@@ -442,6 +442,10 @@ samples, guidance on mobile development, and a full API reference.
 
 - シールド図面データ呼び出しのための QR 印刷を追加
 
+#### 076
+
+- efu.dart での生産条件検索でシールド図面に対応
+
 #### 不具合
 
 - QR リーダー接続が切れたらアプリトップに戻る不具合
