@@ -32,6 +32,7 @@ class _Work40PageState extends State<Work40Page>
   List<Map<String, dynamic>>? _chListData;
   bool _isLoadingChList = false;
   String? _chListError;
+  bool _isShieldSearch = false; // S-で始まる検索かどうか
   final FocusNode _searchFocusNode = FocusNode();
   final TextEditingController _searchController = TextEditingController(
     text: 'N712/ 5M3920002178070018682143V1010A011N712/94.54.5325184039',
@@ -78,6 +79,17 @@ class _Work40PageState extends State<Work40Page>
   }
 
   void _onSearch(String query) async {
+    // S-で始まる場合はシールド検索
+    if (query.startsWith('S-')) {
+      _onSearchShield(query);
+      return;
+    }
+
+    // 通常の検索
+    setState(() {
+      _isShieldSearch = false;
+    });
+
     String? pNumber;
     String? cfgNo;
 
@@ -126,6 +138,77 @@ class _Work40PageState extends State<Work40Page>
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('検索エラー: $e')));
+    }
+  }
+
+  void _onSearchShield(String query) async {
+    // S-82122V1010-C01-MU5 形式を解析
+    final parts = query.split('-');
+
+    if (parts.length != 4 || parts[0] != 'S') {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('シールド検索形式が正しくありません。(例: S-82122V1010-C01-MU5)'),
+          ),
+        );
+      }
+      return;
+    }
+
+    final pNumber = parts[1]; // 82122V1010
+    final engChange = parts[2]; // C01
+    final ybm = parts[3]; // MU5
+
+    setState(() {
+      _isShieldSearch = true;
+    });
+
+    try {
+      final result = await ApiService.fetchShieldConditions(
+        pNumber: pNumber,
+        engChange: engChange,
+        ybm: ybm,
+      );
+
+      setState(() {
+        _processingConditions = result;
+        _isDetailView = false;
+      });
+
+      if (_animationType == 'flip' ||
+          _animationType == 'slide' ||
+          _animationType == 'fade_scale') {
+        _animationController.reset();
+        _animationController.forward(from: 0.0);
+      }
+
+      _focusAndSelectSearchText();
+
+      if (mounted) {
+        if (result != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('シールド検索成功'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'データが見つかりませんでした。P/N: $pNumber, ENG: $engChange, YBM: $ybm',
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('シールド検索エラー: $e')));
+      }
     }
   }
 

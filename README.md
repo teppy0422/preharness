@@ -440,11 +440,15 @@ samples, guidance on mobile development, and a full API reference.
 
 #### 075
 
-- シールド図面データ呼び出しのための QR 印刷を追加
+- シールド図面データ呼び出しのための QR 印刷(S-から始まるテキスト)を追加
 
 #### 076
 
 - efu.dart での生産条件検索でシールド図面に対応
+
+#### 077
+
+- シールド図面データ呼び出し専用の efu.dart を追加
 
 #### 不具合
 
