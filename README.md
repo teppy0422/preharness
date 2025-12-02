@@ -456,6 +456,11 @@ samples, guidance on mobile development, and a full API reference.
 
 #### 079
 
+- シールド QR コードに数量を含むように修正
+- QR コードの数量を入力する専用モーダルを追加
+
+#### 080
+
 #### 不具合
 
 - QR リーダー接続が切れたらアプリトップに戻る不具合
