@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/features/import_export/data/shield_service.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:printing/printing.dart';
@@ -26,21 +28,12 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
   // 各QRコードの数量を管理（index -> 数量）
   final Map<int, int> _quantities = {};
 
-  // 合計数量を計算
-  int _getTotalQuantity() {
-    int total = 0;
-    for (int i = 0; i < widget.qrDataList.length; i++) {
-      total += _quantities[i] ?? 1;
-    }
-    return total;
-  }
-
   // 数量入力ダイアログを表示
   Future<void> _showQuantityDialog(int index) async {
     final result = await showDialog<int>(
       context: context,
       builder: (context) =>
-          _QuantityInputDialog(currentQuantity: _quantities[index] ?? 1),
+          _QuantityInputDialog(currentQuantity: _quantities[index] ?? 100),
     );
 
     if (result != null) {
@@ -54,7 +47,7 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
   Future<void> _showBulkQuantityDialog() async {
     final result = await showDialog<int>(
       context: context,
-      builder: (context) => const _QuantityInputDialog(currentQuantity: 1),
+      builder: (context) => const _QuantityInputDialog(currentQuantity: 100),
     );
 
     if (result != null) {
@@ -67,41 +60,93 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
   }
 
   Future<void> _handlePrint(BuildContext context) async {
-    try {
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => _generatePdf(format),
-      );
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('印刷エラー: $e')));
-      }
-    }
+    await showDialog(
+      context: context,
+      builder: (context) => Dialog.fullscreen(
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: AppColors.getCardColor(context),
+            foregroundColor: AppColors.getLineColor(context),
+            title: const Text('印刷プレビュー'),
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
+              tooltip: '閉じる',
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.print),
+                onPressed: () async {
+                  try {
+                    await Printing.layoutPdf(
+                      onLayout: (PdfPageFormat format) async =>
+                          _generatePdf(format),
+                    );
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('印刷エラー: $e')));
+                    }
+                  }
+                },
+                tooltip: '印刷',
+              ),
+            ],
+          ),
+          body: PdfPreview(
+            build: (format) => _generatePdf(format),
+            allowSharing: false,
+            allowPrinting: false,
+            canChangePageFormat: false,
+            canChangeOrientation: false,
+            canDebug: false,
+          ),
+        ),
+      ),
+    );
   }
 
   Future<Uint8List> _generatePdf(PdfPageFormat format) async {
-    final pdf = pw.Document();
+    // 日本語フォントをassetsから読み込み
+    final fontData = await rootBundle.load(
+      'assets/fonts/NotoSansJP-Regular.ttf',
+    );
+    final font = pw.Font.ttf(fontData);
 
-    // 数量を考慮してQRコードリストを展開
-    final List<ShieldQrData> expandedList = [];
+    final fontBoldData = await rootBundle.load(
+      'assets/fonts/NotoSansJP-Bold.ttf',
+    );
+    final fontBold = pw.Font.ttf(fontBoldData);
+
+    // PDFドキュメントに日本語フォントをデフォルトテーマとして設定
+    final pdf = pw.Document(
+      theme: pw.ThemeData.withFont(base: font, bold: fontBold),
+    );
+
+    // QRコードデータを準備
+    final List<Map<String, dynamic>> itemsToPrint = [];
     for (int i = 0; i < widget.qrDataList.length; i++) {
-      final quantity = _quantities[i] ?? 1;
-      for (int j = 0; j < quantity; j++) {
-        expandedList.add(widget.qrDataList[i]);
-      }
+      final quantity = _quantities[i] ?? 100;
+      final qrData = widget.qrDataList[i];
+      final qrDataString = '${qrData.toQrString()}-$quantity';
+      itemsToPrint.add({
+        'data': qrData,
+        'quantity': quantity,
+        'qrText': qrDataString,
+      });
     }
 
     // 1ページに6列×N行でQRコードを配置
     const itemsPerPage = 24; // 6列 × 4行
-    final pageCount = (expandedList.length / itemsPerPage).ceil();
+    final pageCount = (itemsToPrint.length / itemsPerPage).ceil();
 
     for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
       final startIndex = pageIndex * itemsPerPage;
-      final endIndex = (startIndex + itemsPerPage > expandedList.length)
-          ? expandedList.length
+      final endIndex = (startIndex + itemsPerPage > itemsToPrint.length)
+          ? itemsToPrint.length
           : startIndex + itemsPerPage;
-      final pageItems = expandedList.sublist(startIndex, endIndex);
+      final pageItems = itemsToPrint.sublist(startIndex, endIndex);
 
       pdf.addPage(
         pw.Page(
@@ -119,6 +164,7 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
                       pw.Text(
                         'Shield QRコード',
                         style: pw.TextStyle(
+                          font: fontBold,
                           fontSize: 24,
                           fontWeight: pw.FontWeight.bold,
                         ),
@@ -126,7 +172,7 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
                       pw.SizedBox(height: 4),
                       pw.Text(
                         '${widget.pNumber} ${widget.engChange}',
-                        style: const pw.TextStyle(fontSize: 12),
+                        style: pw.TextStyle(font: font, fontSize: 12),
                       ),
                     ],
                   ),
@@ -138,53 +184,63 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
                 pw.Expanded(
                   child: pw.GridView(
                     crossAxisCount: 6,
-                    childAspectRatio: 1,
-                    children: pageItems.map((qrData) {
+                    crossAxisSpacing: 4,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 0.8,
+                    children: pageItems.map((item) {
+                      final qrData = item['data'] as ShieldQrData;
+                      final quantity = item['quantity'] as int;
+                      final qrDataString = item['qrText'] as String;
+
                       return pw.Container(
                         padding: const pw.EdgeInsets.all(2),
                         decoration: pw.BoxDecoration(
-                          color: PdfColors.white,
-                          border: pw.Border.all(color: PdfColors.grey300),
-                          borderRadius: pw.BorderRadius.circular(8),
+                          border: pw.Border.all(
+                            color: PdfColors.black,
+                            width: 1,
+                          ),
+                          borderRadius: pw.BorderRadius.circular(4),
                         ),
                         child: pw.Column(
-                          mainAxisAlignment: pw.MainAxisAlignment.center,
+                          mainAxisSize: pw.MainAxisSize.min,
                           children: [
-                            // YBMバッジ
-                            pw.Container(
-                              padding: const pw.EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: pw.BoxDecoration(
-                                color: PdfColors.blue,
-                                borderRadius: pw.BorderRadius.circular(12),
-                              ),
-                              child: pw.Text(
-                                qrData.ybm,
-                                style: pw.TextStyle(
-                                  color: PdfColors.white,
-                                  fontSize: 12,
-                                  fontWeight: pw.FontWeight.bold,
+                            // YBMと数量
+                            pw.Row(
+                              mainAxisAlignment:
+                                  pw.MainAxisAlignment.spaceBetween,
+                              children: [
+                                pw.Text(
+                                  qrData.ybm,
+                                  style: pw.TextStyle(
+                                    font: fontBold,
+                                    fontSize: 8,
+                                  ),
+                                ),
+                                pw.Text(
+                                  '$quantity本',
+                                  style: pw.TextStyle(
+                                    font: fontBold,
+                                    fontSize: 8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // QRコード
+                            pw.Expanded(
+                              child: pw.Center(
+                                child: pw.BarcodeWidget(
+                                  barcode: pw.Barcode.qrCode(),
+                                  data: qrDataString,
+                                  width: 60,
+                                  height: 60,
+                                  drawText: false,
                                 ),
                               ),
                             ),
-                            pw.SizedBox(height: 2),
-                            // QRコード
-                            pw.Expanded(
-                              child: pw.BarcodeWidget(
-                                barcode: pw.Barcode.qrCode(),
-                                data: qrData.toQrString(),
-                              ),
-                            ),
-                            pw.SizedBox(height: 2),
-                            // QRコード内容
+                            // QRテキスト
                             pw.Text(
-                              qrData.toQrString(),
-                              style: pw.TextStyle(
-                                fontSize: 10,
-                                fontWeight: pw.FontWeight.bold,
-                              ),
+                              qrDataString,
+                              style: pw.TextStyle(font: fontBold, fontSize: 6),
                               textAlign: pw.TextAlign.center,
                             ),
                           ],
@@ -200,7 +256,7 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
                   alignment: pw.Alignment.centerRight,
                   child: pw.Text(
                     'Page ${pageIndex + 1} of $pageCount',
-                    style: const pw.TextStyle(fontSize: 10),
+                    style: pw.TextStyle(font: font, fontSize: 10),
                   ),
                 ),
               ],
@@ -215,6 +271,10 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final buttonColor = AppColors.getHighLightColor(context);
+    final cardColor = AppColors.getCardColor(context);
+    final errorColor = AppColors.getErrorColor(context);
     return Dialog(
       child: Container(
         width: 900,
@@ -239,7 +299,7 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'P/N: ${widget.pNumber} | ENG: ${widget.engChange}',
+                      '${widget.pNumber}  ${widget.engChange}',
                       style: const TextStyle(fontSize: 14, color: Colors.black),
                     ),
                   ],
@@ -250,8 +310,12 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
                       onPressed: () => _handlePrint(context),
                       icon: const Icon(Icons.print),
                       label: const Text('印刷'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: buttonColor,
+                        foregroundColor: cardColor, // Custom foreground
+                      ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 18),
                     IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: () => Navigator.of(context).pop(),
@@ -265,18 +329,18 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
 
             // QRコード数の表示と一括設定ボタン
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 // color: Colors.blue.shade50,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, color: Colors.blue),
-                  const SizedBox(width: 8),
+                  Icon(Icons.info_outline, color: errorColor),
+                  const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      '合計 ${_getTotalQuantity()} 個のQRコードを印刷します (${widget.qrDataList.length} 種類)',
+                      '${widget.qrDataList.length} 種類のQRコードを印刷します',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -289,8 +353,8 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
                     icon: const Icon(Icons.edit, size: 16),
                     label: const Text('数量を一括設定'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.getHighLightColor(context),
+                      foregroundColor: AppColors.getCardColor(context),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
@@ -339,7 +403,7 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
                         return _QrCodeCard(
                           qrData: qrData,
                           index: index + 1,
-                          quantity: _quantities[index] ?? 1,
+                          quantity: _quantities[index] ?? 100,
                           onQuantityTap: () => _showQuantityDialog(index),
                         );
                       },
@@ -367,78 +431,90 @@ class _QrCodeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
-      elevation: 2,
-      color: Colors.white,
+      elevation: 0,
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
+        side: BorderSide(
+          color: isDark ? AppColors.paperWhite : AppColors.black,
+          width: 1,
+        ),
+      ),
+
       child: Padding(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.only(top: 4, right: 2, bottom: 4, left: 2),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // YBM表示と数量
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    qrData.ybm,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: onQuantityTap,
-                  child: Container(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(12),
+                      horizontal: 0,
+                      vertical: 2,
                     ),
                     child: Text(
-                      '$quantity本',
+                      qrData.ybm,
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
+                        color: AppColors.paperWhite,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            // QRコード
-            Expanded(
-              child: QrImageView(
-                data: qrData.toQrString(),
-                version: QrVersions.auto,
-                gapless: false,
+                  GestureDetector(
+                    onTap: onQuantityTap,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.getHighLightColor(context),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '$quantity本',
+                        style: TextStyle(
+                          color: AppColors.getCardColor(context),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 1),
 
+            // QRコード
+            Expanded(
+              child: QrImageView(
+                data: '${qrData.toQrString()}-$quantity',
+                version: QrVersions.auto,
+                gapless: false,
+                foregroundColor: AppColors.getLineColor(
+                  context,
+                ), // Conditional color
+                backgroundColor: Colors.transparent, // Ensure transparency
+              ),
+            ),
+            const SizedBox(height: 1),
             // QRコード内容
             Text(
-              qrData.toQrString(),
-              style: const TextStyle(
+              '${qrData.toQrString()}-$quantity',
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: AppColors.getLineColor(context),
               ),
               textAlign: TextAlign.center,
             ),
@@ -504,7 +580,12 @@ class _QuantityInputDialogState extends State<_QuantityInputDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dialogBackgroundColor = isDark ? AppColors.paperBlack : Colors.white;
+    final textColor = isDark ? AppColors.paperWhite : AppColors.paperBlack;
+
     return Dialog(
+      backgroundColor: dialogBackgroundColor,
       child: Container(
         width: 500,
         padding: const EdgeInsets.all(24),
@@ -512,9 +593,13 @@ class _QuantityInputDialogState extends State<_QuantityInputDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // タイトル
-            const Text(
+            Text(
               'QRコードの数量を設定',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
             ),
             const SizedBox(height: 4),
 
@@ -522,14 +607,18 @@ class _QuantityInputDialogState extends State<_QuantityInputDialog> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.blue, width: 2),
+                border: Border.all(
+                  color: AppColors.getHighLightColor(context),
+                  width: 2,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 _inputValue,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
+                  color: textColor,
                 ),
               ),
             ),
@@ -541,9 +630,12 @@ class _QuantityInputDialogState extends State<_QuantityInputDialog> {
               children: [
                 // 左側: プリセット
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text('プリセット', style: TextStyle(fontSize: 14)),
+                    Text(
+                      'プリセット',
+                      style: TextStyle(fontSize: 14, color: textColor),
+                    ),
                     const SizedBox(height: 4),
                     ..._presets.map((preset) {
                       return Padding(
@@ -557,13 +649,17 @@ class _QuantityInputDialogState extends State<_QuantityInputDialog> {
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
+                              elevation: 1,
+                              backgroundColor: AppColors.getCardColor(context),
+                              foregroundColor: AppColors.getLineColor(context),
                               padding: const EdgeInsets.symmetric(vertical: 0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(2),
+                              ),
                             ),
                             child: Text(
                               preset.toString(),
-                              style: const TextStyle(fontSize: 14),
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ),
                         ),
@@ -576,30 +672,60 @@ class _QuantityInputDialogState extends State<_QuantityInputDialog> {
                 // 右側: テンキー
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text('テンキー', style: TextStyle(fontSize: 14)),
+                      Text(
+                        'テンキー',
+                        style: TextStyle(fontSize: 14, color: textColor),
+                      ),
                       const SizedBox(height: 4),
                       GridView.count(
                         shrinkWrap: true,
                         crossAxisCount: 3,
                         crossAxisSpacing: 8,
                         mainAxisSpacing: 8,
-                        childAspectRatio: 2,
+                        childAspectRatio:
+                            1.4, // Changed from 2 to 1 for square buttons
                         children: [
                           ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) {
                             return ElevatedButton(
                               onPressed: () => _onNumberTap(number.toString()),
+                              style: ElevatedButton.styleFrom(
+                                fixedSize: const Size.square(
+                                  80,
+                                ), // Adjust size here
+                                shape: const CircleBorder(), // Make it circular
+                                backgroundColor: Colors
+                                    .transparent, // Remove background color
+                                side: BorderSide(
+                                  color: textColor,
+                                  width: 1.5,
+                                ), // Add border
+                                elevation: 0, // Remove shadow
+                                shadowColor: Colors
+                                    .transparent, // Ensure no shadow color
+                              ),
                               child: Text(
                                 number.toString(),
-                                style: const TextStyle(fontSize: 20),
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  color: textColor,
+                                ),
                               ),
                             );
                           }),
                           ElevatedButton(
                             onPressed: _onClear,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              foregroundColor:
+                                  Colors.red, // Set icon color here
+                              fixedSize: const Size.square(
+                                80,
+                              ), // Adjust size here
+                              shape: const CircleBorder(), // Make it circular
+                              side: BorderSide(color: Colors.red, width: 2),
                             ),
                             child: const Text(
                               'C',
@@ -608,17 +734,43 @@ class _QuantityInputDialogState extends State<_QuantityInputDialog> {
                           ),
                           ElevatedButton(
                             onPressed: () => _onNumberTap('0'),
-                            child: const Text(
+                            style: ElevatedButton.styleFrom(
+                              fixedSize: const Size.square(
+                                80,
+                              ), // Adjust size here
+                              shape: const CircleBorder(), // Make it circular
+                              backgroundColor:
+                                  Colors.transparent, // Remove background color
+                              side: BorderSide(
+                                color: textColor,
+                                width: 1.5,
+                              ), // Add border
+                              elevation: 0, // Remove shadow
+                              shadowColor:
+                                  Colors.transparent, // Ensure no shadow color
+                            ),
+                            child: Text(
                               '0',
-                              style: TextStyle(fontSize: 20),
+                              style: TextStyle(fontSize: 20, color: textColor),
                             ),
                           ),
                           ElevatedButton(
                             onPressed: _onBackspace,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              foregroundColor:
+                                  Colors.orange, // Set icon color here
+                              fixedSize: const Size.square(
+                                80,
+                              ), // Adjust size here
+                              shape: const CircleBorder(), // Make it circular
+                              side: BorderSide(
+                                color: Colors.orange,
+                                width: 2,
+                              ), // Add border with orange color
                             ),
-                            child: const Icon(Icons.backspace),
+                            child: const Icon(Icons.backspace, size: 28),
                           ),
                         ],
                       ),
@@ -635,13 +787,18 @@ class _QuantityInputDialogState extends State<_QuantityInputDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.getHighLightColor(
+                      context,
+                    ), // Example conditional color
+                  ),
                   child: const Text('キャンセル'),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _onConfirm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppColors.getHighLightColor(context),
                   ),
                   child: const Text('確定'),
                 ),

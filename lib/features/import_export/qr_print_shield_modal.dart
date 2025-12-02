@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:preharness/core/core.dart';
 import 'package:preharness/features/import_export/data/shield_service.dart';
 import 'package:preharness/features/import_export/qr_print_preview.dart';
 
@@ -54,6 +55,7 @@ class _QrPrintShieldModalState extends State<QrPrintShieldModal> {
 
   @override
   Widget build(BuildContext context) {
+    final lineColor = AppColors.getLineColor(context);
     return Dialog(
       child: Container(
         width: 800,
@@ -68,10 +70,7 @@ class _QrPrintShieldModalState extends State<QrPrintShieldModal> {
               children: [
                 const Text(
                   'Shield QRコード印刷',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -80,57 +79,54 @@ class _QrPrintShieldModalState extends State<QrPrintShieldModal> {
               ],
             ),
             const Divider(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
             // コンテンツエリア
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _groups.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.inbox,
-                                size: 100,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'データがありません',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.inbox,
+                            size: 100,
+                            color: Colors.grey,
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: _groups.length,
-                          itemBuilder: (context, index) {
-                            final group = _groups[index];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              child: ListTile(
-                                leading: const Icon(
-                                  Icons.qr_code_2,
-                                  color: Colors.blue,
-                                ),
-                                title: Text(
-                                  group.pNumber,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                subtitle: Text('ENG Change: ${group.engChange}'),
-                                trailing: const Icon(Icons.arrow_forward_ios),
-                                onTap: () => _onGroupTapped(group),
+                          const SizedBox(height: 16),
+                          Text(
+                            'データがありません',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _groups.length,
+                      itemBuilder: (context, index) {
+                        final group = _groups[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            leading: Icon(Icons.qr_code_2, color: lineColor),
+                            title: Text(
+                              group.pNumber,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                            subtitle: Text('ENG Change: ${group.engChange}'),
+                            trailing: const Icon(Icons.arrow_forward_ios),
+                            onTap: () => _onGroupTapped(group),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),

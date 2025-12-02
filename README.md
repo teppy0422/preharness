@@ -461,6 +461,11 @@ samples, guidance on mobile development, and a full API reference.
 
 #### 080
 
+- 専用モーダルで入力した数量が QR テキストに含まれるように修正
+- QR コード印刷で日本語ば化ける不具合の修正
+
+#### 081
+
 #### 不具合
 
 - QR リーダー接続が切れたらアプリトップに戻る不具合
@@ -508,7 +513,7 @@ flutter pub get
   adb start-server
   adb devices
   adb tcpip 5555</pre>
-- IP アドレスを調べて実行
+- IP アドレスを調べて実行(デバイス選択がスキップできるようになる)
   <pre>adb connect 192.168.11.5:5555
   </pre>
 - USB ケーブルを抜いて下記実行後に選択

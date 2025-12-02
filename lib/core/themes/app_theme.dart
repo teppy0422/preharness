@@ -21,12 +21,10 @@ class AppTheme {
       primary: AppColors.blue,
       secondary: AppColors.green,
       surface: AppColors.paperWhite,
-      background: AppColors.grayWhite,
       error: AppColors.errorRed,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onSurface: Colors.black87,
-      onBackground: Colors.black87,
       onError: Colors.white,
     ),
 
@@ -56,7 +54,7 @@ class AppTheme {
     // ボタンテーマ
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.blue,
+        backgroundColor: AppColors.neonOrange,
         foregroundColor: Colors.white,
         elevation: 2,
         textStyle: const TextStyle(
@@ -95,10 +93,7 @@ class AppTheme {
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(color: AppColors.blue),
       ),
-      labelStyle: TextStyle(
-        fontFamily: 'NotoSansJP',
-        color: Colors.black54,
-      ),
+      labelStyle: TextStyle(fontFamily: 'NotoSansJP', color: Colors.black54),
     ),
   );
 
@@ -119,12 +114,10 @@ class AppTheme {
       primary: AppColors.neonGreen,
       secondary: AppColors.neonOrange,
       surface: AppColors.lightBlack,
-      background: AppColors.black,
       error: AppColors.errorRed,
       onPrimary: Colors.black,
       onSecondary: Colors.black,
       onSurface: Colors.white,
-      onBackground: Colors.white,
       onError: Colors.white,
     ),
 
@@ -189,16 +182,11 @@ class AppTheme {
 
     // 入力フィールドテーマ
     inputDecorationTheme: const InputDecorationTheme(
-      border: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.white54),
-      ),
+      border: OutlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(color: AppColors.neonGreen),
       ),
-      labelStyle: TextStyle(
-        fontFamily: 'NotoSansJP',
-        color: Colors.white54,
-      ),
+      labelStyle: TextStyle(fontFamily: 'NotoSansJP', color: Colors.white54),
     ),
   );
 

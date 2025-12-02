@@ -60,7 +60,6 @@ class UserLoginCardModal extends StatelessWidget {
     final doc = pw.Document();
     final username = user['username'];
     final qrId = user['id'].toString();
-    final qrBytes = await _generateQrImage(qrId);
 
     final fontData = await rootBundle.load(
       'assets/fonts/NotoSansJP-Regular.ttf',
@@ -96,6 +95,17 @@ class UserLoginCardModal extends StatelessWidget {
                 pw.SizedBox(height: 8),
                 pw.Text('ID: $qrId', style: pw.TextStyle(font: ttf)),
                 pw.Text('名前: $username', style: pw.TextStyle(font: ttf)),
+                pw.SizedBox(height: 20),
+                // QRコード
+                pw.Container(
+                  width: 150,
+                  height: 150,
+                  child: pw.BarcodeWidget(
+                    barcode: pw.Barcode.qrCode(),
+                    data: qrId,
+                    drawText: false,
+                  ),
+                ),
                 pw.SizedBox(height: 10),
                 // アイコン
                 // pw.Text(
