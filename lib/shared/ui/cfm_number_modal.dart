@@ -60,10 +60,7 @@ class _CfmNumberModalState extends State<CfmNumberModal> {
         decoration: BoxDecoration(
           color: AppColors.getCardColor(context),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.getLineColor(context),
-            width: 1,
-          ),
+          border: Border.all(color: AppColors.getLineColor(context), width: 1),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -124,7 +121,10 @@ class _CfmNumberModalState extends State<CfmNumberModal> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 16,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.getHighLightColor(context).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -184,7 +184,6 @@ class _CfmNumberModalState extends State<CfmNumberModal> {
       ),
     );
   }
-
 
   static Future<String?> show(
     BuildContext context, {

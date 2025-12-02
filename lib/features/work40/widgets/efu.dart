@@ -4,7 +4,6 @@ import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/core/utils/global.dart';
 import 'package:preharness/core/utils/color_utils.dart'; // getColorFromHive関数のため
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:preharness/features/work40/pages/work_results_page.dart';
 import 'dart:async'; // ← これを追加
 
 Color getLineColor(BuildContext context) {

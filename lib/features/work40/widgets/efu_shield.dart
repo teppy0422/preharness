@@ -230,9 +230,6 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark ? AppColors.paperBlack : Colors.white;
-    final borderColor = isDark
-        ? AppColors.paperWhite.withValues(alpha: 1)
-        : AppColors.green.withValues(alpha: 0.2);
     final labelColor = isDark
         ? (Colors.grey[400] ?? Colors.grey)
         : AppColors.green;

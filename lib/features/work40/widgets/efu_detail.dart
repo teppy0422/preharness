@@ -12,9 +12,7 @@ import 'package:preharness/features/work40/widgets/product_info_card.dart';
 import 'package:preharness/features/work40/widgets/crimp_condition.dart';
 import 'package:preharness/core/utils/shared_prefs_helper.dart';
 import 'package:preharness/core/models/workflow_state.dart';
-import 'package:preharness/shared/ui/pattern_button.dart';
 import 'package:preharness/shared/ui/cfm_number_modal.dart';
-import 'package:preharness/features/work40/widgets/components/sliding_number.dart';
 import 'package:preharness/features/work40/widgets/components/animated_counter.dart';
 import 'package:preharness/features/work40/widgets/components/speed_graph.dart';
 import 'package:preharness/features/work40/widgets/components/comparison_formula.dart';
@@ -238,20 +236,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
         });
       }
     });
-  }
-
-  // フォールバック：別の方法でフォーカスをアクティブ化
-  void _fallbackFocusActivation() {
-    // 複数回のフォーカス要求でシステムを刺激
-    for (int i = 0; i < 3; i++) {
-      Future.delayed(Duration(milliseconds: i * 50), () {
-        if (mounted) {
-          FocusScope.of(context).requestFocus(_focusNode);
-          _focusNode.requestFocus();
-        }
-      });
-    }
-    debugPrint('🎯 [efu_detail] フォールバック：複数回フォーカス要求実行');
   }
 
   @override
@@ -1322,48 +1306,6 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
     return ComparisonFormula(
       comparisonData: _comparisonData,
       isLoading: _comparisonData == null,
-    );
-  }
-
-  Widget _buildComparisonRow(String label, String comparison, bool isValid) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            isValid ? Icons.check_circle : Icons.cancel,
-            color: isValid
-                ? AppColors.getLineSubColor(context)
-                : AppColors.getErrorColor(context),
-            size: 12,
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.getLineColor(context),
-                  ),
-                ),
-                Text(
-                  comparison,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isValid
-                        ? AppColors.getLineSubColor(context)
-                        : AppColors.getErrorColor(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/core/utils/global.dart';
 import 'package:preharness/shared/ui/pattern_button.dart';
-import 'package:preharness/features/work40/pages/work_results_page.dart';
 
 class ProductInfoCard extends StatefulWidget {
   final Map<String, dynamic> processingConditions;
