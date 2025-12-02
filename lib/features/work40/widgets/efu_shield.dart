@@ -7,8 +7,13 @@ import 'package:preharness/core/utils/global.dart';
 
 class EfuShieldPage extends StatelessWidget {
   final List<Map<String, dynamic>> shieldConditions;
+  final Function(Map<String, dynamic>)? onBlockTapped;
 
-  const EfuShieldPage({super.key, required this.shieldConditions});
+  const EfuShieldPage({
+    super.key,
+    required this.shieldConditions,
+    this.onBlockTapped,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +40,9 @@ class EfuShieldPage extends StatelessWidget {
     final ybm = firstCondition['ybm']?.toString() ?? '';
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final headerBgColor = isDark ? AppColors.deepGreen : AppColors.lightGreen;
+    final headerBgColor = isDark ? AppColors.black : AppColors.paperWhite;
     final headerTextColor = isDark ? AppColors.paperWhite : AppColors.black;
+    final borderColor = isDark ? AppColors.paperWhite : AppColors.paperWhite;
 
     return Column(
       children: [
@@ -47,7 +53,8 @@ class EfuShieldPage extends StatelessWidget {
           margin: const EdgeInsets.only(top: 4, right: 1, left: 1, bottom: 4),
           decoration: BoxDecoration(
             color: headerBgColor,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(0),
+            border: Border.all(color: borderColor, width: .5),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
@@ -109,6 +116,7 @@ class EfuShieldPage extends StatelessWidget {
                 return _ShieldConditionCard(
                   condition: condition,
                   index: index + 1,
+                  onTap: onBlockTapped,
                 );
               },
             ),
@@ -147,8 +155,13 @@ class EfuShieldPage extends StatelessWidget {
 class _ShieldConditionCard extends StatefulWidget {
   final Map<String, dynamic> condition;
   final int index;
+  final Function(Map<String, dynamic>)? onTap;
 
-  const _ShieldConditionCard({required this.condition, required this.index});
+  const _ShieldConditionCard({
+    required this.condition,
+    required this.index,
+    this.onTap,
+  });
 
   @override
   State<_ShieldConditionCard> createState() => _ShieldConditionCardState();
@@ -156,11 +169,8 @@ class _ShieldConditionCard extends StatefulWidget {
 
 class _ShieldConditionCardState extends State<_ShieldConditionCard> {
   Color? _wireColor;
-  Color? _wireForeColor;
   Color? _markColor1;
-  Color? _markForeColor1;
   Color? _markColor2;
-  Color? _markForeColor2;
 
   @override
   void initState() {
@@ -174,14 +184,9 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
       final wireColorCode = widget.condition['wire_color']?.toString() ?? '';
       if (wireColorCode.isNotEmpty) {
         final backColor = await getColorFromHive(wireColorCode);
-        final foreColor = await getColorFromHive(
-          wireColorCode,
-          getForeColor: true,
-        );
         if (mounted) {
           setState(() {
             _wireColor = backColor ?? Colors.white;
-            _wireForeColor = foreColor ?? Colors.black;
           });
         }
       }
@@ -190,14 +195,9 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
       final markColor1Code = widget.condition['mark_color_1']?.toString() ?? '';
       if (markColor1Code.isNotEmpty) {
         final backColor = await getColorFromHive(markColor1Code);
-        final foreColor = await getColorFromHive(
-          markColor1Code,
-          getForeColor: true,
-        );
         if (mounted) {
           setState(() {
             _markColor1 = backColor ?? Colors.white;
-            _markForeColor1 = foreColor ?? Colors.black;
           });
         }
       }
@@ -206,14 +206,9 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
       final markColor2Code = widget.condition['mark_color_2']?.toString() ?? '';
       if (markColor2Code.isNotEmpty) {
         final backColor = await getColorFromHive(markColor2Code);
-        final foreColor = await getColorFromHive(
-          markColor2Code,
-          getForeColor: true,
-        );
         if (mounted) {
           setState(() {
             _markColor2 = backColor ?? Colors.white;
-            _markForeColor2 = foreColor ?? Colors.black;
           });
         }
       }
@@ -222,7 +217,6 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
       if (mounted) {
         setState(() {
           _wireColor = Colors.white;
-          _wireForeColor = Colors.black;
         });
       }
     }
@@ -245,16 +239,15 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
     final valueColor = isDark ? AppColors.paperWhite : AppColors.black;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 6),
       elevation: 2,
       color: cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: borderColor, width: .5),
+        side: BorderSide(width: .5),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(8),
-
+        padding: const EdgeInsets.only(top: 2, right: 8, bottom: 4, left: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -263,7 +256,7 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       _getValue('cfg_no'),
@@ -274,7 +267,6 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
                       ),
                     ),
                     const SizedBox(width: 8),
-
                     Flexible(
                       flex: 0,
                       child: _buildInfoRowCompact(
@@ -284,7 +276,7 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
                         valueColor,
                       ),
                     ),
-                    const SizedBox(width: 24),
+                    const SizedBox(width: 12),
                     Flexible(
                       flex: 0,
                       child: _buildWireColorRowCompact(
@@ -294,14 +286,46 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
                         valueColor,
                       ),
                     ),
-                    const SizedBox(width: 24),
+                    const SizedBox(width: 12),
                     Flexible(
                       flex: 0,
-                      child: _buildInfoRowCompact(
-                        '線長',
-                        _getValue('wire_len'),
-                        labelColor,
-                        valueColor,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_getValue("wire_len").isEmpty)
+                            Text(
+                              '-',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: valueColor,
+                              ),
+                            )
+                          else
+                            RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: _getValue("wire_len"),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: valueColor,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: ' mm',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: valueColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ],
@@ -309,98 +333,213 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
               ],
             ),
 
-            const Divider(height: 10, thickness: 0.5),
-
-            // 端子情報
+            // const Divider(height: 10, thickness: 0.5),
+            const SizedBox(height: 0),
+            // 端子情報（左右でタップ可能）
             Row(
               children: [
+                // 端子1（左側）
                 Expanded(
-                  child: _buildSection(
-                    context,
-                    title: '端子1',
-                    labelColor: labelColor,
-                    valueColor: valueColor,
-                    items: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildInfoRow(
-                              '端子品番',
-                              formatCode(_getValue('term_part_no_1'), '-'),
-                              labelColor,
-                              valueColor,
-                            ),
-                          ),
-                          if (_getValue('mark_color_1') != '-' && _getValue('mark_color_1').isNotEmpty)
-                            Expanded(
-                              child: _buildColorBoxRow(
-                                'マジック色',
+                  child: Container(
+                    margin: EdgeInsets.all(0),
+                    padding: EdgeInsets.all(0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.getHighLightColor(
+                                context,
+                              ).withValues(alpha: 1)
+                            : AppColors.getHighLightColor(
+                                context,
+                              ).withValues(alpha: 1),
+                        width: isDark ? .5 : 1,
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () {
+                          if (widget.onTap != null) {
+                            final blockInfo = {
+                              'strip': _getValue('strip_len_1'),
+                              'directives': [
+                                _getValue('term_proc_inst_1'),
+                                '',
+                                '',
+                                '',
+                                '',
+                              ],
+                              'terminals': [
+                                _getValue('term_part_no_1'),
+                                _getValue('add_parts_1'),
                                 _getValue('mark_color_1'),
+                                '',
+                                '',
+                              ],
+                            };
+                            widget.onTap!(blockInfo);
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            top: 2,
+                            bottom: 2,
+                            left: 8,
+                            right: 8,
+                          ),
+                          child: _buildSection(
+                            context,
+                            title: '端子1',
+                            labelColor: labelColor,
+                            valueColor: valueColor,
+                            items: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildInfoRow(
+                                      '端子品番',
+                                      formatCode(
+                                        _getValue('term_part_no_1'),
+                                        '-',
+                                      ),
+                                      labelColor,
+                                      valueColor,
+                                    ),
+                                  ),
+                                  if (_getValue('mark_color_1') != '-' &&
+                                      _getValue('mark_color_1').isNotEmpty)
+                                    Expanded(
+                                      child: _buildColorBoxRow(
+                                        'マジック色',
+                                        _getValue('mark_color_1'),
+                                        labelColor,
+                                        valueColor,
+                                        _markColor1,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              _buildInfoRow(
+                                '付属部品',
+                                formatCode(_getValue('add_parts_1'), "-"),
                                 labelColor,
                                 valueColor,
-                                _markColor1,
                               ),
-                            ),
-                        ],
+                              _buildInfoRow(
+                                '回路',
+                                _getValue('circuit_1'),
+                                labelColor,
+                                valueColor,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      _buildInfoRow(
-                        '付属部品',
-                        formatCode(_getValue('add_parts_1'), "-"),
-                        labelColor,
-                        valueColor,
-                      ),
-                      _buildInfoRow(
-                        '回路',
-                        _getValue('circuit_1'),
-                        labelColor,
-                        valueColor,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
+                // 端子2（右側）
                 Expanded(
-                  child: _buildSection(
-                    context,
-                    title: '端子2',
-                    labelColor: labelColor,
-                    valueColor: valueColor,
-                    items: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildInfoRow(
-                              '端子品番',
-                              formatCode(_getValue('term_part_no_2'), '-'),
-                              labelColor,
-                              valueColor,
-                            ),
-                          ),
-                          if (_getValue('mark_color_2') != '-' && _getValue('mark_color_2').isNotEmpty)
-                            Expanded(
-                              child: _buildColorBoxRow(
-                                'マジック色',
+                  child: Container(
+                    margin: EdgeInsets.all(0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.getHighLightColor(
+                                context,
+                              ).withValues(alpha: 1)
+                            : AppColors.getHighLightColor(
+                                context,
+                              ).withValues(alpha: 1),
+                        width: isDark ? .5 : 1,
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () {
+                          if (widget.onTap != null) {
+                            final blockInfo = {
+                              'strip': _getValue('strip_len_2'),
+                              'directives': [
+                                _getValue('term_proc_inst_2'),
+                                '',
+                                '',
+                                '',
+                                '',
+                              ],
+                              'terminals': [
+                                _getValue('term_part_no_2'),
+                                _getValue('add_parts_2'),
                                 _getValue('mark_color_2'),
+                                '',
+                                '',
+                              ],
+                            };
+                            widget.onTap!(blockInfo);
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            top: 2,
+                            bottom: 2,
+                            left: 8,
+                            right: 8,
+                          ),
+                          child: _buildSection(
+                            context,
+                            title: '端子2',
+                            labelColor: labelColor,
+                            valueColor: valueColor,
+                            items: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildInfoRow(
+                                      '端子品番',
+                                      formatCode(
+                                        _getValue('term_part_no_2'),
+                                        '-',
+                                      ),
+                                      labelColor,
+                                      valueColor,
+                                    ),
+                                  ),
+                                  if (_getValue('mark_color_2') != '-' &&
+                                      _getValue('mark_color_2').isNotEmpty)
+                                    Expanded(
+                                      child: _buildColorBoxRow(
+                                        'マジック色',
+                                        _getValue('mark_color_2'),
+                                        labelColor,
+                                        valueColor,
+                                        _markColor2,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              _buildInfoRow(
+                                '付属部品',
+                                formatCode(_getValue('add_parts_2'), "-"),
                                 labelColor,
                                 valueColor,
-                                _markColor2,
                               ),
-                            ),
-                        ],
+                              _buildInfoRow(
+                                '回路',
+                                _getValue('circuit_2'),
+                                labelColor,
+                                valueColor,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      _buildInfoRow(
-                        '付属部品',
-                        formatCode(_getValue('add_parts_2'), "-"),
-                        labelColor,
-                        valueColor,
-                      ),
-                      _buildInfoRow(
-                        '回路',
-                        _getValue('circuit_2'),
-                        labelColor,
-                        valueColor,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ],
@@ -530,59 +669,6 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
     );
   }
 
-  Widget _buildWireColorRow(
-    String label,
-    String value,
-    Color labelColor,
-    Color valueColor,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 14, color: labelColor),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Row(
-              children: [
-                Text(
-                  value.isEmpty ? '-' : value,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: valueColor,
-                  ),
-                ),
-                if (value.isNotEmpty) ...[
-                  const SizedBox(width: 12),
-                  Container(
-                    width: 40,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: _wireColor ?? Colors.white,
-                      border: Border.all(
-                        color: _wireForeColor ?? Colors.black,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // 横並び用のコンパクト版
   Widget _buildInfoRowCompact(
     String label,
@@ -593,8 +679,8 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 12, color: labelColor)),
-        const SizedBox(height: 4),
+        // Text(label, style: TextStyle(fontSize: 12, color: labelColor)),
+        // const SizedBox(height: 4),
         Text(
           value.isEmpty ? '-' : value,
           style: TextStyle(
@@ -619,8 +705,8 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 12, color: labelColor)),
-        const SizedBox(height: 4),
+        // Text(label, style: TextStyle(fontSize: 12, color: labelColor)),
+        // const SizedBox(height: 4),
         Row(
           children: [
             Text(

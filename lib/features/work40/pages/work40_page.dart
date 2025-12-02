@@ -261,6 +261,34 @@ class _Work40PageState extends State<Work40Page>
     }
   }
 
+  void _handleShieldBlockTapped(Map<String, dynamic> blockInfo) async {
+    // シールド検索からの詳細表示
+    // _shieldConditionsから選択された条件を_processingConditionsとして設定
+    if (_shieldConditions != null && _shieldConditions!.isNotEmpty) {
+      // blockInfoのterminalsから該当するシールド条件を見つける
+      final selectedCondition = _shieldConditions!.firstWhere(
+        (condition) => condition['term_part_no_1'] == blockInfo['terminals'][0],
+        orElse: () => _shieldConditions!.first,
+      );
+
+      // シールド条件に不足しているフィールドを追加
+      final processingConditions = Map<String, dynamic>.from(selectedCondition);
+      processingConditions['lot_num'] = processingConditions['lot_num'] ?? '';
+      processingConditions['sub_assy'] = processingConditions['sub_assy'] ?? '';
+      processingConditions['cut_code'] = processingConditions['cut_code'] ?? '';
+      processingConditions['wire_cnt'] = processingConditions['wire_cnt'] ?? '';
+      processingConditions['delivery_date'] =
+          processingConditions['delivery_date'] ?? '200101';
+
+      setState(() {
+        _processingConditions = processingConditions;
+      });
+    }
+
+    // 通常のblockTappedと同じ処理を実行
+    _handleBlockTapped(blockInfo);
+  }
+
   void _handleBackFromDetail() {
     setState(() {
       _isDetailView = false;
@@ -375,6 +403,7 @@ class _Work40PageState extends State<Work40Page>
     if (_isShieldSearch) {
       final shieldPage = EfuShieldPage(
         shieldConditions: _shieldConditions ?? [],
+        onBlockTapped: _handleShieldBlockTapped,
       );
 
       if (_animationType == 'flip') {

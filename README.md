@@ -452,7 +452,9 @@ samples, guidance on mobile development, and a full API reference.
 
 #### 078
 
-- シールド図面データ呼び出し専用の efu.dart を追加
+- シールド図面データ呼び出し専用の efu_shield.dart を追加
+
+#### 079
 
 #### 不具合
 
