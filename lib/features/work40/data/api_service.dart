@@ -171,6 +171,46 @@ class ApiService {
     }
   }
 
+  /// シールド加工条件を複数件取得（S-検索用）
+  static Future<List<Map<String, dynamic>>?> fetchShieldConditionsList({
+    required String pNumber,
+    required String engChange,
+    required String ybm,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final mainPath = prefs.getString('main_path');
+
+    if (mainPath == null || mainPath.isEmpty) {
+      log('main_path が設定されていません');
+      throw Exception('サーバーパスが設定されていません。');
+    }
+
+    final ip = mainPath.replaceAll(r'\\', '').replaceAll('//', '');
+    final url = Uri.parse(
+      'http://$ip:3000/api/shield-search?p_number=$pNumber&eng_change=$engChange&ybm=$ybm',
+    );
+
+    try {
+      final response = await http.get(url);
+
+      log('Shield search list response status: ${response.statusCode}');
+      log('Shield search list response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final List<dynamic> jsonList = jsonDecode(decodedBody);
+
+        return jsonList.cast<Map<String, dynamic>>();
+      } else {
+        log('サーバーエラー: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      log('通信エラー: $e');
+      return null;
+    }
+  }
+
   static Future<List<Map<String, dynamic>>?> searchChList({
     required String thin,
     required String fhin,

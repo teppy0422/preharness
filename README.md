@@ -448,6 +448,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### 077
 
+- efu_shield.dart のデザインを修正
+
+#### 078
+
 - シールド図面データ呼び出し専用の efu.dart を追加
 
 #### 不具合

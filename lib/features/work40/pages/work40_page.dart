@@ -3,6 +3,7 @@ import 'package:flutter/services.dart'; // RawKeyEventのために追加
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preharness/features/work40/data/api_service.dart';
 import 'package:preharness/features/work40/widgets/efu.dart';
+import 'package:preharness/features/work40/widgets/efu_shield.dart'; // シールド用ページをインポート
 import 'package:preharness/features/work40/widgets/efu_detail.dart'; // 詳細ページをインポート
 import 'package:preharness/shared/widgets/responsive_scaffold.dart';
 import 'package:preharness/routes/app_routes.dart';
@@ -27,6 +28,7 @@ class Work40Page extends StatefulWidget {
 class _Work40PageState extends State<Work40Page>
     with SingleTickerProviderStateMixin {
   Map<String, dynamic>? _processingConditions;
+  List<Map<String, dynamic>>? _shieldConditions; // シールド条件リスト
   bool _isDetailView = false;
   Map<String, dynamic>? _selectedBlockInfo;
   List<Map<String, dynamic>>? _chListData;
@@ -165,14 +167,14 @@ class _Work40PageState extends State<Work40Page>
     });
 
     try {
-      final result = await ApiService.fetchShieldConditions(
+      final result = await ApiService.fetchShieldConditionsList(
         pNumber: pNumber,
         engChange: engChange,
         ybm: ybm,
       );
 
       setState(() {
-        _processingConditions = result;
+        _shieldConditions = result;
         _isDetailView = false;
       });
 
@@ -186,10 +188,10 @@ class _Work40PageState extends State<Work40Page>
       _focusAndSelectSearchText();
 
       if (mounted) {
-        if (result != null) {
+        if (result != null && result.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('シールド検索成功'),
+            SnackBar(
+              content: Text('シールド検索成功: ${result.length}件'),
               backgroundColor: Colors.green,
             ),
           );
@@ -369,6 +371,26 @@ class _Work40PageState extends State<Work40Page>
   }
 
   Widget _buildEfuPage() {
+    // シールド検索の場合はEfuShieldPageを表示
+    if (_isShieldSearch) {
+      final shieldPage = EfuShieldPage(
+        shieldConditions: _shieldConditions ?? [],
+      );
+
+      if (_animationType == 'flip') {
+        return FlipAnimation(controller: _animationController, child: shieldPage);
+      } else if (_animationType == 'slide') {
+        return SlideAnimation(controller: _animationController, child: shieldPage);
+      } else if (_animationType == 'fade_scale') {
+        return FadeScaleAnimation(
+          controller: _animationController,
+          child: shieldPage,
+        );
+      }
+      return shieldPage;
+    }
+
+    // 通常の検索の場合はEfuPageを表示
     final efuPage = EfuPage(
       lot_num: _processingConditions?['lot_num']?.toString() ?? '',
       p_number: _processingConditions?['p_number']?.toString() ?? '',
