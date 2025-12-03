@@ -471,6 +471,12 @@ samples, guidance on mobile development, and a full API reference.
 
 #### 082
 
+- efu_shield.dart に前回の条件を表示を追加
+
+#### 083
+
+- efu_shield.dart で読み込み済みのアプリケーターとマッチする条件をハイライト表示(点滅)
+
 #### 不具合
 
 - QR リーダー接続が切れたらアプリトップに戻る不具合

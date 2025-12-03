@@ -271,7 +271,6 @@ class _QrPrintPreviewState extends State<QrPrintPreview> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final buttonColor = AppColors.getHighLightColor(context);
     final cardColor = AppColors.getCardColor(context);
     final errorColor = AppColors.getErrorColor(context);

@@ -190,6 +190,12 @@ class _StandardInfoCardState extends State<Measurement> {
       final blockTerminal1 = await SharedPrefsHelper.getString(
         'block_terminals_1',
       );
+      final efuWireType = await SharedPrefsHelper.getString(
+        'efu_wire_type',
+      );
+      final efuWireSize = await SharedPrefsHelper.getString(
+        'efu_wire_size',
+      );
 
       if (blockTerminal0 != null) {
         await SharedPrefsHelper.saveStringWithNotify(
@@ -208,6 +214,26 @@ class _StandardInfoCardState extends State<Measurement> {
         );
         debugPrint(
           '💾 block_terminals保存: measured_block_terminals_1 = $blockTerminal1',
+        );
+      }
+
+      if (efuWireType != null) {
+        await SharedPrefsHelper.saveStringWithNotify(
+          'measured_efu_wire_type',
+          efuWireType,
+        );
+        debugPrint(
+          '💾 efu_wire_type保存: measured_efu_wire_type = $efuWireType',
+        );
+      }
+
+      if (efuWireSize != null) {
+        await SharedPrefsHelper.saveStringWithNotify(
+          'measured_efu_wire_size',
+          efuWireSize,
+        );
+        debugPrint(
+          '💾 efu_wire_size保存: measured_efu_wire_size = $efuWireSize',
         );
       }
     } catch (e) {

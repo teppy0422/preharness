@@ -4,8 +4,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/core/utils/color_utils.dart';
 import 'package:preharness/core/utils/global.dart';
+import 'package:preharness/core/utils/shared_prefs_helper.dart';
 
-class EfuShieldPage extends StatelessWidget {
+class EfuShieldPage extends StatefulWidget {
   final List<Map<String, dynamic>> shieldConditions;
   final String? quantity;
   final Function(Map<String, dynamic>)? onBlockTapped;
@@ -18,8 +19,52 @@ class EfuShieldPage extends StatelessWidget {
   });
 
   @override
+  State<EfuShieldPage> createState() => _EfuShieldPageState();
+}
+
+class _EfuShieldPageState extends State<EfuShieldPage> {
+  String _terminalName = '';
+  String _efuWireType = '';
+  String _measuredTerminal0 = '';
+  String _measuredTerminal1 = '';
+  String _measuredWireType = '';
+  String _measuredWireSize = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs();
+  }
+
+  Future<void> _loadPrefs() async {
+    final terminalName =
+        await SharedPrefsHelper.getString('terminal_name') ?? '';
+    final efuWireType =
+        await SharedPrefsHelper.getString('efu_wire_type') ?? '';
+    final measuredTerminal0 =
+        await SharedPrefsHelper.getString('measured_block_terminals_0') ?? '';
+    final measuredTerminal1 =
+        await SharedPrefsHelper.getString('measured_block_terminals_1') ?? '';
+    final measuredWireType =
+        await SharedPrefsHelper.getString('measured_efu_wire_type') ?? '';
+    final measuredWireSize =
+        await SharedPrefsHelper.getString('measured_efu_wire_size') ?? '';
+
+    if (mounted) {
+      setState(() {
+        _terminalName = terminalName;
+        _efuWireType = efuWireType;
+        _measuredTerminal0 = measuredTerminal0;
+        _measuredTerminal1 = measuredTerminal1;
+        _measuredWireType = measuredWireType;
+        _measuredWireSize = measuredWireSize;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (shieldConditions.isEmpty) {
+    if (widget.shieldConditions.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -36,7 +81,7 @@ class EfuShieldPage extends StatelessWidget {
     }
 
     // 最初のレコードから共通情報を取得
-    final firstCondition = shieldConditions.first;
+    final firstCondition = widget.shieldConditions.first;
     final pNumber = firstCondition['p_number']?.toString() ?? '';
     final engChange = firstCondition['eng_change']?.toString() ?? '';
     final ybm = firstCondition['ybm']?.toString() ?? '';
@@ -48,101 +93,233 @@ class EfuShieldPage extends StatelessWidget {
 
     return Column(
       children: [
-        // 固定ヘッダー（p_number, eng_change, ybm）
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.only(top: 4, right: 8, left: 8, bottom: 2),
-          margin: const EdgeInsets.only(top: 4, right: 1, left: 1, bottom: 4),
-          decoration: BoxDecoration(
-            color: headerBgColor,
-            borderRadius: BorderRadius.circular(0),
-            border: Border.all(color: borderColor, width: .5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'シールド加工条件',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: headerTextColor,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${shieldConditions.length}件',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: headerTextColor.withValues(alpha: 1),
-                    ),
-                  ),
-                  if (quantity != null) ...[
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        '数量: $quantity本',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+        // ヘッダー部分（横並び）
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 左側: シールド加工条件ヘッダー
+            Expanded(
+              flex: 3,
+              child: Container(
+                height: 60,
+                padding: const EdgeInsets.only(
+                  top: 4,
+                  right: 8,
+                  left: 8,
+                  bottom: 2,
+                ),
+                margin: const EdgeInsets.only(
+                  top: 4,
+                  right: 4,
+                  left: 1,
+                  bottom: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: headerBgColor,
+                  borderRadius: BorderRadius.circular(0),
+                  border: Border.all(color: borderColor, width: .5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
                     ),
                   ],
-                ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'シールド加工条件',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: headerTextColor,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${widget.shieldConditions.length}件',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: headerTextColor.withValues(alpha: 1),
+                          ),
+                        ),
+                        if (widget.quantity != null) ...[
+                          const SizedBox(width: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '数量: ${widget.quantity}本',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildHeaderItem(
+                            'P/N',
+                            pNumber,
+                            headerTextColor,
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildHeaderItem(
+                            'ENG',
+                            engChange,
+                            headerTextColor,
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildHeaderItem('YBM', ybm, headerTextColor),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                  ],
+                ),
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildHeaderItem('P/N', pNumber, headerTextColor),
-                  ),
-                  Expanded(
-                    child: _buildHeaderItem('ENG', engChange, headerTextColor),
-                  ),
-                  Expanded(
-                    child: _buildHeaderItem('YBM', ybm, headerTextColor),
-                  ),
-                ],
+            ),
+
+            // 右側: 前回の加工条件ヘッダー
+            Expanded(
+              flex: 2,
+              child: Container(
+                height: 60,
+                padding: const EdgeInsets.only(
+                  top: 4,
+                  right: 8,
+                  left: 8,
+                  bottom: 2,
+                ),
+                margin: const EdgeInsets.only(
+                  top: 4,
+                  right: 1,
+                  left: 4,
+                  bottom: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: headerBgColor,
+                  borderRadius: BorderRadius.circular(0),
+                  border: Border.all(color: borderColor, width: .5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '前回の加工条件',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: headerTextColor,
+                      ),
+                    ),
+                    if (_measuredTerminal0.isNotEmpty ||
+                        _measuredWireType.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          if (_measuredTerminal0.isNotEmpty)
+                            Flexible(
+                              child: Text(
+                                formatCode(_measuredTerminal0, "-"),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: headerTextColor.withValues(alpha: 1),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          if (_measuredWireType.isNotEmpty) ...[
+                            const SizedBox(width: 16),
+                            Text(
+                              '$_measuredWireType/${_measuredWireSize.isNotEmpty ? _measuredWireSize : ''}',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: headerTextColor.withValues(alpha: 1),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                          if (_measuredTerminal1.isNotEmpty)
+                            const SizedBox(width: 16),
+                          Flexible(
+                            child: Text(
+                              formatCode(_measuredTerminal1, "-"),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: headerTextColor.withValues(alpha: 1),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: 2),
+                  ],
+                ),
               ),
-              const SizedBox(height: 2),
-            ],
-          ),
+            ),
+          ],
         ),
 
-        // 条件リスト
+        // コンテンツ部分（横並び）
         Expanded(
-          child: Container(
-            margin: const EdgeInsets.only(top: 4, right: 0, left: 0, bottom: 4),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(0),
-              itemCount: shieldConditions.length,
-              itemBuilder: (context, index) {
-                final condition = shieldConditions[index];
-                return _ShieldConditionCard(
-                  condition: condition,
-                  index: index + 1,
-                  onTap: onBlockTapped,
-                );
-              },
-            ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 左側: 条件リスト
+              Expanded(
+                flex: 2,
+                child: Container(
+                  margin: const EdgeInsets.only(
+                    top: 4,
+                    right: 4,
+                    left: 0,
+                    bottom: 4,
+                  ),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(0),
+                    itemCount: widget.shieldConditions.length,
+                    itemBuilder: (context, index) {
+                      final condition = widget.shieldConditions[index];
+                      return _ShieldConditionCard(
+                        condition: condition,
+                        index: index + 1,
+                        onTap: widget.onBlockTapped,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -153,15 +330,6 @@ class EfuShieldPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Text(
-        //   label,
-        //   style: TextStyle(
-        //     fontSize: 12,
-        //     color: textColor.withValues(alpha: 0.7),
-        //     fontWeight: FontWeight.w500,
-        //   ),
-        // ),
-        const SizedBox(height: 0),
         Text(
           value,
           style: TextStyle(
@@ -247,6 +415,190 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
 
   String _getValue(String key) {
     return widget.condition[key]?.toString() ?? '';
+  }
+
+  Widget _buildSection(
+    BuildContext context, {
+    required String title,
+    required Color labelColor,
+    required Color valueColor,
+    required List<Widget> items,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [const SizedBox(height: 0), ...items],
+    );
+  }
+
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    Color labelColor,
+    Color valueColor,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 14, color: labelColor),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value.isEmpty ? '-' : value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: valueColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildColorBoxRow(
+    String label,
+    String value,
+    Color labelColor,
+    Color valueColor,
+    Color? boxColor,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final outerBorderColor = isDark ? Colors.white : AppColors.grayWhite;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 14, color: labelColor),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Row(
+              children: [
+                Text(
+                  value.isEmpty ? '-' : value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: valueColor,
+                  ),
+                ),
+                if (value.isNotEmpty && boxColor != null) ...[
+                  const SizedBox(width: 6),
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/tearDrop.svg',
+                          width: 20,
+                          height: 20,
+                          colorFilter: ColorFilter.mode(
+                            outerBorderColor,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        SvgPicture.asset(
+                          'assets/images/tearDrop.svg',
+                          width: 18,
+                          height: 18,
+                          colorFilter: ColorFilter.mode(
+                            boxColor,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRowCompact(
+    String label,
+    String value,
+    Color labelColor,
+    Color valueColor,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Text(label, style: TextStyle(fontSize: 12, color: labelColor)),
+        // const SizedBox(height: 4),
+        Text(
+          value.isEmpty ? '-' : value,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: valueColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWireColorRowCompact(
+    String label,
+    String value,
+    Color labelColor,
+    Color valueColor,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final outerBorderColor = isDark ? Colors.white : AppColors.grayWhite;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Text(label, style: TextStyle(fontSize: 12, color: labelColor)),
+        // const SizedBox(height: 4),
+        Row(
+          children: [
+            Text(
+              value.isEmpty ? '-' : value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: valueColor,
+              ),
+            ),
+            if (value.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              Container(
+                width: 40,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: _wireColor ?? Colors.white,
+                  border: Border.all(color: outerBorderColor, width: 1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
   }
 
   @override
@@ -465,6 +817,7 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
                 Expanded(
                   child: Container(
                     margin: EdgeInsets.all(0),
+                    padding: EdgeInsets.all(0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
@@ -567,191 +920,6 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSection(
-    BuildContext context, {
-    required String title,
-    required Color labelColor,
-    required Color valueColor,
-    required List<Widget> items,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [const SizedBox(height: 0), ...items],
-    );
-  }
-
-  Widget _buildInfoRow(
-    String label,
-    String value,
-    Color labelColor,
-    Color valueColor,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 14, color: labelColor),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              value.isEmpty ? '-' : value,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: valueColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildColorBoxRow(
-    String label,
-    String value,
-    Color labelColor,
-    Color valueColor,
-    Color? boxColor,
-  ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outerBorderColor = isDark ? Colors.white : AppColors.grayWhite;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 14, color: labelColor),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Row(
-              children: [
-                Text(
-                  value.isEmpty ? '-' : value,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: valueColor,
-                  ),
-                ),
-                if (value.isNotEmpty && boxColor != null) ...[
-                  const SizedBox(width: 6),
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/images/tearDrop.svg',
-                          width: 20,
-                          height: 20,
-                          colorFilter: ColorFilter.mode(
-                            outerBorderColor,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        SvgPicture.asset(
-                          'assets/images/tearDrop.svg',
-                          width: 18,
-                          height: 18,
-                          colorFilter: ColorFilter.mode(
-                            boxColor,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 横並び用のコンパクト版
-  Widget _buildInfoRowCompact(
-    String label,
-    String value,
-    Color labelColor,
-    Color valueColor,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Text(label, style: TextStyle(fontSize: 12, color: labelColor)),
-        // const SizedBox(height: 4),
-        Text(
-          value.isEmpty ? '-' : value,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: valueColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWireColorRowCompact(
-    String label,
-    String value,
-    Color labelColor,
-    Color valueColor,
-  ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outerBorderColor = isDark ? Colors.white : AppColors.grayWhite;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Text(label, style: TextStyle(fontSize: 12, color: labelColor)),
-        // const SizedBox(height: 4),
-        Row(
-          children: [
-            Text(
-              value.isEmpty ? '-' : value,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: valueColor,
-              ),
-            ),
-            if (value.isNotEmpty) ...[
-              const SizedBox(width: 8),
-              Container(
-                width: 40,
-                height: 18,
-                decoration: BoxDecoration(
-                  color: _wireColor ?? Colors.white,
-                  border: Border.all(color: outerBorderColor, width: 1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ],
     );
   }
 }
