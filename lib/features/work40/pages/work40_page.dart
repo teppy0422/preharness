@@ -29,6 +29,7 @@ class _Work40PageState extends State<Work40Page>
     with SingleTickerProviderStateMixin {
   Map<String, dynamic>? _processingConditions;
   List<Map<String, dynamic>>? _shieldConditions; // シールド条件リスト
+  String? _shieldQuantity; // シールドQRコードの数量
   bool _isDetailView = false;
   Map<String, dynamic>? _selectedBlockInfo;
   List<Map<String, dynamic>>? _chListData;
@@ -144,14 +145,14 @@ class _Work40PageState extends State<Work40Page>
   }
 
   void _onSearchShield(String query) async {
-    // S-82122V1010-C01-MU5 形式を解析
+    // S-82122V1010-C01-MU5-100 形式を解析
     final parts = query.split('-');
 
-    if (parts.length != 4 || parts[0] != 'S') {
+    if (parts.length != 5 || parts[0] != 'S') {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('シールド検索形式が正しくありません。(例: S-82122V1010-C01-MU5)'),
+            content: Text('シールド検索形式が正しくありません。(例: S-82122V1010-C01-MU5-100)'),
           ),
         );
       }
@@ -161,9 +162,11 @@ class _Work40PageState extends State<Work40Page>
     final pNumber = parts[1]; // 82122V1010
     final engChange = parts[2]; // C01
     final ybm = parts[3]; // MU5
+    final quantity = parts[4]; // 100
 
     setState(() {
       _isShieldSearch = true;
+      _shieldQuantity = quantity;
     });
 
     try {
@@ -387,6 +390,7 @@ class _Work40PageState extends State<Work40Page>
                           chListData: _chListData,
                           isLoadingChList: _isLoadingChList,
                           chListError: _chListError,
+                          quantity: _shieldQuantity,
                         )
                       : _buildEfuPage(),
                 ),
@@ -403,6 +407,7 @@ class _Work40PageState extends State<Work40Page>
     if (_isShieldSearch) {
       final shieldPage = EfuShieldPage(
         shieldConditions: _shieldConditions ?? [],
+        quantity: _shieldQuantity,
         onBlockTapped: _handleShieldBlockTapped,
       );
 

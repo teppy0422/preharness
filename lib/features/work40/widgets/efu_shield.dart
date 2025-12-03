@@ -7,11 +7,13 @@ import 'package:preharness/core/utils/global.dart';
 
 class EfuShieldPage extends StatelessWidget {
   final List<Map<String, dynamic>> shieldConditions;
+  final String? quantity;
   final Function(Map<String, dynamic>)? onBlockTapped;
 
   const EfuShieldPage({
     super.key,
     required this.shieldConditions,
+    this.quantity,
     this.onBlockTapped,
   });
 
@@ -84,6 +86,27 @@ class EfuShieldPage extends StatelessWidget {
                       color: headerTextColor.withValues(alpha: 1),
                     ),
                   ),
+                  if (quantity != null) ...[
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '数量: $quantity本',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
               Row(

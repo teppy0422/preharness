@@ -25,6 +25,7 @@ class EfuDetailPage extends StatefulWidget {
   final List<Map<String, dynamic>>? chListData;
   final bool isLoadingChList;
   final String? chListError;
+  final String? quantity;
 
   const EfuDetailPage({
     super.key,
@@ -35,6 +36,7 @@ class EfuDetailPage extends StatefulWidget {
     this.chListData,
     this.isLoadingChList = false,
     this.chListError,
+    this.quantity,
   });
 
   @override
@@ -856,6 +858,7 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
                                           containerColor: _containerColor,
                                           containerForeColor:
                                               _containerForeColor,
+                                          quantity: widget.quantity,
                                         ),
                                         CrimpCondition(
                                           onValidationComplete:
@@ -1080,8 +1083,10 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
   }
 
   Widget _buildAnimatedCounter() {
-    final targetCount =
-        int.tryParse(widget.processingConditions['wire_cnt'].toString()) ?? 0;
+    // 数量が指定されている場合はそれを使用、なければwire_cntを使用
+    final targetCount = widget.quantity != null
+        ? int.tryParse(widget.quantity!) ?? 0
+        : int.tryParse(widget.processingConditions['wire_cnt'].toString()) ?? 0;
     final isCompleted = _f13KeyCount >= targetCount && targetCount > 0;
 
     return _buildCounterDisplay(targetCount, isCompleted);

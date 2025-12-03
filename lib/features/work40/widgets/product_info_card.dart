@@ -8,6 +8,7 @@ class ProductInfoCard extends StatefulWidget {
   final VoidCallback onBack;
   final Color? containerColor;
   final Color? containerForeColor;
+  final String? quantity;
 
   const ProductInfoCard({
     super.key,
@@ -15,6 +16,7 @@ class ProductInfoCard extends StatefulWidget {
     required this.onBack,
     this.containerColor,
     this.containerForeColor,
+    this.quantity,
   });
 
   @override

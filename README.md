@@ -466,6 +466,11 @@ samples, guidance on mobile development, and a full API reference.
 
 #### 081
 
+- efu.dart で読み込んだテキストが S-から始まる場合に数量を読み取るように修正
+- efu_shield.dart で読み込みとカウントの動作確認 OK
+
+#### 082
+
 #### 不具合
 
 - QR リーダー接続が切れたらアプリトップに戻る不具合
