@@ -11,6 +11,7 @@ class PatternButton extends StatefulWidget {
   final IconData? icon; // アイコン（オプション）
   final double iconSize; // アイコンサイズ
   final double iconTextSpacing; // アイコンとテキストの間隔
+  final double animationSpeed; // アニメーション速度（秒単位、1サイクルの時間）
 
   const PatternButton({
     super.key,
@@ -23,6 +24,7 @@ class PatternButton extends StatefulWidget {
     this.icon,
     this.iconSize = 16,
     this.iconTextSpacing = 4,
+    this.animationSpeed = 3.0, // デフォルト2秒
   });
 
   @override
@@ -38,17 +40,15 @@ class _PatternButtonState extends State<PatternButton>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(seconds: 2), // 2秒で1サイクル
+      duration: Duration(
+        milliseconds: (widget.animationSpeed * 1000).toInt(),
+      ), // 秒をミリ秒に変換
       vsync: this,
     );
 
-    _animation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.linear,
-    ));
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.linear),
+    );
 
     if (widget.enableAnimation) {
       _animationController.repeat(); // 無限ループ
@@ -81,7 +81,7 @@ class _PatternButtonState extends State<PatternButton>
           child: Ink(
             decoration: BoxDecoration(
               border: Border.all(
-                color: AppColors.getLineColor(context),
+                color: AppColors.getHighLightColor(context),
                 width: 1,
               ),
               borderRadius: BorderRadius.circular(4),
@@ -91,9 +91,11 @@ class _PatternButtonState extends State<PatternButton>
               builder: (context, child) {
                 return CustomPaint(
                   painter: DiagonalStripesPainter(
-                    color: AppColors.getLineColor(context),
-                    alpha: isDark ? 60 : 40,
-                    animationOffset: widget.enableAnimation ? _animation.value : 0.0,
+                    color: AppColors.getHighLightColor(context),
+                    alpha: isDark ? 100 : 40,
+                    animationOffset: widget.enableAnimation
+                        ? _animation.value
+                        : 0.0,
                   ),
                   child: Center(
                     child: widget.icon != null
@@ -215,6 +217,6 @@ class DiagonalStripesPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return oldDelegate is DiagonalStripesPainter &&
-           oldDelegate.animationOffset != animationOffset;
+        oldDelegate.animationOffset != animationOffset;
   }
 }

@@ -29,6 +29,8 @@ class _EfuShieldPageState extends State<EfuShieldPage> {
   String _measuredTerminal1 = '';
   String _measuredWireType = '';
   String _measuredWireSize = '';
+  String _measuredAddParts1 = '';
+  String _measuredAddParts2 = '';
 
   @override
   void initState() {
@@ -49,6 +51,10 @@ class _EfuShieldPageState extends State<EfuShieldPage> {
         await SharedPrefsHelper.getString('measured_efu_wire_type') ?? '';
     final measuredWireSize =
         await SharedPrefsHelper.getString('measured_efu_wire_size') ?? '';
+    final measuredAddParts1 =
+        await SharedPrefsHelper.getString('measured_efu_add_parts_1') ?? '';
+    final measuredAddParts2 =
+        await SharedPrefsHelper.getString('measured_efu_add_parts_2') ?? '';
 
     if (mounted) {
       setState(() {
@@ -58,6 +64,8 @@ class _EfuShieldPageState extends State<EfuShieldPage> {
         _measuredTerminal1 = measuredTerminal1;
         _measuredWireType = measuredWireType;
         _measuredWireSize = measuredWireSize;
+        _measuredAddParts1 = measuredAddParts1;
+        _measuredAddParts2 = measuredAddParts2;
       });
     }
   }
@@ -314,6 +322,12 @@ class _EfuShieldPageState extends State<EfuShieldPage> {
                         condition: condition,
                         index: index + 1,
                         onTap: widget.onBlockTapped,
+                        measuredTerminal0: _measuredTerminal0,
+                        measuredTerminal1: _measuredTerminal1,
+                        measuredWireType: _measuredWireType,
+                        measuredWireSize: _measuredWireSize,
+                        measuredAddParts1: _measuredAddParts1,
+                        measuredAddParts2: _measuredAddParts2,
                       );
                     },
                   ),
@@ -347,11 +361,23 @@ class _ShieldConditionCard extends StatefulWidget {
   final Map<String, dynamic> condition;
   final int index;
   final Function(Map<String, dynamic>)? onTap;
+  final String measuredTerminal0;
+  final String measuredTerminal1;
+  final String measuredWireType;
+  final String measuredWireSize;
+  final String measuredAddParts1;
+  final String measuredAddParts2;
 
   const _ShieldConditionCard({
     required this.condition,
     required this.index,
     this.onTap,
+    this.measuredTerminal0 = '',
+    this.measuredTerminal1 = '',
+    this.measuredWireType = '',
+    this.measuredWireSize = '',
+    this.measuredAddParts1 = '',
+    this.measuredAddParts2 = '',
   });
 
   @override
@@ -601,14 +627,64 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
     );
   }
 
+  bool _isTerminal1Matching() {
+    // 端子1が前回の端子品番0、wire_type、wire_size、add_parts_1と一致するかチェック
+    final terminal1 = _getValue('term_part_no_1');
+    final wireType = _getValue('wire_type');
+    final wireSize = _getValue('wire_size');
+    final addParts1 = _getValue('add_parts_1');
+    final result =
+        widget.measuredTerminal0.isNotEmpty &&
+        terminal1.isNotEmpty &&
+        terminal1 == widget.measuredTerminal0 &&
+        wireType.isNotEmpty &&
+        wireType == widget.measuredWireType &&
+        wireSize.isNotEmpty &&
+        wireSize == widget.measuredWireSize &&
+        addParts1.isNotEmpty &&
+        addParts1 == widget.measuredAddParts1;
+    return result;
+  }
+
+  bool _isTerminal2Matching() {
+    // 端子2が前回の端子品番1、wire_type、wire_size、add_parts_2と一致するかチェック
+    final terminal2 = _getValue('term_part_no_2');
+    final wireType = _getValue('wire_type');
+    final wireSize = _getValue('wire_size');
+    final addParts2 = _getValue('add_parts_2');
+    final result =
+        widget.measuredTerminal1.isNotEmpty &&
+        terminal2.isNotEmpty &&
+        terminal2 == widget.measuredTerminal1 &&
+        wireType.isNotEmpty &&
+        wireType == widget.measuredWireType &&
+        wireSize.isNotEmpty &&
+        wireSize == widget.measuredWireSize &&
+        addParts2.isNotEmpty &&
+        addParts2 == widget.measuredAddParts2;
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isTerminal1Matching = _isTerminal1Matching();
+    final isTerminal2Matching = _isTerminal2Matching();
+
     final cardColor = isDark ? AppColors.paperBlack : Colors.white;
+
     final labelColor = isDark
         ? (Colors.grey[400] ?? Colors.grey)
         : AppColors.green;
     final valueColor = isDark ? AppColors.paperWhite : AppColors.black;
+
+    // 端子の背景色
+    final terminal1BgColor = isTerminal1Matching
+        ? AppColors.getHighLightColor(context).withAlpha(50)
+        : Colors.transparent;
+    final terminal2BgColor = isTerminal2Matching
+        ? AppColors.getHighLightColor(context).withAlpha(50)
+        : Colors.transparent;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 6),
@@ -716,6 +792,7 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
                     margin: EdgeInsets.all(0),
                     padding: EdgeInsets.all(0),
                     decoration: BoxDecoration(
+                      color: terminal1BgColor,
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
                         color: isDark
@@ -819,6 +896,7 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
                     margin: EdgeInsets.all(0),
                     padding: EdgeInsets.all(0),
                     decoration: BoxDecoration(
+                      color: terminal2BgColor,
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
                         color: isDark

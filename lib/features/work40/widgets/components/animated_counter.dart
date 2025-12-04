@@ -44,7 +44,8 @@ class AnimatedCounter extends StatefulWidget {
 class _AnimatedCounterState extends State<AnimatedCounter> {
   @override
   Widget build(BuildContext context) {
-    final isCompleted = widget.currentCount >= widget.targetCount && widget.targetCount > 0;
+    final isCompleted =
+        widget.currentCount >= widget.targetCount && widget.targetCount > 0;
 
     return Column(
       children: [
@@ -246,18 +247,14 @@ class FlipCounter extends StatelessWidget {
         width: 15,
         height: 24,
         child: SlidingNumber(
-          key: ValueKey('${digitIndex}_${currentDigit}'),
+          key: ValueKey('${digitIndex}_$currentDigit'),
           currentChild: currentChild,
           previousChild: previousChild,
           isNewDigit: isNewDigit,
         ),
       );
     } else {
-      return SizedBox(
-        width: 15,
-        height: 24,
-        child: currentChild,
-      );
+      return SizedBox(width: 15, height: 24, child: currentChild);
     }
   }
 }

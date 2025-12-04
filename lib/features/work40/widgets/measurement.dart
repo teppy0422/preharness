@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/core/utils/shared_prefs_helper.dart';
@@ -190,12 +189,10 @@ class _StandardInfoCardState extends State<Measurement> {
       final blockTerminal1 = await SharedPrefsHelper.getString(
         'block_terminals_1',
       );
-      final efuWireType = await SharedPrefsHelper.getString(
-        'efu_wire_type',
-      );
-      final efuWireSize = await SharedPrefsHelper.getString(
-        'efu_wire_size',
-      );
+      final efuWireType = await SharedPrefsHelper.getString('efu_wire_type');
+      final efuWireSize = await SharedPrefsHelper.getString('efu_wire_size');
+      final efuAddParts1 = await SharedPrefsHelper.getString('efu_add_parts_1');
+      final efuAddParts2 = await SharedPrefsHelper.getString('efu_add_parts_2');
 
       if (blockTerminal0 != null) {
         await SharedPrefsHelper.saveStringWithNotify(
@@ -222,9 +219,7 @@ class _StandardInfoCardState extends State<Measurement> {
           'measured_efu_wire_type',
           efuWireType,
         );
-        debugPrint(
-          '💾 efu_wire_type保存: measured_efu_wire_type = $efuWireType',
-        );
+        debugPrint('💾 efu_wire_type保存: measured_efu_wire_type = $efuWireType');
       }
 
       if (efuWireSize != null) {
@@ -232,9 +227,23 @@ class _StandardInfoCardState extends State<Measurement> {
           'measured_efu_wire_size',
           efuWireSize,
         );
-        debugPrint(
-          '💾 efu_wire_size保存: measured_efu_wire_size = $efuWireSize',
+        debugPrint('💾 efu_wire_size保存: measured_efu_wire_size = $efuWireSize');
+      }
+
+      if (efuAddParts1 != null) {
+        await SharedPrefsHelper.saveStringWithNotify(
+          'measured_efu_add_parts_1',
+          efuAddParts1,
         );
+        debugPrint('💾 efu_add_parts_1保存: measured_efu_add_parts_1 = $efuAddParts1');
+      }
+
+      if (efuAddParts2 != null) {
+        await SharedPrefsHelper.saveStringWithNotify(
+          'measured_efu_add_parts_2',
+          efuAddParts2,
+        );
+        debugPrint('💾 efu_add_parts_2保存: measured_efu_add_parts_2 = $efuAddParts2');
       }
     } catch (e) {
       debugPrint('❌ block_terminals保存エラー: $e');

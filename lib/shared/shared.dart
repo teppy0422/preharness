@@ -1,6 +1,7 @@
 /// 共通コンポーネントのエクスポートファイル
 ///
 /// アプリ全体で再利用可能なウィジェットとユーティリティ
+library;
 
 // Widgets
 export 'widgets/responsive_scaffold.dart';

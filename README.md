@@ -475,6 +475,10 @@ samples, guidance on mobile development, and a full API reference.
 
 #### 083
 
+- efu_shield.dart で前回の条件と比較を追加
+
+#### 084
+
 - efu_shield.dart で読み込み済みのアプリケーターとマッチする条件をハイライト表示(点滅)
 
 #### 不具合
