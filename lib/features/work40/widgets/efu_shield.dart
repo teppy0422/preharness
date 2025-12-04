@@ -5,6 +5,7 @@ import 'package:preharness/core/constants/app_colors.dart';
 import 'package:preharness/core/utils/color_utils.dart';
 import 'package:preharness/core/utils/global.dart';
 import 'package:preharness/core/utils/shared_prefs_helper.dart';
+import 'package:preharness/shared/ui/pattern_button.dart';
 
 class EfuShieldPage extends StatefulWidget {
   final List<Map<String, dynamic>> shieldConditions;
@@ -678,14 +679,6 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
         : AppColors.green;
     final valueColor = isDark ? AppColors.paperWhite : AppColors.black;
 
-    // 端子の背景色
-    final terminal1BgColor = isTerminal1Matching
-        ? AppColors.getHighLightColor(context).withAlpha(50)
-        : Colors.transparent;
-    final terminal2BgColor = isTerminal2Matching
-        ? AppColors.getHighLightColor(context).withAlpha(50)
-        : Colors.transparent;
-
     return Card(
       margin: const EdgeInsets.only(bottom: 6),
       elevation: 2,
@@ -792,99 +785,115 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
                     margin: EdgeInsets.all(0),
                     padding: EdgeInsets.all(0),
                     decoration: BoxDecoration(
-                      color: terminal1BgColor,
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: isDark
+                        color: isTerminal1Matching
                             ? AppColors.getHighLightColor(
                                 context,
                               ).withValues(alpha: 1)
-                            : AppColors.getHighLightColor(
-                                context,
-                              ).withValues(alpha: 1),
+                            : AppColors.getLineColor(context),
                         width: isDark ? .5 : 1,
                       ),
                     ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(8),
-                        onTap: () {
-                          if (widget.onTap != null) {
-                            final blockInfo = {
-                              'strip': _getValue('strip_len_1'),
-                              'directives': [
-                                _getValue('term_proc_inst_1'),
-                                '',
-                                '',
-                                '',
-                                '',
-                              ],
-                              'terminals': [
-                                _getValue('term_part_no_1'),
-                                _getValue('add_parts_1'),
-                                _getValue('mark_color_1'),
-                                '',
-                                '',
-                              ],
-                            };
-                            widget.onTap!(blockInfo);
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            top: 2,
-                            bottom: 2,
-                            left: 8,
-                            right: 8,
-                          ),
-                          child: _buildSection(
-                            context,
-                            title: '端子1',
-                            labelColor: labelColor,
-                            valueColor: valueColor,
-                            items: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildInfoRow(
-                                      '端子品番',
-                                      formatCode(
-                                        _getValue('term_part_no_1'),
-                                        '-',
-                                      ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Stack(
+                        children: [
+                          if (isTerminal1Matching)
+                            Positioned.fill(
+                              child: CustomPaint(
+                                painter: DiagonalStripesPainter(
+                                  color: AppColors.getHighLightColor(context),
+                                  alpha: isDark ? 30 : 40,
+                                  animationOffset: 0.0,
+                                ),
+                              ),
+                            ),
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () {
+                                if (widget.onTap != null) {
+                                  final blockInfo = {
+                                    'strip': _getValue('strip_len_1'),
+                                    'directives': [
+                                      _getValue('term_proc_inst_1'),
+                                      '',
+                                      '',
+                                      '',
+                                      '',
+                                    ],
+                                    'terminals': [
+                                      _getValue('term_part_no_1'),
+                                      _getValue('add_parts_1'),
+                                      _getValue('mark_color_1'),
+                                      '',
+                                      '',
+                                    ],
+                                  };
+                                  widget.onTap!(blockInfo);
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 2,
+                                  bottom: 2,
+                                  left: 8,
+                                  right: 8,
+                                ),
+                                child: _buildSection(
+                                  context,
+                                  title: '端子1',
+                                  labelColor: labelColor,
+                                  valueColor: valueColor,
+                                  items: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildInfoRow(
+                                            '端子品番',
+                                            formatCode(
+                                              _getValue('term_part_no_1'),
+                                              '-',
+                                            ),
+                                            labelColor,
+                                            valueColor,
+                                          ),
+                                        ),
+                                        if (_getValue('mark_color_1') != '-' &&
+                                            _getValue(
+                                              'mark_color_1',
+                                            ).isNotEmpty)
+                                          Expanded(
+                                            child: _buildColorBoxRow(
+                                              'マジック色',
+                                              _getValue('mark_color_1'),
+                                              labelColor,
+                                              valueColor,
+                                              _markColor1,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    _buildInfoRow(
+                                      '付属部品',
+                                      formatCode(_getValue('add_parts_1'), "-"),
                                       labelColor,
                                       valueColor,
                                     ),
-                                  ),
-                                  if (_getValue('mark_color_1') != '-' &&
-                                      _getValue('mark_color_1').isNotEmpty)
-                                    Expanded(
-                                      child: _buildColorBoxRow(
-                                        'マジック色',
-                                        _getValue('mark_color_1'),
-                                        labelColor,
-                                        valueColor,
-                                        _markColor1,
-                                      ),
+                                    _buildInfoRow(
+                                      '回路',
+                                      _getValue('circuit_1'),
+                                      labelColor,
+                                      valueColor,
                                     ),
-                                ],
+                                  ],
+                                ),
                               ),
-                              _buildInfoRow(
-                                '付属部品',
-                                formatCode(_getValue('add_parts_1'), "-"),
-                                labelColor,
-                                valueColor,
-                              ),
-                              _buildInfoRow(
-                                '回路',
-                                _getValue('circuit_1'),
-                                labelColor,
-                                valueColor,
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
@@ -896,99 +905,115 @@ class _ShieldConditionCardState extends State<_ShieldConditionCard> {
                     margin: EdgeInsets.all(0),
                     padding: EdgeInsets.all(0),
                     decoration: BoxDecoration(
-                      color: terminal2BgColor,
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: isDark
+                        color: isTerminal2Matching
                             ? AppColors.getHighLightColor(
                                 context,
                               ).withValues(alpha: 1)
-                            : AppColors.getHighLightColor(
-                                context,
-                              ).withValues(alpha: 1),
+                            : AppColors.getLineColor(context),
                         width: isDark ? .5 : 1,
                       ),
                     ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(8),
-                        onTap: () {
-                          if (widget.onTap != null) {
-                            final blockInfo = {
-                              'strip': _getValue('strip_len_2'),
-                              'directives': [
-                                _getValue('term_proc_inst_2'),
-                                '',
-                                '',
-                                '',
-                                '',
-                              ],
-                              'terminals': [
-                                _getValue('term_part_no_2'),
-                                _getValue('add_parts_2'),
-                                _getValue('mark_color_2'),
-                                '',
-                                '',
-                              ],
-                            };
-                            widget.onTap!(blockInfo);
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            top: 2,
-                            bottom: 2,
-                            left: 8,
-                            right: 8,
-                          ),
-                          child: _buildSection(
-                            context,
-                            title: '端子2',
-                            labelColor: labelColor,
-                            valueColor: valueColor,
-                            items: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildInfoRow(
-                                      '端子品番',
-                                      formatCode(
-                                        _getValue('term_part_no_2'),
-                                        '-',
-                                      ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Stack(
+                        children: [
+                          if (isTerminal2Matching)
+                            Positioned.fill(
+                              child: CustomPaint(
+                                painter: DiagonalStripesPainter(
+                                  color: AppColors.getHighLightColor(context),
+                                  alpha: isDark ? 100 : 40,
+                                  animationOffset: 0.0,
+                                ),
+                              ),
+                            ),
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () {
+                                if (widget.onTap != null) {
+                                  final blockInfo = {
+                                    'strip': _getValue('strip_len_2'),
+                                    'directives': [
+                                      _getValue('term_proc_inst_2'),
+                                      '',
+                                      '',
+                                      '',
+                                      '',
+                                    ],
+                                    'terminals': [
+                                      _getValue('term_part_no_2'),
+                                      _getValue('add_parts_2'),
+                                      _getValue('mark_color_2'),
+                                      '',
+                                      '',
+                                    ],
+                                  };
+                                  widget.onTap!(blockInfo);
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 2,
+                                  bottom: 2,
+                                  left: 8,
+                                  right: 8,
+                                ),
+                                child: _buildSection(
+                                  context,
+                                  title: '端子2',
+                                  labelColor: labelColor,
+                                  valueColor: valueColor,
+                                  items: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildInfoRow(
+                                            '端子品番',
+                                            formatCode(
+                                              _getValue('term_part_no_2'),
+                                              '-',
+                                            ),
+                                            labelColor,
+                                            valueColor,
+                                          ),
+                                        ),
+                                        if (_getValue('mark_color_2') != '-' &&
+                                            _getValue(
+                                              'mark_color_2',
+                                            ).isNotEmpty)
+                                          Expanded(
+                                            child: _buildColorBoxRow(
+                                              'マジック色',
+                                              _getValue('mark_color_2'),
+                                              labelColor,
+                                              valueColor,
+                                              _markColor2,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    _buildInfoRow(
+                                      '付属部品',
+                                      formatCode(_getValue('add_parts_2'), "-"),
                                       labelColor,
                                       valueColor,
                                     ),
-                                  ),
-                                  if (_getValue('mark_color_2') != '-' &&
-                                      _getValue('mark_color_2').isNotEmpty)
-                                    Expanded(
-                                      child: _buildColorBoxRow(
-                                        'マジック色',
-                                        _getValue('mark_color_2'),
-                                        labelColor,
-                                        valueColor,
-                                        _markColor2,
-                                      ),
+                                    _buildInfoRow(
+                                      '回路',
+                                      _getValue('circuit_2'),
+                                      labelColor,
+                                      valueColor,
                                     ),
-                                ],
+                                  ],
+                                ),
                               ),
-                              _buildInfoRow(
-                                '付属部品',
-                                formatCode(_getValue('add_parts_2'), "-"),
-                                labelColor,
-                                valueColor,
-                              ),
-                              _buildInfoRow(
-                                '回路',
-                                _getValue('circuit_2'),
-                                labelColor,
-                                valueColor,
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ),

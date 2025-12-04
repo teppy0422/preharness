@@ -92,7 +92,7 @@ class _PatternButtonState extends State<PatternButton>
                 return CustomPaint(
                   painter: DiagonalStripesPainter(
                     color: AppColors.getHighLightColor(context),
-                    alpha: isDark ? 100 : 40,
+                    alpha: isDark ? 80 : 40,
                     animationOffset: widget.enableAnimation
                         ? _animation.value
                         : 0.0,
@@ -199,7 +199,7 @@ class DiagonalStripesPainter extends CustomPainter {
       ..color = color.withAlpha(alpha)
       ..strokeWidth = 2;
 
-    const double step = 8; // 斜線の間隔
+    const double step = 6; // 斜線の間隔
 
     // アニメーションオフセットを適用（左から右へ移動）
     final double offset = animationOffset * step;
