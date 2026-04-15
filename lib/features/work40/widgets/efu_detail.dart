@@ -170,6 +170,15 @@ class _EfuDetailPageState extends State<EfuDetailPage> {
       widget.processingConditions,
     );
 
+    // 数量（quantity）を efu_wire_cnt として保存
+    if (widget.quantity != null && widget.quantity!.isNotEmpty) {
+      await SharedPrefsHelper.saveStringWithNotify(
+        'efu_wire_cnt',
+        widget.quantity!,
+      );
+      print('🔥 efu_detail: efu_wire_cnt 保存: ${widget.quantity}');
+    }
+
     // blockInfo を block_ プレフィックスで通知機能付き保存
     await SharedPrefsHelper.saveMapWithNotify('block', widget.blockInfo);
 

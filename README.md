@@ -483,6 +483,13 @@ samples, guidance on mobile development, and a full API reference.
 
 #### 085
 
+- 久しぶりに起動してQRリーダーを読み込まない不具合
+
+#### 086
+
+- フリック入力に対応
+- アップデートに対応
+
 #### 不具合
 
 - QR リーダー接続が切れたらアプリトップに戻る不具合

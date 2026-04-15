@@ -131,7 +131,7 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                       flex: 3,
                       child: _buildLabelValue(
                         '数量:',
-                        widget.processingConditions['wire_cnt'],
+                        widget.quantity ?? widget.processingConditions['wire_cnt'],
                         valueFont: 30,
                       ),
                     ),

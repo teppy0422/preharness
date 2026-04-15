@@ -81,7 +81,7 @@ class _PatternButtonState extends State<PatternButton>
           child: Ink(
             decoration: BoxDecoration(
               border: Border.all(
-                color: AppColors.getHighLightColor(context),
+                color: AppColors.getLineColor(context),
                 width: 1,
               ),
               borderRadius: BorderRadius.circular(4),
@@ -91,7 +91,7 @@ class _PatternButtonState extends State<PatternButton>
               builder: (context, child) {
                 return CustomPaint(
                   painter: DiagonalStripesPainter(
-                    color: AppColors.getHighLightColor(context),
+                    color: AppColors.getLineColor(context),
                     alpha: isDark ? 80 : 40,
                     animationOffset: widget.enableAnimation
                         ? _animation.value

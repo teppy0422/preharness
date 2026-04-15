@@ -6,6 +6,7 @@ import 'package:preharness/core/utils/color_utils.dart';
 import 'package:preharness/core/utils/global.dart';
 import 'package:preharness/core/utils/shared_prefs_helper.dart';
 import 'package:preharness/shared/ui/pattern_button.dart';
+import 'package:preharness/widgets/info/info_icon_button.dart';
 
 class EfuShieldPage extends StatefulWidget {
   final List<Map<String, dynamic>> shieldConditions;
@@ -238,13 +239,26 @@ class _EfuShieldPageState extends State<EfuShieldPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '前回の加工条件',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: headerTextColor,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          '前回の加工条件',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: headerTextColor,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        InfoIconButton(
+                          title: '前回の加工条件について',
+                          content:
+                              '前回測定した加工条件が表示されます。\n\n'
+                              '端子品番、電線品種/サイズ、付属部品がすべて一致する場合、'
+                              '該当する条件に斜線パターンが表示されます。',
+                          iconSize: 18,
+                        ),
+                      ],
                     ),
                     if (_measuredTerminal0.isNotEmpty ||
                         _measuredWireType.isNotEmpty) ...[
