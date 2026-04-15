@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // RawKeyEventのために追加
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preharness/features/work40/data/api_service.dart';
 import 'package:preharness/features/work40/widgets/efu.dart';
@@ -616,10 +616,10 @@ class _SearchCardState extends State<_SearchCard> {
 
   // QRリーダーモードのウィジェット
   Widget _buildRawKeyboardReader() {
-    return RawKeyboardListener(
+    return KeyboardListener(
       focusNode: widget.focusNode,
-      onKey: (RawKeyEvent event) {
-        if (event is RawKeyDownEvent) {
+      onKeyEvent: (KeyEvent event) {
+        if (event is KeyDownEvent) {
           if (event.logicalKey == LogicalKeyboardKey.enter) {
             _handleSearch();
             return;
@@ -635,8 +635,8 @@ class _SearchCardState extends State<_SearchCard> {
             return;
           }
 
-          final char = event.character;
-          if (char != null && char.isNotEmpty) {
+          final char = event.character ?? event.logicalKey.keyLabel;
+          if (char.isNotEmpty) {
             final code = char.codeUnits.first;
             if (code < 32 || code == 127) {
               return; // 制御文字は無視
